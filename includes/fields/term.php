@@ -56,7 +56,8 @@ class xfields_term extends xfields_field
         $field->value = implode( ',', $ids );
 
         if ( ! empty( $ids ) ) {
-            $results = get_terms( [ 'include' => $ids, 'orderby' => 'include', 'hide_empty' => false ] );
+            // Restrict to the allowed taxonomies (IDs can be tampered with)
+            $results = get_terms( [ 'taxonomy' => array_values( (array) $taxonomies ), 'include' => $ids, 'orderby' => 'include', 'hide_empty' => false ] );
             foreach ( is_wp_error( $results ) ? [] : $results as $result ) {
                 $selected_posts[ $result->term_id ] = $result;
             }

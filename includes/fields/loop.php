@@ -163,7 +163,7 @@ class xfields_loop extends xfields_field
     ?>
 
         <script>
-        XFields.loop_buffer[<?php echo (int) $field_id; ?>] = <?php echo wp_json_encode( $buffer ); ?>;
+        XFields.loop_buffer[<?php echo (int) $field_id; ?>] = <?php echo wp_json_encode( $buffer, JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
         </script>
 
     <?php

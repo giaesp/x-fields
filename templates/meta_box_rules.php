@@ -65,7 +65,7 @@ $xfields_post_in = array_filter( array_map( 'absint', $xfields_rules['post_ids']
 if ( ! empty( $xfields_post_in ) ) {
     $xfields_results = get_posts( [
         'post__in'       => $xfields_post_in,
-        'post_type'      => 'any',
+        'post_type'      => array_values( get_post_types() ), // "any" would skip exclude_from_search types
         'post_status'    => 'any',
         'orderby'        => [ 'type' => 'ASC', 'title' => 'ASC' ],
         'posts_per_page' => count( $xfields_post_in ),
@@ -117,7 +117,7 @@ wp_add_inline_script( 'xfields-fields', 'window.XFields = Object.assign( window.
         'search'      => __( 'Type at least 2 characters…', 'x-fields' ),
         'no_results'  => __( 'No results', 'x-fields' ),
     ],
-] ) . ' );', 'before' );
+], JSON_HEX_TAG | JSON_HEX_AMP ) . ' );', 'before' );
 ?>
 
 <table>

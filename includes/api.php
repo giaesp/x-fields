@@ -41,6 +41,10 @@ class xfields_api
             return null;
         }
 
+        if ( ! is_string( $field_name ) && ! is_int( $field_name ) ) {
+            return null;
+        }
+
         $post_id = empty( $post_id ) ? $post->ID : (int) $post_id;
 
         // Trigger get_fields if not in cache

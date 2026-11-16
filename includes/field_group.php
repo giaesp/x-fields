@@ -100,11 +100,15 @@ class xfields_field_group
                     continue;
                 }
 
-                $group['post_title'] = sanitize_text_field( $group['post_title'] );
-                $group['post_name'] = sanitize_title( $group['post_name'] );
+                $group['post_title'] = is_scalar( $group['post_title'] ) ? sanitize_text_field( $group['post_title'] ) : '';
+                $group['post_name'] = is_scalar( $group['post_name'] ) ? sanitize_title( $group['post_name'] ) : '';
                 $group['xfields_fields'] = isset( $group['xfields_fields'] ) && is_array( $group['xfields_fields'] ) ? $group['xfields_fields'] : [];
                 $group['xfields_rules'] = isset( $group['xfields_rules'] ) && is_array( $group['xfields_rules'] ) ? $this->sanitize_rules( $group['xfields_rules'] ) : [];
                 $group['xfields_extras'] = isset( $group['xfields_extras'] ) && is_array( $group['xfields_extras'] ) ? $this->sanitize_extras( $group['xfields_extras'] ) : [];
+
+                if ( '' === $group['post_name'] ) {
+                    continue;
+                }
 
                 // Make sure this field group doesn't exist
                 if ( ! in_array( $group['post_name'], $existing_groups ) ) {
@@ -129,7 +133,7 @@ class xfields_field_group
 
                     // First pass: assign new IDs
                     foreach ( $group['xfields_fields'] as $data ) {
-                        if ( ! is_array( $data ) || ! isset( $data['id'], $data['type'] ) || ! isset( XFields()->fields[ $data['type'] ] ) ) {
+                        if ( ! is_array( $data ) || ! isset( $data['id'], $data['type'] ) || ! is_string( $data['type'] ) || ! is_scalar( $data['id'] ) || ! isset( XFields()->fields[ $data['type'] ] ) ) {
                             continue;
                         }
                         $field_id_mapping[ (int) $data['id'] ] = $next_field_id;
@@ -138,16 +142,16 @@ class xfields_field_group
 
                     // Second pass: remap IDs and sanitize
                     foreach ( $group['xfields_fields'] as $data ) {
-                        if ( ! is_array( $data ) || ! isset( $data['id'], $data['type'] ) || ! isset( XFields()->fields[ $data['type'] ] ) ) {
+                        if ( ! is_array( $data ) || ! isset( $data['id'], $data['type'] ) || ! is_string( $data['type'] ) || ! is_scalar( $data['id'] ) || ! isset( XFields()->fields[ $data['type'] ] ) ) {
                             continue;
                         }
                         $parent_id = isset( $data['parent_id'] ) ? (int) $data['parent_id'] : 0;
                         $clean_fields[] = [
                             'id'        => $field_id_mapping[ (int) $data['id'] ],
-                            'name'      => $this->sanitize_field_name( isset( $data['name'] ) ? $data['name'] : '' ),
-                            'label'     => sanitize_text_field( isset( $data['label'] ) ? $data['label'] : '' ),
+                            'name'      => $this->sanitize_field_name( isset( $data['name'] ) && is_scalar( $data['name'] ) ? $data['name'] : '' ),
+                            'label'     => sanitize_text_field( isset( $data['label'] ) && is_scalar( $data['label'] ) ? $data['label'] : '' ),
                             'type'      => $data['type'],
-                            'notes'     => sanitize_textarea_field( isset( $data['notes'] ) ? $data['notes'] : '' ),
+                            'notes'     => sanitize_textarea_field( isset( $data['notes'] ) && is_scalar( $data['notes'] ) ? $data['notes'] : '' ),
                             'parent_id' => ( 0 < $parent_id && isset( $field_id_mapping[ $parent_id ] ) ) ? $field_id_mapping[ $parent_id ] : 0,
                             'weight'    => isset( $data['weight'] ) ? (int) $data['weight'] : 0,
                             'options'   => isset( $data['options'] ) && is_array( $data['options'] ) ? $data['options'] : [],
@@ -283,13 +287,20 @@ class xfields_field_group
             // Sanitize the field
             $field = stripslashes_deep( $field );
 
-            // Skip unknown field types (avoids a fatal error on PHP 8)
-            if ( empty( $field['type'] ) || ! isset( XFields()->fields[ $field['type'] ] ) ) {
+            // Skip unknown / malformed field types (an array key here would be a fatal TypeError on PHP 8)
+            if ( empty( $field['type'] ) || ! is_string( $field['type'] ) || ! isset( XFields()->fields[ $field['type'] ] ) ) {
                 continue;
             }
 
             $field = array_merge( [ 'id' => 0, 'name' => '', 'label' => '', 'notes' => '', 'parent_id' => 0, 'options' => [] ], $field );
             $field['options'] = is_array( $field['options'] ) ? $field['options'] : [];
+
+            // Scalar properties must be scalars
+            foreach ( [ 'id', 'name', 'label', 'notes', 'parent_id' ] as $prop ) {
+                if ( ! is_scalar( $field[ $prop ] ) ) {
+                    $field[ $prop ] = '';
+                }
+            }
 
             // Allow for field customizations
             $field = XFields()->fields[ $field['type'] ]->pre_save_field( $field );

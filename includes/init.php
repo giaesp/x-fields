@@ -292,8 +292,9 @@ class xfields_init
             wp_die( '', '', [ 'response' => 403 ] );
         }
 
-        if ( ! check_ajax_referer( 'xfields_admin_nonce', 'nonce', false ) ) {
-            exit;
+        // A non-string nonce would trigger a PHP warning inside wp_verify_nonce()
+        if ( ! isset( $_REQUEST['nonce'] ) || ! is_string( $_REQUEST['nonce'] ) || ! check_ajax_referer( 'xfields_admin_nonce', 'nonce', false ) ) {
+            wp_die( '', '', [ 'response' => 403 ] );
         }
 
         $ajax_method = isset( $_POST['action_type'] ) && is_string( $_POST['action_type'] ) ? sanitize_key( wp_unslash( $_POST['action_type'] ) ) : false;

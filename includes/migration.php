@@ -123,6 +123,17 @@ class xfields_migration
             return;
         }
 
+        // "xf_version" is a generic name: only proceed with real X-Fields 1.x evidence
+        // (its values table or its field group post type), so other plugins' data is never touched.
+        $legacy_table   = $wpdb->prefix . $old . 'values';
+        $has_v1_table   = ( $legacy_table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $legacy_table ) ) ) );
+        $has_v1_groups  = (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$wpdb->posts} WHERE post_type = %s LIMIT 1", $old . 'group' ) );
+
+        if ( ! $has_v1_table && ! $has_v1_groups ) {
+            update_option( 'xfields_v1_migrated', 'not-xfields', false );
+            return;
+        }
+
         $tables = [ 'values', 'sessions' ];
         foreach ( $tables as $t ) {
             $old_table = $wpdb->prefix . $old . $t;

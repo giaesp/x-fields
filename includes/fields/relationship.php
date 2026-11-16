@@ -31,7 +31,6 @@ class xfields_relationship extends xfields_field
         $current = get_the_ID();
 
         $args = [
-            'post__not_in'      => $current ? [ (int) $current ] : [],  // a post can't relate to itself
             'post_type'         => $post_types,
             'post_status'       => [ 'publish', 'private' ],
             'posts_per_page'    => -1,
@@ -41,8 +40,9 @@ class xfields_relationship extends xfields_field
 
         $args = apply_filters( 'xfields_field_relationship_query_args', $args, [ 'field' => $field ] );
         $query = new WP_Query( $args );
-        $query->posts = array_filter( $query->posts, function( $p ) {
-            return current_user_can( 'read_post', $p->ID );
+        $query->posts = array_filter( $query->posts, function( $p ) use ( $current ) {
+            // A post can't relate to itself; never list posts the user can't read
+            return (int) $p->ID !== (int) $current && current_user_can( 'read_post', $p->ID );
         } );
 
         foreach ( $query->posts as $post_obj ) {
@@ -62,7 +62,7 @@ class xfields_relationship extends xfields_field
             $results = get_posts( [
                 'post__in'               => $ids,
                 'orderby'                => 'post__in',
-                'post_type'              => 'any',
+                'post_type'              => array_values( get_post_types() ), // "any" would skip exclude_from_search types
                 'post_status'            => 'any',
                 'posts_per_page'         => count( $ids ),
                 'ignore_sticky_posts'    => true,
