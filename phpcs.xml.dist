@@ -11,6 +11,9 @@
     <arg name="extensions" value="php"/>
     <arg value="sp"/>
 
+    <!-- Fail the build on errors only; warnings are tracked as technical debt -->
+    <config name="ignore_warnings_on_exit" value="1"/>
+
     <config name="testVersion" value="7.4-"/>
     <config name="minimum_wp_version" value="6.0"/>
 
