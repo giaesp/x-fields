@@ -11,7 +11,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Check version matches tag
         run: |
           TAG="${GITHUB_REF_NAME#v}"
@@ -39,7 +39,7 @@ jobs:
       - name: Skip (WordPress.org credentials not configured)
         if: env.HAS_SVN != 'true'
         run: echo "SVN_USERNAME / SVN_PASSWORD not set; skipping WordPress.org deploy."
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: env.HAS_SVN == 'true'
       - name: Deploy plugin and assets to WordPress.org
         if: env.HAS_SVN == 'true'

@@ -20,7 +20,7 @@ jobs:
       - name: Skip (WordPress.org credentials not configured)
         if: env.HAS_SVN != 'true'
         run: echo "SVN credentials not set; skipping."
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: env.HAS_SVN == 'true'
       - uses: 10up/action-wordpress-plugin-asset-update@stable
         if: env.HAS_SVN == 'true'
