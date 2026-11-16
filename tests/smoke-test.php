@@ -275,6 +275,57 @@ xfields_t( 'validation: valid submission passes', [] === $errs );
 $errs = XFields()->api->validate_input( [ $vids['v_req'] => 'not-an-array', $vids['v_loop'] => 'x' ], [ $vg ] );
 xfields_t( 'validation: malformed input handled', 3 === count( $errs ) );
 
+// ---- 2.0.1 audit -----------------------------------------------------------------
+// Malformed field definitions never crash (PHP 8 TypeError on array keys)
+$mg = xfields_test_post( [ 'post_type' => 'xfields_group', 'post_status' => 'publish', 'post_title' => 'Malformed' ] );
+$crashed = false;
+try {
+    XFields()->field_group->save( [ 'post_id' => $mg, 'fields' => [
+        [ 'id' => 0, 'type' => [ 'text' ], 'name' => 'a' ],
+        [ 'id' => [ 1 ], 'type' => 'text', 'name' => [ 'x' ], 'label' => [ 'y' ] ],
+        [ 'id' => 0, 'type' => 'text', 'name' => 'ok', 'label' => [ 'bad' ] ],
+    ], 'rules' => [], 'extras' => [] ] );
+} catch ( \Throwable $e ) { $crashed = true; }
+$mf = get_post_meta( $mg, 'xfields_fields', true );
+xfields_t( 'malformed field definitions are dropped, not fatal', ! $crashed && 1 === count( $mf ) && 'ok' === $mf[0]['name'] && '' === $mf[0]['label'] );
+
+$crashed = false;
+try {
+    $msg = XFields()->field_group->import( [ 'import_code' => [
+        [ 'post_name' => 'fz-' . wp_rand(), 'post_title' => [ 't' ], 'xfields_fields' => [ [ 'id' => [ 1 ], 'type' => [ 'text' ] ], [ 'id' => 2, 'type' => 'text', 'name' => [ 'n' ] ] ] ],
+        [ 'post_name' => [ 'x' ] ], null, 1,
+    ] ] );
+} catch ( \Throwable $e ) { $crashed = true; }
+xfields_t( 'import with wrong types is not fatal', ! $crashed );
+foreach ( get_posts( [ 'post_type' => 'xfields_group', 'name' => '', 'post_status' => 'any', 'numberposts' => -1, 's' => '' ] ) as $p ) {
+    if ( 0 === strpos( $p->post_name, 'fz-' ) ) { $GLOBALS['xfields_test_posts'][] = $p->ID; }
+}
+
+// Relationship keeps posts of types excluded from search
+register_post_type( 'xf_hidden_type', [ 'public' => true, 'exclude_from_search' => true ] );
+$hidden = xfields_test_post( [ 'post_type' => 'xf_hidden_type', 'post_status' => 'publish', 'post_title' => 'Hidden type item' ] );
+ob_start();
+XFields()->create_field( [ 'type' => 'relationship', 'value' => (string) $hidden, 'options' => [ 'post_types' => [ 'xf_hidden_type' ] ] ] );
+$rel_html = ob_get_clean();
+xfields_t( 'relationship shows selected posts of exclude_from_search types', false !== strpos( $rel_html, 'Hidden type item' ) );
+
+// Term field never reveals terms outside the allowed taxonomies
+$secret_term = wp_insert_term( 'Secret term ' . wp_rand(), 'post_tag' );
+ob_start();
+XFields()->create_field( [ 'type' => 'term', 'value' => (string) $secret_term['term_id'], 'options' => [ 'taxonomies' => [ 'category' ] ] ] );
+$term_html = ob_get_clean();
+wp_delete_term( $secret_term['term_id'], 'post_tag' );
+xfields_t( 'term field restricted to allowed taxonomies', false === strpos( $term_html, 'Secret term' ) );
+
+// get() with a non-scalar name
+xfields_t( 'get() with an array name returns null', null === XFields()->get( [ 'x' ], $page ) );
+
+// Inline JSON cannot break out of <script>
+ob_start();
+XFields()->fields['loop']->recursive_clone( $group_id, $ids['rows'] );
+$buf = ob_get_clean();
+xfields_t( 'loop buffer JSON escapes < and >', false === strpos( substr( $buf, strpos( $buf, '= ' ) ), '<div' ) );
+
 // ---- Cleanup happens in the shutdown function (also after fatal errors) ----
 
 echo "\nPHP notices/warnings from XFields: " . count( $GLOBALS['xfields_test_errors'] ) . "\n";

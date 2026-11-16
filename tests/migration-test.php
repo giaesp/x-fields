@@ -74,6 +74,16 @@ update_option( 'xfields_version', $backup['version'] );
 update_option( 'xfields_next_field_id', max( (int) $backup['next'], (int) get_option( 'xfields_next_field_id' ) ) );
 update_option( 'xfields_v1_migrated', $backup['flag'] ? $backup['flag'] : time(), false );
 
+// ---- A foreign "xf_version" option (another plugin) must not trigger the 1.x migration
+delete_option( 'xfields_v1_migrated' );
+update_option( $old . 'version', '9.9.9-other-plugin' );
+update_option( $old . 'next_field_id', 'other-plugin-data' );
+xfields_migration::maybe_migrate_v1();
+xfields_mig_t( 'foreign xf_version option left untouched', '9.9.9-other-plugin' === get_option( $old . 'version' ) && 'other-plugin-data' === get_option( $old . 'next_field_id' ) );
+delete_option( $old . 'version' );
+delete_option( $old . 'next_field_id' );
+update_option( 'xfields_v1_migrated', time(), false );
+
 // ---- Custom Field Suite -> X-Fields -----------------------------------------------
 $cfs_table = $wpdb->prefix . 'cfs_values';
 $wpdb->query( "CREATE TABLE {$cfs_table} LIKE {$values}" );

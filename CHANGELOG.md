@@ -5,6 +5,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-11-16
+
+Audit of the 2.0 code (modern libraries, migrations, WordPress APIs) with HTTP fuzzing of every endpoint.
+
+### Fixed
+- **Data loss:** Relationship fields (and the "Posts" placement rule) hid selected posts whose post type is excluded from search (`post_type => 'any'`); saving again dropped them. Now all registered post types are looked up.
+- **Fatal error** (PHP 8 `TypeError`) when a field definition or an imported field group contained an array where a string was expected; malformed entries are now skipped.
+- PHP warning when the AJAX nonce was sent as an array; invalid nonces now return **403**.
+
+### Security
+- The 1.x → 2.x migration only runs with real X-Fields 1.x evidence (its table or post type); a generic `xf_version` option from another plugin is no longer touched.
+- Term field: selected terms are restricted to the allowed taxonomies (no term names from other taxonomies via tampered IDs).
+- Inline JSON in `<script>` blocks uses `JSON_HEX_TAG | JSON_HEX_AMP`.
+- `get()` ignores non-scalar field names; import ignores non-scalar names, labels and notes.
+
+### Tests
+- 48 smoke/security checks and 11 migration checks (new: malformed definitions, typed import, hidden post types, term restriction, inline JSON, foreign `xf_version`).
+
 ## [2.0.0] - 2026-11-16
 
 Prepared for the WordPress.org plugin directory.
@@ -108,7 +126,8 @@ First release of X-Fields, forked from Custom Field Suite 2.6.7.
 - Double-encoded HTML entities in text/textarea values.
 - Tables are created with the site charset/collation (utf8mb4).
 
-[Unreleased]: https://github.com/giaesp/x-fields/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/giaesp/x-fields/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/giaesp/x-fields/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/giaesp/x-fields/compare/v1.1.0...v2.0.0
 [1.1.0]: https://github.com/giaesp/x-fields/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/giaesp/x-fields/compare/v1.0.0...v1.0.1

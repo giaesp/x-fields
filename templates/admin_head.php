@@ -40,7 +40,7 @@ if ( 'xfields_group' == $screen->post_type ) {
         'field_clone'  => $xfields_field_clone,
         'options_html' => $xfields_options_html,
         'i18n'         => [ 'confirm_delete' => __( 'Delete this field and its saved values?', 'x-fields' ) ],
-    ] ) . ' );', 'before' );
+    ], JSON_HEX_TAG | JSON_HEX_AMP ) . ' );', 'before' );
 
 }
 

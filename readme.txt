@@ -4,7 +4,7 @@ Tags: custom fields, repeater, relationship, meta box, fields
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,9 @@ Version 2.0 renames the PHP API from `XF()` to `XFields()` (and hooks from `xf_*
 
 == Changelog ==
 
+= 2.0.1 =
+* Security & robustness release: no fatal errors on malformed input, safer 1.x migration detection, related posts of hidden post types are preserved, stricter term lookups, hardened inline JSON.
+
 = 2.0.0 =
 * Breaking: PHP API renamed to `XFields()`, prefix `xfields_` (WordPress.org requirement). Data from 1.x and from Custom Field Suite is migrated automatically.
 * Modern libraries: Tom Select for searchable selects, native date/time inputs, WordPress color picker, official `wp.editor` API for WYSIWYG. Removed Select2 3, bootstrap-datepicker, miniColors, PowerTip and a custom TinyMCE plugin.
@@ -95,6 +98,9 @@ Version 2.0 renames the PHP API from `XF()` to `XFields()` (and hooks from `xf_*
 * First release (fork of Custom Field Suite 2.6.7).
 
 == Upgrade Notice ==
+
+= 2.0.1 =
+Recommended: fixes data loss in Relationship fields pointing to post types excluded from search, and hardens input handling.
 
 = 2.0.0 =
 Major release: the PHP API is now `XFields()` instead of `XF()`. Update your theme before upgrading; data is migrated automatically.
