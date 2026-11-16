@@ -20,7 +20,7 @@ jobs:
           grep -q "Stable tag: $TAG" readme.txt
       - name: Build zip
         run: git archive --format=zip --prefix=x-fields/ -o x-fields-${GITHUB_REF_NAME}.zip HEAD
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: x-fields-${{ github.ref_name }}.zip
           generate_release_notes: true
