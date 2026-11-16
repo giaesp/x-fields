@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class cfs_api
+class xf_api
 {
     public $cache;
     public $saved_fields;
@@ -94,7 +94,7 @@ class cfs_api
                 // Get all the field data
                 $sql = "
                 SELECT m.meta_value, v.field_id, v.hierarchy, v.weight
-                FROM {$wpdb->prefix}cfs_values v
+                FROM {$wpdb->prefix}xf_values v
                 INNER JOIN {$wpdb->postmeta} m ON m.meta_id = v.meta_id
                 WHERE v.field_id IN ($field_ids) AND v.post_id = $post_id
                 ORDER BY v.depth, FIELD(v.field_id, $field_ids), v.weight, v.sub_weight";
@@ -253,7 +253,7 @@ class cfs_api
 
         $sql = "
         SELECT DISTINCT p.ID
-        FROM {$wpdb->prefix}cfs_values v
+        FROM {$wpdb->prefix}xf_values v
         INNER JOIN $wpdb->posts p ON p.ID = v.post_id
         INNER JOIN $wpdb->postmeta m ON m.meta_id = v.meta_id
         WHERE $where";
@@ -294,7 +294,7 @@ class cfs_api
         // create post if the ID is missing
         if ( empty( $post_data['ID'] ) ) {
             $post_defaults = [
-                'post_title'                => 'My CFS post',
+                'post_title'                => 'My XF post',
                 'post_content'              => '',
                 'post_content_filtered'     => '',
                 'post_excerpt'              => '',
@@ -369,7 +369,7 @@ class cfs_api
 
             $sql = "
             DELETE v, m
-            FROM {$wpdb->prefix}cfs_values v
+            FROM {$wpdb->prefix}xf_values v
             LEFT JOIN {$wpdb->postmeta} m ON m.meta_id = v.meta_id
             WHERE v.post_id = $post_id AND (v.field_id IN ($field_ids) OR v.base_field_id IN ($field_ids))";
 
@@ -390,7 +390,7 @@ class cfs_api
 
                 $sql = "
                 DELETE v, m
-                FROM {$wpdb->prefix}cfs_values v
+                FROM {$wpdb->prefix}xf_values v
                 LEFT JOIN {$wpdb->postmeta} m ON m.meta_id = v.meta_id
                 WHERE v.post_id = $post_id AND v.field_id IN ($field_ids)";
 
@@ -465,7 +465,7 @@ class cfs_api
 
             $field_type = $params['all_fields'][ $field_id ]->type;
 
-            if ( ! isset( CFS()->fields[ $field_type ] ) ) {
+            if ( ! isset( XF()->fields[ $field_type ] ) ) {
                 return;
             }
         }
@@ -486,7 +486,7 @@ class cfs_api
             }
 
             // Trigger the pre_save hook
-            $values = CFS()->fields[ $field_type ]->pre_save( $values, $params['all_fields'][ $field_id ] );
+            $values = XF()->fields[ $field_type ]->pre_save( $values, $params['all_fields'][ $field_id ] );
 
             $sub_weight = 0;
 
@@ -512,7 +512,7 @@ class cfs_api
                 // Get the top-level field ID from the hierarchy array
                 $base_field_id = empty( $params['hierarchy'] ) ? 0 : $params['hierarchy'][0];
 
-                // Insert into cfs_values
+                // Insert into xf_values
                 $data = [
                     'field_id'          => $field_id,
                     'meta_id'           => $meta_id,
@@ -524,7 +524,7 @@ class cfs_api
                     'sub_weight'        => $sub_weight,
                 ];
 
-                $wpdb->insert( $wpdb->prefix . 'cfs_values', $data );
+                $wpdb->insert( $wpdb->prefix . 'xf_values', $data );
                 $sub_weight++;
 
                 // Update log
@@ -590,7 +590,7 @@ class cfs_api
 
         $params = array_merge( $defaults, $params );
 
-        $field_groups = CFS()->field_group->load_field_groups();
+        $field_groups = XF()->field_group->load_field_groups();
 
         $output = [];
 
@@ -672,7 +672,7 @@ class cfs_api
             $output[ $field->id ] = $field;
         }
 
-        return apply_filters( 'cfs_get_input_fields', $output, $params );
+        return apply_filters( 'xf_get_input_fields', $output, $params );
     }
 
 
@@ -765,7 +765,7 @@ class cfs_api
         );
 
         // Get all field groups
-        $field_groups = CFS()->field_group->load_field_groups();
+        $field_groups = XF()->field_group->load_field_groups();
 
         // Ignore user_roles if used within get_fields
         if ( false !== $skip_roles ) {
@@ -820,7 +820,7 @@ class cfs_api
         }
 
         // Allow for overrides
-        return apply_filters( 'cfs_matching_groups', $matches, $params, $rule_types );
+        return apply_filters( 'xf_matching_groups', $matches, $params, $rule_types );
     }
 
 
@@ -841,19 +841,19 @@ class cfs_api
             $value[] = $field_value;
         }
         else {
-            if ( ! isset( CFS()->fields[ $field->type ] ) ) {
+            if ( ! isset( XF()->fields[ $field->type ] ) ) {
                 return;
             }
 
-            $value = CFS()->fields[ $field->type ]->prepare_value( $value, $field );
+            $value = XF()->fields[ $field->type ]->prepare_value( $value, $field );
 
             $format = is_array( $options ) && isset( $options['format'] ) ? $options['format'] : 'api';
 
             if ( 'api' == $format ) {
-                $value = CFS()->fields[ $field->type ]->format_value_for_api( $value, $field );
+                $value = XF()->fields[ $field->type ]->format_value_for_api( $value, $field );
             }
             elseif ( 'input' == $format ) {
-                $value = CFS()->fields[ $field->type ]->format_value_for_input( $value, $field );
+                $value = XF()->fields[ $field->type ]->format_value_for_input( $value, $field );
             }
         }
     }
@@ -891,4 +891,4 @@ class cfs_api
     }
 }
 
-CFS()->api = new cfs_api();
+XF()->api = new xf_api();

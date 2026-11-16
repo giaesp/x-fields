@@ -2,12 +2,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class cfs_true_false extends cfs_field
+class xf_true_false extends xf_field
 {
 
     function __construct() {
         $this->name = 'true_false';
-        $this->label = __('True / False', 'cfs');
+        $this->label = __('True / False', 'x-fields' );
     }
 
 
@@ -31,14 +31,14 @@ class cfs_true_false extends cfs_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Message', 'cfs' ); ?></label>
-                <p class="description"><?php _e( 'The text beside the checkbox', 'cfs' ); ?></p>
+                <label><?php _e( 'Message', 'x-fields' ); ?></label>
+                <p class="description"><?php _e( 'The text beside the checkbox', 'x-fields' ); ?></p>
             </td>
             <td>
                 <?php
-                    CFS()->create_field( [
+                    XF()->create_field( [
                         'type' => 'text',
-                        'input_name' => "cfs[fields][$key][options][message]",
+                        'input_name' => "xf[fields][$key][options][message]",
                         'value' => $this->get_option( $field, 'message' ),
                     ] );
                 ?>
@@ -46,16 +46,16 @@ class cfs_true_false extends cfs_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Validation', 'cfs' ); ?></label>
+                <label><?php _e( 'Validation', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
-                    CFS()->create_field( [
+                    XF()->create_field( [
                         'type' => 'true_false',
-                        'input_name' => "cfs[fields][$key][options][required]",
+                        'input_name' => "xf[fields][$key][options][required]",
                         'input_class' => 'true_false',
                         'value' => $this->get_option( $field, 'required' ),
-                        'options' => [ 'message' => __( 'This is a required field', 'cfs' ) ],
+                        'options' => [ 'message' => __( 'This is a required field', 'x-fields' ) ],
                     ] );
                 ?>
             </td>
@@ -71,10 +71,10 @@ class cfs_true_false extends cfs_field
         <script>
         (function($) {
             $(function() {
-                $(document).on('cfs/ready', '.cfs_add_field', function() {
-                    $('.cfs_true_false:not(.ready)').init_true_false();
+                $(document).on('xf/ready', '.xf_add_field', function() {
+                    $('.xf_true_false:not(.ready)').init_true_false();
                 });
-                $('.cfs_true_false').init_true_false();
+                $('.xf_true_false').init_true_false();
             });
 
             $.fn.init_true_false = function() {

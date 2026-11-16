@@ -2,11 +2,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( defined( 'CFS_REVISIONS' ) && CFS_REVISIONS ) {
-    new cfs_revision();
+if ( defined( 'XF_REVISIONS' ) && XF_REVISIONS ) {
+    new xf_revision();
 }
 
-class cfs_revision
+class xf_revision
 {
 
     function __construct() {
@@ -15,7 +15,7 @@ class cfs_revision
         add_action( 'wp_delete_post_revision', [ $this, 'wp_delete_post_revision' ] );
 
         add_filter( '_wp_post_revision_fields', [ $this, '_wp_post_revision_fields' ] );
-        add_filter( '_wp_post_revision_field_cfs_postmeta', [ $this, '_wp_post_revision_field_postmeta' ], 10, 3 );
+        add_filter( '_wp_post_revision_field_xf_postmeta', [ $this, '_wp_post_revision_field_postmeta' ], 10, 3 );
         add_filter( 'wp_save_post_revision_check_for_changes', [ $this, 'check_for_changes' ], 10, 3 );
     }
 
@@ -25,19 +25,19 @@ class cfs_revision
      * @see wp-includes/revision.php - wp_save_post_revision()
      */
     function _wp_post_revision_fields( $fields ) {
-        $fields[ 'cfs_postmeta' ] = __( 'Post Meta', 'cfs' );
+        $fields[ 'xf_postmeta' ] = __( 'Post Meta', 'x-fields' );
         return $fields;
     }
 
 
     /**
-     * Generate the data for the "cfs_postmeta" variable
+     * Generate the data for the "xf_postmeta" variable
      * @see wp-admin/includes/ajax-actions - wp_ajax_revisions_data()
      */
     function _wp_post_revision_field_postmeta( $value, $column, $post ) {
         $output = '';
-        $fields = CFS()->get( false, $post->ID );
-        $field_info = CFS()->get_field_info( false, $post->ID );
+        $fields = XF()->get( false, $post->ID );
+        $field_info = XF()->get_field_info( false, $post->ID );
 
         foreach ( (array) $fields as $field_name => $field_data ) {
             $output .= '[' . $field_name . "]\n";
@@ -71,8 +71,8 @@ class cfs_revision
      * @see wp-includes/revision.php -> wp_save_post_revision()
      */
     function check_for_changes( $default, $last_revision, $post ) {
-        $revision_data = CFS()->get( false, $last_revision->ID );
-        $post_data = CFS()->get( false, $post->ID );
+        $revision_data = XF()->get( false, $last_revision->ID );
+        $post_data = XF()->get( false, $post->ID );
 
         if ( serialize( $revision_data ) != serialize( $post_data ) ) {
             return false;
@@ -93,8 +93,8 @@ class cfs_revision
         $original_post_id = wp_is_post_revision( $post_id );
 
         if ( $original_post_id ) {
-            $field_data = CFS()->get( false, $original_post_id, [ 'format' => 'raw' ] );
-            CFS()->save( $field_data, [ 'ID' => $post_id ] );
+            $field_data = XF()->get( false, $original_post_id, [ 'format' => 'raw' ] );
+            XF()->save( $field_data, [ 'ID' => $post_id ] );
         }
     }
 
@@ -104,8 +104,8 @@ class cfs_revision
      * @see wp-includes/revision.php -> wp_restore_post_revision()
      */
     function wp_restore_post_revision( $post_id, $revision_id ) {
-        $field_data = CFS()->get( false, $revision_id, [ 'format' => 'raw' ] );
-        CFS()->save( $field_data, [ 'ID' => $post_id ] );
+        $field_data = XF()->get( false, $revision_id, [ 'format' => 'raw' ] );
+        XF()->save( $field_data, [ 'ID' => $post_id ] );
     }
 
 
@@ -116,6 +116,6 @@ class cfs_revision
     function wp_delete_post_revision( $revision_id ) {
         global $wpdb;
 
-        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}cfs_values WHERE post_id = %d", $revision_id ) );
+        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}xf_values WHERE post_id = %d", $revision_id ) );
     }
 }

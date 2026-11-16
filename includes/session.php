@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class cfs_session
+class xf_session
 {
     public $session_id;
     public $session_data;
@@ -13,8 +13,8 @@ class cfs_session
      * Constructor
      */
     public function __construct() {
-        if ( isset( $_POST['cfs']['session_id'] ) && is_string( $_POST['cfs']['session_id'] ) && $this->is_valid( $_POST['cfs']['session_id'] ) ) {
-            $this->session_id = $_POST['cfs']['session_id'];
+        if ( isset( $_POST['xf']['session_id'] ) && is_string( $_POST['xf']['session_id'] ) && $this->is_valid( $_POST['xf']['session_id'] ) ) {
+            $this->session_id = $_POST['xf']['session_id'];
         }
         else {
             // Cryptographically secure, unpredictable ID (was md5( uniqid() ))
@@ -32,7 +32,7 @@ class cfs_session
 
         $output = [];
         $session_data = $wpdb->get_var( $wpdb->prepare(
-            "SELECT data FROM {$wpdb->prefix}cfs_sessions WHERE id = %s AND expires > %d",
+            "SELECT data FROM {$wpdb->prefix}xf_sessions WHERE id = %s AND expires > %d",
             $this->session_id, time()
         ) );
 
@@ -60,11 +60,11 @@ class cfs_session
         $session_data = (array) $session_data;
         $session_data['user_id'] = get_current_user_id();
 
-        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}cfs_sessions WHERE id = %s LIMIT 1", $this->session_id ) );
+        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}xf_sessions WHERE id = %s LIMIT 1", $this->session_id ) );
 
         $wpdb->query(
             $wpdb->prepare(
-                "INSERT INTO {$wpdb->prefix}cfs_sessions VALUES (%s, %s, %s)",
+                "INSERT INTO {$wpdb->prefix}xf_sessions VALUES (%s, %s, %s)",
                 $this->session_id, serialize( $session_data ), time() + $this->expires
             )
         );
@@ -77,7 +77,7 @@ class cfs_session
     public function cleanup() {
         global $wpdb;
 
-        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}cfs_sessions WHERE CAST(expires AS UNSIGNED) <= %d", time() ) );
+        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}xf_sessions WHERE CAST(expires AS UNSIGNED) <= %d", time() ) );
     }
 
 

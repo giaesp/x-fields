@@ -1,1 +1,9 @@
-.svn/
+/vendor/
+/node_modules/
+/build/
+*.zip
+.DS_Store
+._*
+.idea/
+.vscode/
+.phpcs-cache

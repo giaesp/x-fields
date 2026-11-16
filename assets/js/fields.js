@@ -6,10 +6,11 @@
         function zebra_stripes() {
             $('.fields .field_meta').removeClass('even');
             $('.fields .field_meta:even').addClass('even');
+            $('#xf_fields .xf-empty-state').prop('hidden', $('#xf_fields .fields .field').length > 0);
         }
 
         function init_tooltip() {
-            $(document).on('mouseover', '.cfs_tooltip', function() {
+            $(document).on('mouseover', '.xf_tooltip', function() {
                 if ('undefined' == typeof $(this).data('powertip')) {
                     var content = $(this).find('.tooltip_inner').html();
                     $(this).data('powertip', content);
@@ -56,7 +57,7 @@
 
                 /*
                 var $container = ui.item.closest('.fields');
-                $container.find('[name^="cfs[fields]"]').each(function() {
+                $container.find('[name^="xf[fields]"]').each(function() {
                     console.log($(this).attr('name') + ' = ' + $(this).val());
                 });
                 */
@@ -64,22 +65,32 @@
         });
 
         // Add a new field
-        $(document).on('click', '.cfs_add_field', function() {
-            var html = CFS.field_clone.replace(/\[clone\]/g, '['+CFS.field_index+']');
+        $(document).on('click', '.xf_add_field', function() {
+            var html = XF.field_clone.replace(/\[clone\]/g, '['+XF.field_index+']');
             $('.fields').append('<li>' + html + '</li>');
-            $('.fields li:last .field_label a').click();
-            $('.fields li:last .field_type select').change();
-            CFS.field_index = CFS.field_index + 1;
+            $('.fields > li:last .field_meta .field_label a').trigger('click');
+            $('.fields > li:last .field_type select').trigger('change');
+            $('.fields > li:last .field_label input').trigger('focus');
+            XF.field_index = XF.field_index + 1;
+            zebra_stripes();
             init_tooltip();
         });
 
         // Delete a field
-        $(document).on('click', '.cfs_delete_field', function() {
-            $(this).closest('li').remove();
+        $(document).on('click', '#xf_fields .xf_delete_field', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var label = $.trim($(this).closest('.field').find('.field_meta .field_label a').text());
+            var msg = (XF.i18n && XF.i18n.confirm_delete) ? XF.i18n.confirm_delete : 'Delete this field and its saved values?';
+            if (window.confirm(label ? msg + '\n\n' + label : msg)) {
+                $(this).closest('li').remove();
+                zebra_stripes();
+            }
         });
 
         // Pop open the edit fields
-        $(document).on('click', '.cfs_edit_field', function() {
+        $(document).on('click', '#xf_fields .xf_edit_field', function(e) {
+            e.preventDefault();
             var field = $(this).closest('.field');
             field.toggleClass('form_open');
             field.find('.field_form').slideToggle('fast');
@@ -89,8 +100,10 @@
         $(document).on('change', '.field_form .field_type select', function() {
             var type = $(this).val();
             var input_name = $(this).attr('name').replace('[type]', '');
-            var html = CFS.options_html[type].replace(/cfs\[fields\]\[clone\]/g, input_name);
-            $(this).closest('.field').find('.field_meta .field_type').html(type);
+            var html = XF.options_html[type].replace(/xf\[fields\]\[clone\]/g, input_name);
+            $(this).closest('.field').find('.field_meta .field_type')
+                .text($(this).find('option:selected').text())
+                .attr('class', 'field_type xf-type-' + type);
             $(this).closest('.field').find('.field_option').remove();
             $(this).closest('.field_basics').after(html);
             init_tooltip();

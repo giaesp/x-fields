@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class cfs_form
+class xf_form
 {
 
     public $used_types;
@@ -38,18 +38,18 @@ class cfs_form
             return;
         }
 
-        $this->session = new cfs_session();
+        $this->session = new xf_session();
 
         // Save the form
-        if ( isset( $_POST['cfs']['save'] ) && is_string( $_POST['cfs']['save'] ) ) {
-            if ( wp_verify_nonce( $_POST['cfs']['save'], 'cfs_save_input' ) ) {
+        if ( isset( $_POST['xf']['save'] ) && is_string( $_POST['xf']['save'] ) ) {
+            if ( wp_verify_nonce( $_POST['xf']['save'], 'xf_save_input' ) ) {
                 $session = $this->session->get();
 
                 if ( empty( $session ) ) {
-                    wp_die( esc_html__( 'Your session has expired.', 'cfs' ), '', [ 'response' => 403 ] );
+                    wp_die( esc_html__( 'Your session has expired.', 'x-fields' ), '', [ 'response' => 403 ] );
                 }
 
-                $field_data = isset( $_POST['cfs']['input'] ) && is_array( $_POST['cfs']['input'] ) ? $_POST['cfs']['input'] : [];
+                $field_data = isset( $_POST['xf']['input'] ) && is_array( $_POST['xf']['input'] ) ? $_POST['xf']['input'] : [];
                 $post_data = [];
                 $is_front_end = ! empty( $session['front_end'] );
 
@@ -58,7 +58,7 @@ class cfs_form
 
                 // Admin (meta box) saves require the right to edit the post
                 if ( ! $is_front_end && ( $post_id < 1 || ! current_user_can( 'edit_post', $post_id ) ) ) {
-                    wp_die( esc_html__( 'Sorry, you are not allowed to edit this item.', 'cfs' ), '', [ 'response' => 403 ] );
+                    wp_die( esc_html__( 'Sorry, you are not allowed to edit this item.', 'x-fields' ), '', [ 'response' => 403 ] );
                 }
                 $field_groups = isset( $session['field_groups'] ) ? (array) $session['field_groups'] : [];
 
@@ -70,13 +70,13 @@ class cfs_form
                 // Title
                 // (sanitized through the core *_save_pre filters, which apply KSES
                 // for users without the unfiltered_html capability)
-                if ( isset( $_POST['cfs']['post_title'] ) && is_string( $_POST['cfs']['post_title'] ) ) {
-                    $post_data['post_title'] = sanitize_post_field( 'post_title', wp_unslash( $_POST['cfs']['post_title'] ), $post_id, 'db' );
+                if ( isset( $_POST['xf']['post_title'] ) && is_string( $_POST['xf']['post_title'] ) ) {
+                    $post_data['post_title'] = sanitize_post_field( 'post_title', wp_unslash( $_POST['xf']['post_title'] ), $post_id, 'db' );
                 }
 
                 // Content
-                if ( isset( $_POST['cfs']['post_content'] ) && is_string( $_POST['cfs']['post_content'] ) ) {
-                    $post_data['post_content'] = sanitize_post_field( 'post_content', wp_unslash( $_POST['cfs']['post_content'] ), $post_id, 'db' );
+                if ( isset( $_POST['xf']['post_content'] ) && is_string( $_POST['xf']['post_content'] ) ) {
+                    $post_data['post_content'] = sanitize_post_field( 'post_content', wp_unslash( $_POST['xf']['post_content'] ), $post_id, 'db' );
                 }
 
                 // New posts
@@ -108,17 +108,17 @@ class cfs_form
                 ];
 
                 // Pre-save hook
-                do_action( 'cfs_pre_save_input', $hook_params );
+                do_action( 'xf_pre_save_input', $hook_params );
 
                 // Save the input values
-                $hook_params['post_data']['ID'] = CFS()->save(
+                $hook_params['post_data']['ID'] = XF()->save(
                     $field_data,
                     $post_data,
                     $options
                 );
 
                 // After-save hook
-                do_action( 'cfs_after_save_input', $hook_params );
+                do_action( 'xf_after_save_input', $hook_params );
 
                 // Delete expired sessions
                 $this->session->cleanup();
@@ -154,10 +154,10 @@ class cfs_form
 
         wp_enqueue_script( 'jquery-ui-core' );
         wp_enqueue_script( 'jquery-ui-sortable' );
-        wp_enqueue_script( 'cfs-validation', CFS_URL . '/assets/js/validation.js', [ 'jquery' ], CFS_VERSION );
-        wp_enqueue_script( 'jquery-powertip', CFS_URL . '/assets/js/jquery-powertip/jquery.powertip.min.js', [ 'jquery' ], CFS_VERSION );
-        wp_enqueue_style( 'jquery-powertip', CFS_URL . '/assets/js/jquery-powertip/jquery.powertip.css', [], CFS_VERSION );
-        wp_enqueue_style( 'cfs-input', CFS_URL . '/assets/css/input.css', [], CFS_VERSION );
+        wp_enqueue_script( 'xf-validation', XF_URL . '/assets/js/validation.js', [ 'jquery' ], XF_VERSION );
+        wp_enqueue_script( 'jquery-powertip', XF_URL . '/assets/js/jquery-powertip/jquery.powertip.min.js', [ 'jquery' ], XF_VERSION );
+        wp_enqueue_style( 'jquery-powertip', XF_URL . '/assets/js/jquery-powertip/jquery.powertip.css', [], XF_VERSION );
+        wp_enqueue_style( 'xf-input', XF_URL . '/assets/css/input.css', [], XF_VERSION );
     }
 
 
@@ -169,9 +169,9 @@ class cfs_form
     ?>
 
 <script>
-var CFS = CFS || {};
-CFS['get_field_value'] = {};
-CFS['loop_buffer'] = [];
+var XF = XF || {};
+XF['get_field_value'] = {};
+XF['loop_buffer'] = [];
 </script>
 
     <?php
@@ -183,7 +183,7 @@ CFS['loop_buffer'] = [];
      * @since 1.9.5
      */
     function footer_scripts() {
-        do_action( 'cfs_custom_validation' );
+        do_action( 'xf_custom_validation' );
     }
 
 
@@ -199,8 +199,8 @@ CFS['loop_buffer'] = [];
             return;
         }
 
-        echo '<div class="notice notice-error" id="cfs-validation-admin-notice" style="display: none;"><p><strong>';
-        echo __( 'One (or more) of your fields had validation errors. More information is available below.', 'cfs' );
+        echo '<div class="notice notice-error" id="xf-validation-admin-notice" style="display: none;"><p><strong>';
+        echo __( 'One (or more) of your fields had validation errors. More information is available below.', 'x-fields' );
         echo '</strong></p></div>';
     }
 
@@ -224,7 +224,7 @@ CFS['loop_buffer'] = [];
             'excluded_fields'       => [],
             'confirmation_message'  => '',
             'confirmation_url'      => '',
-            'submit_label'          => __( 'Submit', 'cfs' ),
+            'submit_label'          => __( 'Submit', 'x-fields' ),
             'front_end'             => true,
         ];
 
@@ -232,12 +232,12 @@ CFS['loop_buffer'] = [];
         $input_fields = [];
 
         // The session isn't created during AJAX / autosave requests
-        if ( ! ( $this->session instanceof cfs_session ) ) {
-            $this->session = new cfs_session();
+        if ( ! ( $this->session instanceof xf_session ) ) {
+            $this->session = new xf_session();
         }
 
         // Keep track of field validators
-        CFS()->validators = [];
+        XF()->validators = [];
 
         $post_id = (int) $params['post_id'];
 
@@ -246,7 +246,7 @@ CFS['loop_buffer'] = [];
         }
 
         if ( empty( $params['field_groups'] ) ) {
-            $field_groups = CFS()->api->get_matching_groups( $post_id, true );
+            $field_groups = XF()->api->get_matching_groups( $post_id, true );
             $field_groups = array_keys( $field_groups );
         }
         else {
@@ -254,19 +254,19 @@ CFS['loop_buffer'] = [];
         }
 
         if ( ! empty( $field_groups ) ) {
-            $input_fields = CFS()->api->get_input_fields( [
+            $input_fields = XF()->api->get_input_fields( [
                 'group_id' => $field_groups,
                 'post_id_values' => $post_id,
             ] );
         }
 
         // Hook to allow for overridden field settings
-        $input_fields = apply_filters( 'cfs_pre_render_fields', $input_fields, $params );
+        $input_fields = apply_filters( 'xf_pre_render_fields', $input_fields, $params );
 
         // The SESSION should contain all applicable field group IDs. Since add_meta_box only
-        // passes 1 field group at a time, we use CFS()->group_ids from admin_head.php
+        // passes 1 field group at a time, we use XF()->group_ids from admin_head.php
         // to store all group IDs needed for the SESSION.
-        $all_group_ids = ( false === $params['front_end'] ) ? CFS()->group_ids : $field_groups;
+        $all_group_ids = ( false === $params['front_end'] ) ? XF()->group_ids : $field_groups;
         $all_group_ids = array_map( 'intval', (array) $all_group_ids );
 
         $session_data = [
@@ -285,7 +285,7 @@ CFS['loop_buffer'] = [];
         if ( false !== $params['front_end'] ) {
     ?>
 
-<div class="cfs_input no_box">
+<div class="xf_input no_box">
     <form id="post" method="post" action="">
 
     <?php
@@ -296,7 +296,7 @@ CFS['loop_buffer'] = [];
 
         <div class="field" data-validator="required">
             <label><?php echo esc_html( $params['post_title'] ); ?></label>
-            <input type="text" name="cfs[post_title]" value="<?php echo empty( $post_id ) ? '' : esc_attr( $post->post_title ); ?>" />
+            <input type="text" name="xf[post_title]" value="<?php echo empty( $post_id ) ? '' : esc_attr( $post->post_title ); ?>" />
         </div>
 
     <?php
@@ -307,7 +307,7 @@ CFS['loop_buffer'] = [];
 
         <div class="field">
             <label><?php echo esc_html( $params['post_content'] ); ?></label>
-            <textarea name="cfs[post_content]"><?php echo empty( $post_id ) ? '' : esc_textarea( $post->post_content ); ?></textarea>
+            <textarea name="xf[post_content]"><?php echo empty( $post_id ) ? '' : esc_textarea( $post->post_content ); ?></textarea>
         </div>
 
     <?php
@@ -322,7 +322,7 @@ CFS['loop_buffer'] = [];
             }
         }
 
-        do_action( 'cfs_form_before_fields', $params, [
+        do_action( 'xf_form_before_fields', $params, [
             'group_ids'     => $all_group_ids,
             'input_fields'  => $input_fields
         ] );
@@ -336,15 +336,15 @@ CFS['loop_buffer'] = [];
             }
 
             // Skip missing field types
-            if ( ! isset( CFS()->fields[ $field->type ] ) ) {
+            if ( ! isset( XF()->fields[ $field->type ] ) ) {
                 continue;
             }
 
             // Output tabs
             if ( 'tab' == $field->type && $is_first_tab ) {
-                echo '<div class="cfs-tabs">';
+                echo '<div class="xf-tabs">';
                 foreach ( $tabs as $key => $tab ) {
-                    echo '<div class="cfs-tab" rel="' . esc_attr( $tab->name ) . '">' . esc_html( $tab->label ) . '</div>';
+                    echo '<div class="xf-tab" rel="' . esc_attr( $tab->name ) . '">' . esc_html( $tab->label ) . '</div>';
                 }
                 echo '</div>';
                 $is_first_tab = false;
@@ -352,7 +352,7 @@ CFS['loop_buffer'] = [];
 
             // Keep track of active field types
             if ( ! isset( $this->used_types[ $field->type ] ) ) {
-                CFS()->fields[ $field->type ]->input_head( $field );
+                XF()->fields[ $field->type ]->input_head( $field );
                 $this->used_types[ $field->type ] = true;
             }
 
@@ -377,7 +377,7 @@ CFS['loop_buffer'] = [];
             }
 
             if ( ! empty( $validator ) ) {
-                CFS()->validators[ $field->name ] = [
+                XF()->validators[ $field->name ] = [
                     'rule'  => $validator,
                     'type'  => $field->type
                 ];
@@ -393,10 +393,10 @@ CFS['loop_buffer'] = [];
                     if ( isset( $tabs[0] ) && $field->name != $tabs[0]->name ) {
                         echo '</div>';
                     }
-                    echo '<div class="cfs-tab-content cfs-tab-content-' . esc_attr( $field->name ) . '">';
+                    echo '<div class="xf-tab-content xf-tab-content-' . esc_attr( $field->name ) . '">';
 
 					if ( ! empty( $field->notes ) ) {
-						echo '<div class="cfs-tab-notes">' . esc_html( $field->notes ) . '</div>';
+						echo '<div class="xf-tab-notes">' . esc_html( $field->notes ) . '</div>';
 					}
                 }
                 else {
@@ -404,7 +404,7 @@ CFS['loop_buffer'] = [];
 
         <div class="field field-<?php echo esc_attr( $field->name ); ?>" data-type="<?php echo esc_attr( $field->type ); ?>" data-name="<?php echo esc_attr( $field->name ); ?>">
             <?php if ( 'loop' == $field->type ) : ?>
-            <a href="javascript:;" class="cfs_loop_toggle" title="<?php esc_html_e( 'Toggle row visibility', 'cfs' ); ?>"></a>
+            <a href="javascript:;" class="xf_loop_toggle" title="<?php esc_html_e( 'Toggle row visibility', 'x-fields' ); ?>"></a>
             <?php endif; ?>
 
             <?php if ( ! empty( $field->label ) ) : ?>
@@ -415,14 +415,14 @@ CFS['loop_buffer'] = [];
             <p class="notes"><?php echo esc_html( $field->notes ); ?></p>
             <?php endif; ?>
 
-            <div class="cfs_<?php echo esc_attr( $field->type ); ?>">
+            <div class="xf_<?php echo esc_attr( $field->type ); ?>">
 
     <?php
-                CFS()->create_field( [
+                XF()->create_field( [
                     'id'            => $field->id,
                     'group_id'      => $field->group_id,
                     'type'          => $field->type,
-                    'input_name'    => "cfs[input][$field->id][value]",
+                    'input_name'    => "xf[input][$field->id][value]",
                     'input_class'   => $field->type,
                     'options'       => $field->options,
                     'value'         => $field->value,
@@ -443,7 +443,7 @@ CFS['loop_buffer'] = [];
             echo '</div>';
         }
 
-        do_action( 'cfs_form_after_fields', $params, [
+        do_action( 'xf_form_after_fields', $params, [
             'group_ids'     => $all_group_ids,
             'input_fields'  => $input_fields
         ] );
@@ -451,12 +451,12 @@ CFS['loop_buffer'] = [];
 
         <script>
         (function($) {
-            CFS.field_rules = CFS.field_rules || {};
-            $.extend( CFS.field_rules, <?php echo wp_json_encode( CFS()->validators, JSON_HEX_TAG | JSON_HEX_AMP ); ?> );
+            XF.field_rules = XF.field_rules || {};
+            $.extend( XF.field_rules, <?php echo wp_json_encode( XF()->validators, JSON_HEX_TAG | JSON_HEX_AMP ); ?> );
         })(jQuery);
         </script>
-        <input type="hidden" name="cfs[save]" value="<?php echo esc_attr( wp_create_nonce( 'cfs_save_input' ) ); ?>" />
-        <input type="hidden" name="cfs[session_id]" value="<?php echo esc_attr( $this->session->session_id ); ?>" />
+        <input type="hidden" name="xf[save]" value="<?php echo esc_attr( wp_create_nonce( 'xf_save_input' ) ); ?>" />
+        <input type="hidden" name="xf[session_id]" value="<?php echo esc_attr( $this->session->session_id ); ?>" />
 
         <?php if ( false !== $params['front_end'] ) : ?>
 
@@ -469,4 +469,4 @@ CFS['loop_buffer'] = [];
     }
 }
 
-CFS()->form = new cfs_form();
+XF()->form = new xf_form();

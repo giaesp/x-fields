@@ -1,21 +1,32 @@
 {
-  "name": "mgibbs189/custom-field-suite",
-  "description": "Lightweight Custom Fields Plugin for WordPress",
-  "keywords": ["wordpress", "plugin"],
-  "homepage": "https://wordpress.org/plugins/custom-field-suite/",
-  "license": "GPL-2.0",
-  "authors": [
-    {
-      "name": "Matt Gibbs",
-      "homepage": "https://twitter.com/mgibbs189"
-    }
-  ],
+  "name": "giaesp/x-fields",
+  "description": "Simple, secure custom fields for WordPress.",
   "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/giaesp/x-fields",
+  "authors": [
+    { "name": "Gianluca Esposito", "homepage": "https://github.com/giaesp", "role": "Maintainer" },
+    { "name": "Matt Gibbs", "role": "Original author (Custom Field Suite)" }
+  ],
   "support": {
-    "issues": "https://github.com/mgibbs189/custom-field-suite/issues",
-    "source": "https://github.com/mgibbs189/custom-field-suite"
+    "issues": "https://github.com/giaesp/x-fields/issues",
+    "source": "https://github.com/giaesp/x-fields"
   },
   "require": {
-    "composer/installers": "~1.0"
+    "php": ">=7.4"
+  },
+  "require-dev": {
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+    "wp-coding-standards/wpcs": "^3.1",
+    "phpcompatibility/phpcompatibility-wp": "^2.1"
+  },
+  "scripts": {
+    "lint": "find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l",
+    "phpcs": "phpcs"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
   }
 }

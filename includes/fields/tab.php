@@ -2,12 +2,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class cfs_tab extends cfs_field
+class xf_tab extends xf_field
 {
 
     function __construct() {
         $this->name = 'tab';
-        $this->label = __( 'Tab', 'cfs' );
+        $this->label = __( 'Tab', 'x-fields' );
     }
 
 
@@ -28,18 +28,18 @@ class cfs_tab extends cfs_field
     ?>
         <script>
         (function($) {
-            $(document).on('click', '.cfs-tab', function() {
+            $(document).on('click', '.xf-tab', function() {
                 var tab = $(this).attr('rel'),
-                    $context = $(this).parents('.cfs_input');
-                $context.find('.cfs-tab').removeClass('active');
-                $context.find('.cfs-tab-content').removeClass('active');
+                    $context = $(this).parents('.xf_input');
+                $context.find('.xf-tab').removeClass('active');
+                $context.find('.xf-tab-content').removeClass('active');
                 $(this).addClass('active');
-                $context.find('.cfs-tab-content-' + tab).addClass('active');
+                $context.find('.xf-tab-content-' + tab).addClass('active');
             });
 
             $(function() {
-                $('.cfs-tabs').each(function(){
-                    $(this).find('.cfs-tab:first').click();
+                $('.xf-tabs').each(function(){
+                    $(this).find('.xf-tab:first').click();
                 });
             });
         })(jQuery);

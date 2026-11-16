@@ -2,12 +2,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class cfs_color extends cfs_field
+class xf_color extends xf_field
 {
 
     function __construct() {
         $this->name = 'color';
-        $this->label = __( 'Color', 'cfs' );
+        $this->label = __( 'Color', 'x-fields' );
     }
 
 
@@ -15,13 +15,13 @@ class cfs_color extends cfs_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Default Value', 'cfs' ); ?></label>
+                <label><?php _e( 'Default Value', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
-                    CFS()->create_field( [
+                    XF()->create_field( [
                         'type' => 'text',
-                        'input_name' => "cfs[fields][$key][options][default_value]",
+                        'input_name' => "xf[fields][$key][options][default_value]",
                         'value' => $this->get_option( $field, 'default_value' ),
                     ] );
                 ?>
@@ -32,20 +32,20 @@ class cfs_color extends cfs_field
 
 
     function input_head( $field = null ) {
-        wp_register_script( 'miniColors', CFS_URL . '/includes/fields/color/jquery.miniColors.min.js' );
+        wp_register_script( 'miniColors', XF_URL . '/includes/fields/color/jquery.miniColors.min.js' );
         wp_enqueue_script( 'miniColors' );
     ?>
-        <link rel="stylesheet" type="text/css" href="<?php echo CFS_URL; ?>/includes/fields/color/color.css" />
+        <link rel="stylesheet" type="text/css" href="<?php echo XF_URL; ?>/includes/fields/color/color.css" />
         <script>
         (function($) {
-            $(document).on('focus', '.cfs_color input.color', function() {
+            $(document).on('focus', '.xf_color input.color', function() {
                 if (!$(this).hasClass('ready')) {
                     $(this).addClass('ready').minicolors();
                 }
             });
 
             $(function() {
-                $('.cfs_color input.color').addClass('ready').minicolors();
+                $('.xf_color input.color').addClass('ready').minicolors();
             });
         })(jQuery);
         </script>

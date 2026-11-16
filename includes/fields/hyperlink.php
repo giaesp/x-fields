@@ -2,13 +2,13 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class cfs_hyperlink extends cfs_field
+class xf_hyperlink extends xf_field
 {
 
 
     function __construct() {
         $this->name = 'hyperlink';
-        $this->label = __( 'Hyperlink', 'cfs' );
+        $this->label = __( 'Hyperlink', 'x-fields' );
     }
 
 
@@ -21,17 +21,17 @@ class cfs_hyperlink extends cfs_field
             'target' => isset( $field->value['target'] ) ? $field->value['target'] : '',
         ];
     ?>
-        <div class="cfs-hyperlink" style="overflow:hidden;">
-            <div class="cfs-hyperlink-url" style="width:39%;float:left;">
-                <div><?php _e( 'URL', 'cfs' ); ?></div>
+        <div class="xf-hyperlink" style="overflow:hidden;">
+            <div class="xf-hyperlink-url" style="width:39%;float:left;">
+                <div><?php _e( 'URL', 'x-fields' ); ?></div>
                 <input type="text" name="<?php echo esc_attr( $field->input_name ); ?>[url]" class="link-url" value="<?php echo esc_url( $field->value['url'] ); ?>" placeholder="http://" />
             </div>
-            <div class="cfs-hyperlink-text" style="width:39%;float:left;margin-left:1%;">
-                <div><?php _e( 'Link Text', 'cfs' ); ?></div>
+            <div class="xf-hyperlink-text" style="width:39%;float:left;margin-left:1%;">
+                <div><?php _e( 'Link Text', 'x-fields' ); ?></div>
                 <input type="text" name="<?php echo esc_attr( $field->input_name ); ?>[text]" class="link-text" value="<?php echo esc_attr( $field->value['text'] ); ?>" />
             </div>
-            <div class="cfs-hyperlink-target" style="width:19%;float:left;margin-left:1%;">
-                <div><?php _e( 'Link Target', 'cfs' ); ?></div>
+            <div class="xf-hyperlink-target" style="width:19%;float:left;margin-left:1%;">
+                <div><?php _e( 'Link Target', 'x-fields' ); ?></div>
                 <select class="link-target widefat" name="<?php echo esc_attr( $field->input_name ); ?>[target]">
                     <option value="none" <?php selected( 'none', esc_attr( $field->value['target'] ) ); ?>>None</option>
                     <option value="_blank" <?php selected( '_blank', esc_attr( $field->value['target'] ) ); ?>>_blank</option>
@@ -48,17 +48,17 @@ class cfs_hyperlink extends cfs_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e('Output format', 'cfs'); ?></label>
+                <label><?php _e('Output format', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
-                    CFS()->create_field( [
+                    XF()->create_field( [
                         'type' => 'select',
-                        'input_name' => "cfs[fields][$key][options][format]",
+                        'input_name' => "xf[fields][$key][options][format]",
                         'options' => [
                             'choices' => [
-                                'html' => __( 'HTML', 'cfs' ),
-                                'php' => __( 'PHP Array', 'cfs' )
+                                'html' => __( 'HTML', 'x-fields' ),
+                                'php' => __( 'PHP Array', 'x-fields' )
                             ],
                             'force_single' => true,
                         ],
@@ -130,7 +130,7 @@ class cfs_hyperlink extends cfs_field
             if ( ! empty( $url ) ) {
                 $target_attr = empty( $target ) ? '' : ' target="' . esc_attr( $target ) . '"';
                 $rel_attr = ( '_blank' === $target ) ? ' rel="noopener noreferrer"' : '';
-                $output = '<a class="cfs-hyperlink" href="' . esc_url( $url ) . '"' . $target_attr . $rel_attr . '><span class="text">' . esc_html( $text ) . '</span></a>';
+                $output = '<a class="xf-hyperlink" href="' . esc_url( $url ) . '"' . $target_attr . $rel_attr . '><span class="text">' . esc_html( $text ) . '</span></a>';
             }
         }
 

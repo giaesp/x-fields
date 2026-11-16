@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class cfs_ajax
+class xf_ajax
 {
     /**
      * Search posts (in the Placement Rules area)
@@ -19,7 +19,7 @@ class cfs_ajax
         FROM $wpdb->posts
         WHERE
             post_status IN ('publish', 'private') AND
-            post_type NOT IN ('cfs', 'attachment', 'revision', 'nav_menu_item') AND
+            post_type NOT IN ('xf_group', 'attachment', 'revision', 'nav_menu_item') AND
             post_title LIKE %s
         ORDER BY post_type, post_title
         LIMIT 10",
@@ -49,7 +49,7 @@ class cfs_ajax
 
 
     /**
-     * Remove all traces of CFS
+     * Remove all traces of XF
      */
     public function reset() {
         global $wpdb;
@@ -58,19 +58,19 @@ class cfs_ajax
         $sql = "
         DELETE p, m FROM {$wpdb->posts} p
         LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID
-        WHERE p.post_type = 'cfs'";
+        WHERE p.post_type = 'xf_group'";
         $wpdb->query( $sql );
 
         // Drop custom field values
         $sql = "
-        DELETE v, m FROM {$wpdb->prefix}cfs_values v
+        DELETE v, m FROM {$wpdb->prefix}xf_values v
         LEFT JOIN {$wpdb->postmeta} m ON m.meta_id = v.meta_id";
         $wpdb->query( $sql );
 
         // Drop tables
-        $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}cfs_values" );
-        $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}cfs_sessions" );
-        delete_option( 'cfs_version' );
-        delete_option( 'cfs_next_field_id' );
+        $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}xf_values" );
+        $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}xf_sessions" );
+        delete_option( 'xf_version' );
+        delete_option( 'xf_next_field_id' );
     }
 }

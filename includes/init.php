@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class cfs_init
+class xf_init
 {
 
     function __construct() {
@@ -18,29 +18,29 @@ class cfs_init
 
         add_action( 'admin_head',                       [ $this, 'admin_head' ] );
         add_action( 'admin_menu',                       [ $this, 'admin_menu' ] );
-        add_action( 'admin_footer',                     [ $this, 'show_credits' ] );
         add_action( 'save_post',                        [ $this, 'save_post' ] );
         add_action( 'delete_post',                      [ $this, 'delete_post' ] );
         add_action( 'add_meta_boxes',                   [ $this, 'add_meta_boxes' ] );
-        add_action( 'wp_ajax_cfs_ajax_handler',         [ $this, 'ajax_handler' ] );
-        add_filter( 'manage_cfs_posts_columns',         [ $this, 'cfs_columns' ] );
-        add_action( 'manage_cfs_posts_custom_column',   [ $this, 'cfs_column_content' ], 10, 2 );
+        add_action( 'wp_ajax_xf_ajax_handler',         [ $this, 'ajax_handler' ] );
+        add_filter( 'manage_xf_group_posts_columns',         [ $this, 'xf_columns' ] );
+        add_action( 'manage_xf_group_posts_custom_column',   [ $this, 'xf_column_content' ], 10, 2 );
 
-        include( CFS_DIR . '/includes/api.php' );
-        include( CFS_DIR . '/includes/upgrade.php' );
-        include( CFS_DIR . '/includes/field.php' );
-        include( CFS_DIR . '/includes/field_group.php' );
-        include( CFS_DIR . '/includes/session.php' );
-        include( CFS_DIR . '/includes/form.php' );
-        include( CFS_DIR . '/includes/third_party.php' );
-        include( CFS_DIR . '/includes/revision.php' );
+        include( XF_DIR . '/includes/api.php' );
+        include_once( XF_DIR . '/includes/upgrade.php' );
+        xf_migration::maybe_migrate();
+        include( XF_DIR . '/includes/field.php' );
+        include( XF_DIR . '/includes/field_group.php' );
+        include( XF_DIR . '/includes/session.php' );
+        include( XF_DIR . '/includes/form.php' );
+        include( XF_DIR . '/includes/third_party.php' );
+        include( XF_DIR . '/includes/revision.php' );
 
 
         $this->register_post_type();
-        CFS()->fields = $this->get_field_types();
+        XF()->fields = $this->get_field_types();
 
-        // CFS is ready
-        do_action( 'cfs_init' );
+        // XF is ready
+        do_action( 'xf_init' );
     }
 
 
@@ -48,7 +48,7 @@ class cfs_init
      * Register the field group post type
      */
     function register_post_type() {
-        register_post_type( 'cfs', [
+        register_post_type( 'xf_group', [
             'public'            => false,
             'show_ui'           => true,
             'show_in_menu'      => 'options-general.php',
@@ -57,30 +57,30 @@ class cfs_init
             'supports'          => [ 'title' ],
             'query_var'         => false,
             'labels'            => [
-                'name'                  => __( 'Field Groups', 'cfs' ),
-                'singular_name'         => __( 'Field Group', 'cfs' ),
-                'all_items'             => __( 'Custom Field Suite', 'cfs' ),
-                'add_new_item'          => __( 'Add New Field Group', 'cfs' ),
-                'edit_item'             => __( 'Edit Field Group', 'cfs' ),
-                'new_item'              => __( 'New Field Group', 'cfs' ),
-                'view_item'             => __( 'View Field Group', 'cfs' ),
-                'search_items'          => __( 'Search Field Groups', 'cfs' ),
-                'not_found'             => __( 'No Field Groups found', 'cfs' ),
-                'not_found_in_trash'    => __( 'No Field Groups found in Trash', 'cfs' ),
+                'name'                  => __( 'Field Groups', 'x-fields' ),
+                'singular_name'         => __( 'Field Group', 'x-fields' ),
+                'all_items'             => __( 'X-Fields', 'x-fields' ),
+                'add_new_item'          => __( 'Add New Field Group', 'x-fields' ),
+                'edit_item'             => __( 'Edit Field Group', 'x-fields' ),
+                'new_item'              => __( 'New Field Group', 'x-fields' ),
+                'view_item'             => __( 'View Field Group', 'x-fields' ),
+                'search_items'          => __( 'Search Field Groups', 'x-fields' ),
+                'not_found'             => __( 'No Field Groups found', 'x-fields' ),
+                'not_found_in_trash'    => __( 'No Field Groups found in Trash', 'x-fields' ),
             ],
         ] );
     }
 
 
     function load_textdomain() {
-        $locale = apply_filters( 'plugin_locale', get_locale(), 'cfs' );
-        $mofile = WP_LANG_DIR . '/custom-field-suite/cfs-' . $locale . '.mo';
+        $locale = apply_filters( 'plugin_locale', get_locale(), 'x-fields' );
+        $mofile = WP_LANG_DIR . '/x-fields/x-fields-' . $locale . '.mo';
 
         if ( file_exists( $mofile ) ) {
-            load_textdomain( 'cfs', $mofile );
+            load_textdomain( 'x-fields', $mofile );
         }
         else {
-            load_plugin_textdomain( 'cfs', false, 'custom-field-suite/languages' );
+            load_plugin_textdomain( 'x-fields', false, dirname( plugin_basename( XF_FILE ) ) . '/languages' );
         }
     }
 
@@ -91,25 +91,25 @@ class cfs_init
     function get_field_types() {
 
         // support custom field types
-        $field_types = apply_filters( 'cfs_field_types', [
-            'text'          => CFS_DIR . '/includes/fields/text.php',
-            'textarea'      => CFS_DIR . '/includes/fields/textarea.php',
-            'wysiwyg'       => CFS_DIR . '/includes/fields/wysiwyg.php',
-            'hyperlink'     => CFS_DIR . '/includes/fields/hyperlink.php',
-            'date'          => CFS_DIR . '/includes/fields/date/date.php',
-            'color'         => CFS_DIR . '/includes/fields/color/color.php',
-            'true_false'    => CFS_DIR . '/includes/fields/true_false.php',
-            'select'        => CFS_DIR . '/includes/fields/select.php',
-            'relationship'  => CFS_DIR . '/includes/fields/relationship.php',
-            'term'          => CFS_DIR . '/includes/fields/term.php',
-            'user'          => CFS_DIR . '/includes/fields/user.php',
-            'file'          => CFS_DIR . '/includes/fields/file.php',
-            'loop'          => CFS_DIR . '/includes/fields/loop.php',
-            'tab'           => CFS_DIR . '/includes/fields/tab.php',
+        $field_types = apply_filters( 'xf_field_types', [
+            'text'          => XF_DIR . '/includes/fields/text.php',
+            'textarea'      => XF_DIR . '/includes/fields/textarea.php',
+            'wysiwyg'       => XF_DIR . '/includes/fields/wysiwyg.php',
+            'hyperlink'     => XF_DIR . '/includes/fields/hyperlink.php',
+            'date'          => XF_DIR . '/includes/fields/date/date.php',
+            'color'         => XF_DIR . '/includes/fields/color/color.php',
+            'true_false'    => XF_DIR . '/includes/fields/true_false.php',
+            'select'        => XF_DIR . '/includes/fields/select.php',
+            'relationship'  => XF_DIR . '/includes/fields/relationship.php',
+            'term'          => XF_DIR . '/includes/fields/term.php',
+            'user'          => XF_DIR . '/includes/fields/user.php',
+            'file'          => XF_DIR . '/includes/fields/file.php',
+            'loop'          => XF_DIR . '/includes/fields/loop.php',
+            'tab'           => XF_DIR . '/includes/fields/tab.php',
         ] );
 
         foreach ( $field_types as $type => $path ) {
-            $class_name = 'cfs_' . $type;
+            $class_name = 'xf_' . $type;
 
             // allow for multiple classes per file
             if ( ! class_exists( $class_name ) ) {
@@ -130,28 +130,18 @@ class cfs_init
         $screen = get_current_screen();
 
         if ( is_object( $screen ) && 'post' == $screen->base ) {
-            include( CFS_DIR . '/templates/admin_head.php' );
+            include( XF_DIR . '/templates/admin_head.php' );
         }
     }
 
 
-    /**
-     * show_credits
-     */
-    function show_credits() {
-        $screen = get_current_screen();
-
-        if ( is_object( $screen ) && 'edit' == $screen->base && 'cfs' == $screen->post_type ) {
-            include( CFS_DIR . '/templates/credits.php' );
-        }
-    }
 
     /**
     * admin_menu
     */
     function admin_menu() {
-        if ( false === apply_filters( 'cfs_disable_admin', false ) ) {
-            add_submenu_page( 'tools.php', __( 'CFS Tools', 'cfs' ), __( 'CFS Tools', 'cfs' ), 'manage_options', 'cfs-tools', [ $this, 'page_tools' ] );
+        if ( false === apply_filters( 'xf_disable_admin', false ) ) {
+            add_submenu_page( 'tools.php', __( 'X-Fields Tools', 'x-fields' ), __( 'X-Fields Tools', 'x-fields' ), 'manage_options', 'xf-tools', [ $this, 'page_tools' ] );
         }
     }
 
@@ -159,9 +149,9 @@ class cfs_init
      * add_meta_boxes
      */
     function add_meta_boxes() {
-        add_meta_box( 'cfs_fields', __('Fields', 'cfs'), [ $this, 'meta_box' ], 'cfs', 'normal', 'high', [ 'box' => 'fields' ] );
-        add_meta_box( 'cfs_rules', __('Placement Rules', 'cfs'), [ $this, 'meta_box' ], 'cfs', 'normal', 'high', [ 'box' => 'rules' ] );
-        add_meta_box( 'cfs_extras', __('Extras', 'cfs'), [ $this, 'meta_box' ], 'cfs', 'normal', 'high', [ 'box' => 'extras' ] );
+        add_meta_box( 'xf_fields', __('Fields', 'x-fields' ), [ $this, 'meta_box' ], 'xf_group', 'normal', 'high', [ 'box' => 'fields' ] );
+        add_meta_box( 'xf_rules', __('Placement Rules', 'x-fields' ), [ $this, 'meta_box' ], 'xf_group', 'normal', 'high', [ 'box' => 'rules' ] );
+        add_meta_box( 'xf_extras', __('Extras', 'x-fields' ), [ $this, 'meta_box' ], 'xf_group', 'normal', 'high', [ 'box' => 'extras' ] );
     }
 
 
@@ -174,7 +164,7 @@ class cfs_init
         $box = isset( $metabox['args']['box'] ) ? $metabox['args']['box'] : '';
 
         if ( in_array( $box, [ 'fields', 'rules', 'extras', 'input' ], true ) ) {
-            include( CFS_DIR . "/templates/meta_box_$box.php" );
+            include( XF_DIR . "/templates/meta_box_$box.php" );
         }
     }
 
@@ -183,7 +173,7 @@ class cfs_init
      * page_tools
      */
     function page_tools() {
-        include( CFS_DIR . '/templates/page_tools.php' );
+        include( XF_DIR . '/templates/page_tools.php' );
     }
 
 
@@ -195,7 +185,7 @@ class cfs_init
             return;
         }
 
-        if ( ! isset( $_POST['cfs']['save'] ) || ! is_string( $_POST['cfs']['save'] ) ) {
+        if ( ! isset( $_POST['xf']['save'] ) || ! is_string( $_POST['xf']['save'] ) ) {
             return;
         }
 
@@ -204,7 +194,7 @@ class cfs_init
         }
 
         // Only field groups are handled here
-        if ( 'cfs' !== get_post_type( $post_id ) ) {
+        if ( 'xf_group' !== get_post_type( $post_id ) ) {
             return;
         }
 
@@ -212,12 +202,12 @@ class cfs_init
             return;
         }
 
-        if ( wp_verify_nonce( $_POST['cfs']['save'], 'cfs_save_fields' ) ) {
-            $fields = isset( $_POST['cfs']['fields'] ) && is_array( $_POST['cfs']['fields'] ) ? $_POST['cfs']['fields'] : [];
-            $rules = isset( $_POST['cfs']['rules'] ) && is_array( $_POST['cfs']['rules'] ) ? $_POST['cfs']['rules'] : [];
-            $extras = isset( $_POST['cfs']['extras'] ) && is_array( $_POST['cfs']['extras'] ) ? $_POST['cfs']['extras'] : [];
+        if ( wp_verify_nonce( $_POST['xf']['save'], 'xf_save_fields' ) ) {
+            $fields = isset( $_POST['xf']['fields'] ) && is_array( $_POST['xf']['fields'] ) ? $_POST['xf']['fields'] : [];
+            $rules = isset( $_POST['xf']['rules'] ) && is_array( $_POST['xf']['rules'] ) ? $_POST['xf']['rules'] : [];
+            $extras = isset( $_POST['xf']['extras'] ) && is_array( $_POST['xf']['extras'] ) ? $_POST['xf']['extras'] : [];
 
-            CFS()->field_group->save( [
+            XF()->field_group->save( [
                 'post_id'   => $post_id,
                 'fields'    => $fields,
                 'rules'     => $rules,
@@ -234,8 +224,8 @@ class cfs_init
     function delete_post( $post_id ) {
         global $wpdb;
 
-        if ( 'cfs' != get_post_type( $post_id ) ) {
-            $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}cfs_values WHERE post_id = %d", $post_id ) );
+        if ( 'xf_group' != get_post_type( $post_id ) ) {
+            $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}xf_values WHERE post_id = %d", $post_id ) );
         }
 
         return true;
@@ -250,30 +240,30 @@ class cfs_init
             exit;
         }
 
-        if ( ! check_ajax_referer( 'cfs_admin_nonce', 'nonce', false ) ) {
+        if ( ! check_ajax_referer( 'xf_admin_nonce', 'nonce', false ) ) {
             exit;
         }
 
         $ajax_method = isset( $_POST['action_type'] ) && is_string( $_POST['action_type'] ) ? $_POST['action_type'] : false;
 
         if ( $ajax_method && is_admin() ) {
-            include_once( CFS_DIR . '/includes/ajax.php' );
-            $ajax = new cfs_ajax();
+            include_once( XF_DIR . '/includes/ajax.php' );
+            $ajax = new xf_ajax();
 
             if ( 'import' == $ajax_method ) {
                 $import_code = isset( $_POST['import_code'] ) && is_string( $_POST['import_code'] ) ? wp_unslash( $_POST['import_code'] ) : '';
                 $options = [
                     'import_code' => json_decode( $import_code, true ),
                 ];
-                echo CFS()->field_group->import( $options );
+                echo XF()->field_group->import( $options );
             }
             elseif ( 'export' == $ajax_method ) {
-                echo wp_json_encode( CFS()->field_group->export( $_POST ) );
+                echo wp_json_encode( XF()->field_group->export( $_POST ) );
             }
             elseif ( 'reset' == $ajax_method ) {
                 $ajax->reset();
                 // __FILE__ pointed to includes/init.php, so the plugin was never deactivated
-                deactivate_plugins( plugin_basename( CFS_DIR . '/cfs.php' ) );
+                deactivate_plugins( plugin_basename( XF_DIR . '/xf.php' ) );
                 echo esc_url_raw( admin_url( 'plugins.php' ) );
             }
             elseif ( 'search_posts' == $ajax_method ) {
@@ -288,11 +278,11 @@ class cfs_init
     /**
      * Customize table columns on the Field Group listing
      */
-    function cfs_columns() {
+    function xf_columns() {
         return [
             'cb'            => '<input type="checkbox" />',
-            'title'         => __( 'Title', 'cfs' ),
-            'placement'     => __( 'Placement', 'cfs' ),
+            'title'         => __( 'Title', 'x-fields' ),
+            'placement'     => __( 'Placement', 'x-fields' ),
         ];
     }
 
@@ -300,20 +290,20 @@ class cfs_init
     /**
      * Populate the "Placement" column on the Field Group listing
      */
-    function cfs_column_content( $column_name, $post_id ) {
+    function xf_column_content( $column_name, $post_id ) {
         if ( 'placement' == $column_name ) {
             global $wpdb;
 
             $labels = [
-                'post_types'        => __( 'Post Types', 'cfs' ),
-                'user_roles'        => __( 'User Roles', 'cfs' ),
-                'post_ids'          => __( 'Posts', 'cfs' ),
-                'term_ids'          => __( 'Term IDs', 'cfs' ),
-                'page_templates'    => __( 'Page Templates', 'cfs' ),
-                'post_formats'      => __( 'Post Formats', 'cfs' )
+                'post_types'        => __( 'Post Types', 'x-fields' ),
+                'user_roles'        => __( 'User Roles', 'x-fields' ),
+                'post_ids'          => __( 'Posts', 'x-fields' ),
+                'term_ids'          => __( 'Term IDs', 'x-fields' ),
+                'page_templates'    => __( 'Page Templates', 'x-fields' ),
+                'post_formats'      => __( 'Post Formats', 'x-fields' )
             ];
 
-            $field_groups = CFS()->field_group->load_field_groups();
+            $field_groups = XF()->field_group->load_field_groups();
 
             // Make sure the field group exists
             $rules = [];
@@ -343,4 +333,4 @@ class cfs_init
     }
 }
 
-new cfs_init();
+new xf_init();

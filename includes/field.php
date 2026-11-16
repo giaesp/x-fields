@@ -9,12 +9,12 @@ defined( 'ABSPATH' ) || exit;
  * @return array
  * @since 2.7.0
  */
-function cfs_sanitize_id_list( $value ) {
+function xf_sanitize_id_list( $value ) {
     $ids = [];
 
     foreach ( (array) $value as $item ) {
         if ( is_array( $item ) ) {
-            $ids = array_merge( $ids, cfs_sanitize_id_list( $item ) );
+            $ids = array_merge( $ids, xf_sanitize_id_list( $item ) );
             continue;
         }
 
@@ -33,7 +33,7 @@ function cfs_sanitize_id_list( $value ) {
     return array_values( array_unique( $ids ) );
 }
 
-class cfs_field
+class xf_field
 {
     public $name;
     public $label;
@@ -46,7 +46,7 @@ class cfs_field
      */
     function __construct() {
         $this->name = 'text';
-        $this->label = __( 'Text', 'cfs' );
+        $this->label = __( 'Text', 'x-fields' );
     }
 
 
@@ -72,16 +72,16 @@ class cfs_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Validation', 'cfs' ); ?></label>
+                <label><?php _e( 'Validation', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
-                    CFS()->create_field( [
+                    XF()->create_field( [
                         'type'          => 'true_false',
-                        'input_name'    => "cfs[fields][$key][options][required]",
+                        'input_name'    => "xf[fields][$key][options][required]",
                         'input_class'   => 'true_false',
                         'value'         => $this->get_option( $field, 'required' ),
-                        'options'       => [ 'message' => __( 'This is a required field', 'cfs' ) ],
+                        'options'       => [ 'message' => __( 'This is a required field', 'x-fields' ) ],
                     ] );
                 ?>
             </td>
@@ -118,7 +118,7 @@ class cfs_field
 
 
     /**
-     * Format the value for use with $cfs->get
+     * Format the value for use with $xf->get
      * @param mixed $value
      * @param mixed $field The field object (optional)
      * @return mixed

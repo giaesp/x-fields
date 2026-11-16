@@ -1,497 +1,619 @@
-/*---------------------------------------------------------------------------------------------
-    Container
----------------------------------------------------------------------------------------------*/
+/**
+ * X-Fields — field inputs (edit screens and front-end forms)
+ * Follows WordPress admin conventions; the accent follows the user's admin color scheme.
+ */
 
-#poststuff .cfs_input .inside {
+.xf_input {
+    --xf-accent: var(--wp-admin-theme-color, #2271b1);
+    --xf-accent-soft: rgba(34, 113, 177, 0.08);
+    --xf-border: #dcdcde;
+    --xf-border-strong: #8c8f94;
+    --xf-border-soft: #f0f0f1;
+    --xf-muted: #646970;
+    --xf-text: #1d2327;
+    --xf-bg-soft: #f6f7f7;
+    --xf-danger: #d63638;
+    --xf-radius: 4px;
+}
+
+/*--------------------------------------------------------------
+    Container & fields
+--------------------------------------------------------------*/
+
+#poststuff .xf_input .inside {
     margin: 0;
     padding: 0;
 }
 
-.cfs_input .field {
-    padding: 10px 12px;
-    border-top: 1px solid #fff;
-    border-bottom: 1px solid #dfdfdf;
+.xf_input .field {
+    padding: 16px;
+    border-bottom: 1px solid var(--xf-border-soft);
 }
 
-.cfs_input .field:last-child {
-    border-bottom: none;
+.xf_input .field:last-child {
+    border-bottom: 0;
 }
 
-.cfs_input .field input[type="text"],
-.cfs_input .field textarea,
-.cfs_input .field select {
-    width: 99.8%;
-}
-
-.cfs_input .field label {
-    font-weight: bold;
-    padding: 0 0 0.4em 0;
-    cursor: default;
+.xf_input .field > label,
+.xf_input .xf_loop_body > label {
     display: block;
+    margin: 0 0 6px;
+    color: var(--xf-text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: default;
 }
 
-.cfs_input .field p.notes {
-    margin: 0 0 1em 0;
-    color: #999;
-    font-size:0.9em;
+.xf_input .field p.notes,
+.xf_input .xf_loop_body p.notes {
+    margin: -2px 0 8px;
+    color: var(--xf-muted);
+    font-size: 12px;
+    font-style: normal;
 }
 
-.cfs_input.no_box {
+.xf_input .field input[type="text"],
+.xf_input .field textarea,
+.xf_input .field select {
+    width: 100%;
+    max-width: 100%;
+}
+
+.xf_input .field textarea {
+    min-height: 90px;
+}
+
+/* Front-end forms */
+.xf_input.no_box {
+    border: 0;
     background: none;
-    border: none;
 }
 
-.cfs_input.no_box .hndle,
-.cfs_input.no_box .handlediv {
+.xf_input.no_box .hndle,
+.xf_input.no_box .handlediv {
     display: none;
 }
 
-.cfs_input.no_box .field {
-    padding: 10px 0;
-    border: none;
+.xf_input.no_box .field {
+    padding: 12px 0;
+    border: 0;
 }
 
-.cfs_input .error {
-    padding: 7px 10px;
-    margin: 5px 0;
-    background: #ffebe8;
-    border: 1px solid #dcc6d7;
-    border-left: 4px solid #dc3232;
-    font-weight: bold;
+/* Validation */
+.xf_input .error {
+    margin: 8px 0 0;
+    padding: 8px 12px;
+    border: 0;
+    border-left: 4px solid var(--xf-danger);
+    border-radius: 0 var(--xf-radius) var(--xf-radius) 0;
+    background: #fcf0f1;
+    color: #8a2424;
+    font-weight: 500;
+}
+
+.xf_input .field:has(.error[style*="block"]) input,
+.xf_input .field:has(.error[style*="block"]) textarea,
+.xf_input .field:has(.error[style*="block"]) select {
+    border-color: var(--xf-danger);
 }
 
 .hidden {
     display: none;
 }
 
-/*---------------------------------------------------------------------------------------------
+/*--------------------------------------------------------------
     Select
----------------------------------------------------------------------------------------------*/
+--------------------------------------------------------------*/
 
-.cfs_select select {
-    line-height:1;
-    height:auto;
-}
-
-.cfs_select select.multiple {
-    height: 100px !important;
-}
-
-.cfs_select .select2 {
-    width: 99.95%;
-}
-
-/*---------------------------------------------------------------------------------------------
-    True / false
----------------------------------------------------------------------------------------------*/
-
-.cfs_input .field .cfs_true_false label {
-    font-weight: normal;
-}
-
-/*---------------------------------------------------------------------------------------------
-    Date
----------------------------------------------------------------------------------------------*/
-
-.cfs_input .cfs_date input.date {
-    width: 160px;
-    background: #fff url(../images/icon-calendar.png) right 4px center no-repeat;
-}
-
-
-/*---------------------------------------------------------------------------------------------
-    Color
----------------------------------------------------------------------------------------------*/
-
-.cfs_input .cfs_color input.color {
-    width: 120px;
-}
-
-/*---------------------------------------------------------------------------------------------
-    Wysiwyg
----------------------------------------------------------------------------------------------*/
-
-.cfs_wysiwyg table.mceLayout {
-    background: #fff;
-}
-
-.cfs_wysiwyg textarea {
-    height: 200px;
-}
-
-.cfs_wysiwyg .wp-media-buttons {
-    padding: 5px 0;
-}
-
-/*---------------------------------------------------------------------------------------------
-    File
----------------------------------------------------------------------------------------------*/
-
-.cfs_file .file_url img {
-    padding: 5px;
-    background: #fff url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAIUlEQVQYV2NkYGCQBGJ08BxdgHGIKMTiF0wPgjwz2BUCADTeBYguWvyCAAAAAElFTkSuQmCC);
-    vertical-align: bottom;
-    box-shadow: 0 1px 2px #ddd;
-    max-width: 50%;
+.xf_select select {
     height: auto;
+    line-height: 2;
 }
 
-.cfs_file .media.button.hidden {
-    display: none;
+.xf_select select.multiple {
+    height: 120px !important;
 }
 
-/*---------------------------------------------------------------------------------------------
-    Relationship, User
----------------------------------------------------------------------------------------------*/
-
-.cfs_relationship .post_list,
-.cfs_term .post_list,
-.cfs_user .post_list {
-    float: left;
-    overflow-y: scroll;
-    background: #f5f5f5;
-    border: 1px solid #dfdfdf;
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    height: 205px;
-    width: 49%;
-    -webkit-border-radius: 1px 1px 1px 1px;
-    border-radius: 1px 1px 1px 1px;
+.xf_select .select2,
+.xf_select .select2-container {
+    width: 100% !important;
 }
 
-.cfs_relationship .post_list.selected_posts,
-.cfs_term .post_list.selected_posts,
-.cfs_user .post_list.selected_posts {
-    float: right;
-}
+/*--------------------------------------------------------------
+    True / false
+--------------------------------------------------------------*/
 
-.cfs_relationship .post_list div,
-.cfs_term .post_list div,
-.cfs_user .post_list div {
-    padding: 4px 6px;
-    border-bottom: 1px solid #eee;
+.xf_input .field .xf_true_false label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 400;
     cursor: pointer;
 }
 
-.cfs_relationship .post_list.available_posts > div,
-.cfs_term .post_list.available_posts > div,
-.cfs_user .post_list.available_posts > div {
-    position: relative;
-    padding-right: 3em;
-}
-
-.cfs_relationship .post_list.available_posts > div:after,
-.cfs_term .post_list.available_posts > div:after,
-.cfs_user .post_list.available_posts > div:after {
-    position: absolute;
-    right: 1px;
-    top: 3px;
-    content: '\f139';
-    font-size: 19px;
-}
-
-.cfs_relationship .post_list div:last-child,
-.cfs_term .post_list div:last-child,
-.cfs_user .post_list div:last-child {
-    border-bottom: none;
-}
-
-.cfs_relationship .post_list div:hover,
-.cfs_term .post_list div:hover,
-.cfs_user .post_list div:hover {
-    background: #eee;
-}
-
-.cfs_relationship .available_posts div.used,
-.cfs_term .available_posts div.used,
-.cfs_user .available_posts div.used{
-    display: none;
-}
-
-.cfs_relationship .selected_posts div,
-.cfs_term .selected_posts div,
-.cfs_user .selected_posts div {
-    cursor: move;
-}
-
-.cfs_relationship .selected_posts div span.remove,
-.cfs_term .selected_posts div span.remove,
-.cfs_user .selected_posts div span.remove {
-    float: right;
-    width: 20px;
-    height: 16px;
-    cursor: pointer;
-}
-
-.cfs_relationship .filter_posts,
-.cfs_term .filter_posts,
-.cfs_user .filter_posts {
-    margin-bottom: 10px;
-}
-
-.cfs_input .field .cfs_relationship .cfs_filter_input,
-.cfs_input .field .cfs_term .cfs_filter_input,
-.cfs_input .field .cfs_user .cfs_filter_input{
-    width: 220px;
+.xf_input .field .xf_true_false input[type="checkbox"] {
     margin: 0;
 }
 
-.cfs_relationship .cfs_filter_help,
-.cfs_term .cfs_filter_help,
-.cfs_user .cfs_filter_help {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    margin-top: 4px;
-    vertical-align: top;
+/*--------------------------------------------------------------
+    Date & color
+--------------------------------------------------------------*/
+
+.xf_input .xf_date input.date {
+    width: 180px;
+    padding-right: 30px;
+    background: #fff url(../images/icon-calendar.png) right 8px center no-repeat;
 }
 
-.cfs_relationship .cfs_filter_help:before,
-.cfs_term .cfs_filter_help:before,
-.cfs_user .cfs_filter_help:before {
-    content: '\f348';
+.xf_input .xf_color input.color {
+    width: 140px;
 }
 
+/*--------------------------------------------------------------
+    Wysiwyg
+--------------------------------------------------------------*/
 
-/*---------------------------------------------------------------------------------------------
-    Loop
----------------------------------------------------------------------------------------------*/
-
-.cfs_delete_field {
-    float: right;
-    width: 21px;
-    height: 18px;
-    text-decoration: none;
-    margin-right: -1px;
+.xf_wysiwyg .wp-editor-container {
+    border: 1px solid var(--xf-border);
+    border-radius: var(--xf-radius);
+    overflow: hidden;
 }
 
-.cfs_toggle_field {
-    float: right;
-    width: 21px;
-    height: 18px;
-    text-decoration: none;
+.xf_wysiwyg textarea {
+    height: 220px;
+    border: 0;
 }
 
-.cfs_toggle_field:before {
-    content: '\f140';
+.xf_wysiwyg .wp-media-buttons {
+    padding: 0 0 6px;
+}
+
+/*--------------------------------------------------------------
+    File
+--------------------------------------------------------------*/
+
+.xf_file {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+}
+
+.xf_file .file_url:empty {
+    display: none;
+}
+
+.xf_file .file_url {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    padding: 6px;
+    border: 1px solid var(--xf-border);
+    border-radius: var(--xf-radius);
+    background: #fff url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAIUlEQVQYV2NkYGCQBGJ08BxdgHGIKMTiF0wPgjwz2BUCADTeBYguWvyCAAAAAElFTkSuQmCC);
+}
+
+.xf_file .file_url img {
+    display: block;
+    max-width: 160px;
+    max-height: 120px;
+    height: auto;
+    border-radius: 2px;
+}
+
+.xf_file .file_url a {
+    padding: 2px 6px;
+    background: #fff;
+    word-break: break-all;
+}
+
+.xf_file .media.button.hidden {
+    display: none;
+}
+
+.xf_file .media.button.remove {
+    border-color: transparent;
+    background: transparent;
+    color: var(--xf-danger);
+    box-shadow: none;
+}
+
+.xf_file .media.button.remove:hover {
+    background: #fcf0f1;
+}
+
+/*--------------------------------------------------------------
+    Relationship, Term, User (two-column picker)
+--------------------------------------------------------------*/
+
+.xf_relationship,
+.xf_term,
+.xf_user {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+}
+
+.xf_relationship .filter_posts,
+.xf_term .filter_posts,
+.xf_user .filter_posts {
+    grid-column: 1 / -1;
+    margin: 0;
+}
+
+.xf_input .field .xf_relationship .xf_filter_input,
+.xf_input .field .xf_term .xf_filter_input,
+.xf_input .field .xf_user .xf_filter_input {
+    width: 100%;
+    max-width: 320px;
+    margin: 0;
+    padding-left: 30px;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23646970'%3E%3Cpath d='M12.14 4.18a5.4 5.4 0 0 1 .7 6.8l3.64 3.65-1.62 1.62-3.65-3.64a5.4 5.4 0 1 1 .93-8.43zm-1.41 6.24a3.4 3.4 0 1 0-4.81-4.81 3.4 3.4 0 0 0 4.81 4.81z'/%3E%3C/svg%3E") 8px center / 16px no-repeat;
+}
+
+.xf_relationship .post_list,
+.xf_term .post_list,
+.xf_user .post_list {
+    height: 220px;
+    overflow-y: auto;
+    border: 1px solid var(--xf-border);
+    border-radius: var(--xf-radius);
+    background: #fff;
+}
+
+.xf_relationship .clear,
+.xf_term .clear,
+.xf_user .clear {
+    display: none;
+}
+
+.xf_relationship .post_list.selected_posts,
+.xf_term .post_list.selected_posts,
+.xf_user .post_list.selected_posts {
+    background: var(--xf-bg-soft);
+}
+
+.xf_relationship .post_list.selected_posts:empty::before,
+.xf_term .post_list.selected_posts:empty::before,
+.xf_user .post_list.selected_posts:empty::before {
+    content: "—";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #a7aaad;
+}
+
+.xf_relationship .post_list div,
+.xf_term .post_list div,
+.xf_user .post_list div {
     position: relative;
-    top: -1px;
-}
-
-.open .cfs_toggle_field:before {
-    content: '\f142';
-}
-
-.cfs_insert_field {
-    float: right;
-    width: 21px;
-    height: 18px;
-    text-decoration: none;
-}
-
-.loop_wrapper:hover .cfs_insert_field:before {
-    content: '\f132';
-    position: relative;
-    top: 0px;
-}
-
-.cfs_input .cfs_loop label {
-    padding: 6px 0 0 0;
-}
-
-.cfs_input .cfs_loop .field {
-    border: none;
-    padding: 6px 0;
-}
-
-.cfs_input .cfs_loop_toggle {
-    float: right;
-    width: 20px;
-    height: 20px;
+    padding: 7px 36px 7px 10px;
+    border-bottom: 1px solid var(--xf-border-soft);
     cursor: pointer;
-    display: inline-block;
-    text-decoration: none;
+}
+
+.xf_relationship .post_list div:last-child,
+.xf_term .post_list div:last-child,
+.xf_user .post_list div:last-child {
+    border-bottom: 0;
+}
+
+.xf_relationship .available_posts div:hover,
+.xf_term .available_posts div:hover,
+.xf_user .available_posts div:hover {
+    background: var(--xf-accent-soft);
+    color: var(--xf-accent);
+}
+
+.xf_relationship .available_posts div.used,
+.xf_term .available_posts div.used,
+.xf_user .available_posts div.used {
+    display: none;
+}
+
+.xf_relationship .selected_posts div,
+.xf_term .selected_posts div,
+.xf_user .selected_posts div {
+    padding-left: 30px;
+    background: #fff;
+    cursor: grab;
+}
+
+.xf_relationship .selected_posts div::before,
+.xf_term .selected_posts div::before,
+.xf_user .selected_posts div::before {
+    content: "\f545";
+    position: absolute;
+    top: 50%;
+    left: 8px;
+    margin-top: -8px;
+    color: #a7aaad;
+    font: normal 16px/1 dashicons;
+}
+
+/* "+" on available items */
+.xf_relationship .post_list.available_posts > div::after,
+.xf_term .post_list.available_posts > div::after,
+.xf_user .post_list.available_posts > div::after {
+    content: "\f543";
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    margin-top: -9px;
+    color: #a7aaad;
+    font: normal 18px/1 dashicons;
+}
+
+.xf_relationship .post_list.available_posts > div:hover::after,
+.xf_term .post_list.available_posts > div:hover::after,
+.xf_user .post_list.available_posts > div:hover::after {
+    color: var(--xf-accent);
+}
+
+/* "×" on selected items */
+.xf_relationship .selected_posts div span.remove,
+.xf_term .selected_posts div span.remove,
+.xf_user .selected_posts div span.remove {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    margin-top: -12px;
     border-radius: 50%;
-}
-
-.cfs_input .cfs_loop_toggle:before {
-    content: '\f177';
-}
-
-.cfs_loop .loop_wrapper {
-    border: 1px solid #dfdfdf;
-    border-radius: 1px;
-    margin-bottom: 10px;
-}
-
-@keyframes highlight {
-    0% {
-        box-shadow: 0 0 5px 1px rgba(255,255,0,0.8);
-    }
-
-    100% {
-        box-shadow: 0 0 5px 1px rgba(255,255,0,0);
-    }
-}
-
-.cfs_loop .loop_wrapper_new {
-    animation: highlight 1.5s ease-in-out;
-}
-
-.cfs_loop .cfs_loop_head {
     cursor: pointer;
-    padding: 5px 5px 5px 30px;
-    position: relative;
-    background: #f5f5f5;
 }
 
-.cfs_loop .cfs_loop_head:before {
-    padding: 4px 0;
+.xf_relationship .selected_posts div span.remove::before,
+.xf_term .selected_posts div span.remove::before,
+.xf_user .selected_posts div span.remove::before {
+    content: "\f335";
     display: block;
-    position: absolute;
-    left: 5px;
-    top: 0;
-    color: #adadad;
-    content: '\f333';
-    cursor: move;
-}
-
-.cfs_loop .cfs_loop_head:after {
-    content: "";
-    display: block;
-    clear: both;
-}
-
-.cfs_loop .notes {
-    font-size: 11px;
-    font-style: italic;
-    color: #999;
-    margin-bottom: 1.4em;
-}
-
-.cfs_loop .cfs_loop_body {
-    padding: 10px 12px;
-    background: #f8f8f8;
-    display: none;
-}
-
-.cfs_loop .cfs_loop_body.open {
-    display: block;
-    background: #fbfbfb;
-    border-top: 1px solid #dfdfdf;
-}
-
-.cfs_loop .cfs_loop_body > label:first-of-type {
-    padding-top: 0;
-}
-
-.cfs_loop .cfs_loop_body > .field {
-    padding: 0 0 10px;
-}
-
-/*---------------------------------------------------------------------------------------------
-    Tabs
----------------------------------------------------------------------------------------------*/
-
-.cfs-tabs {
-    display: block;
-    border-bottom: 1px solid #ccc;
-    background: #FAFAFA;
-    margin: 0 0 5px;
-    padding-top: 10px;
-}
-
-.cfs-tab {
-    position: relative;
-    display: inline-block;
-    padding: 5px 15px;
-    margin-left: 12px;
-    margin-bottom: -1px;
-    border: 1px solid #ccc;
-    background-color: #f3f3f3;
-    cursor: pointer;
-    border-radius: 2px 1px 0 0;
-}
-
-.cfs-tab.active {
-    background-color: #fff;
-}
-
-.cfs-tab.active:after {
-    content: '';
-    position: absolute;
-    right: 0;
-    bottom: -2px;
-    left: 0;
-    border-bottom: 4px solid #fff;
-}
-
-.cfs-tab-content {
-    display: none;
-}
-
-.cfs-tab-content.active {
-    display: block;
-}
-
-.cfs-tab-notes {
-    padding: 10px 12px;
-}
-
-/*---------------------------------------------------------------------------------------------
-    Icons
----------------------------------------------------------------------------------------------*/
-
-.cfs_input .cfs_loop_toggle,
-.cfs_input .cfs_toggle_field,
-.cfs_input .cfs_delete_field,
-.cfs_input .cfs_insert_field,
-.cfs_relationship .selected_posts div span.remove,
-.cfs_term .selected_posts div span.remove,
-.cfs_user .selected_posts div span.remove,
-.cfs_relationship .cfs_filter_help,
-.cfs_term .cfs_filter_help,
-.cfs_user .cfs_filter_help{
-    position: relative;
-}
-
-.cfs_input .cfs_loop_toggle:before,
-.cfs_input .cfs_toggle_field:before,
-.cfs_input .cfs_delete_field:before,
-.cfs_input .cfs_insert_field:before,
-.cfs_loop .cfs_loop_head:before,
-.cfs_relationship .selected_posts div span.remove:before,
-.cfs_term .selected_posts div span.remove:before,
-.cfs_user .selected_posts div span.remove:before,
-.cfs_relationship .cfs_filter_help:before,
-.cfs_term .cfs_filter_help:before,
-.cfs_user .cfs_filter_help:before,
-.cfs_relationship .post_list.available_posts > div:after,
-.cfs_term .post_list.available_posts > div:after,
-.cfs_user .post_list.available_posts > div:after {
-    display: block;
-    position: absolute;
-    color: #adadad;
-
-    /* dashicons */
-    font-size: 20px;
-    font-family: dashicons;
-    width: 20px;
-    height: 20px;
-    line-height: 1;
-    font-weight: 400;
-    text-decoration: inherit;
-    vertical-align: top;
+    color: #a7aaad;
+    font: normal 20px/24px dashicons;
     text-align: center;
-    -webkit-font-smoothing: antialiased;
-    -mos-osx-font-smoothing: grayscale;
 }
 
-.cfs_input .cfs_delete_field:before,
-.cfs_relationship .selected_posts div span.remove:before,
-.cfs_term .selected_posts div span.remove:before,
-.cfs_user .selected_posts div span.remove:before {
-    content: '\f335';
-    font-size: 22px;
-    top: -2px;
+.xf_relationship .selected_posts div span.remove:hover,
+.xf_term .selected_posts div span.remove:hover,
+.xf_user .selected_posts div span.remove:hover {
+    background: #fcf0f1;
+}
+
+.xf_relationship .selected_posts div span.remove:hover::before,
+.xf_term .selected_posts div span.remove:hover::before,
+.xf_user .selected_posts div span.remove:hover::before {
+    color: var(--xf-danger);
+}
+
+/*--------------------------------------------------------------
+    Loop (repeater)
+--------------------------------------------------------------*/
+
+.xf_input .field[data-type="loop"] {
+    position: relative;
+}
+
+.xf_input .xf_loop_toggle {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--xf-radius);
+    color: var(--xf-muted);
+    text-decoration: none;
+}
+
+.xf_input .xf_loop_toggle::before {
+    content: "\f177"; /* visibility */
+    font: normal 18px/1 dashicons;
+}
+
+.xf_input .xf_loop_toggle:hover {
+    background: var(--xf-bg-soft);
+    color: var(--xf-accent);
+}
+
+.xf_loop .loop_wrapper {
+    margin: 0 0 8px;
+    border: 1px solid var(--xf-border);
+    border-radius: var(--xf-radius);
+    background: #fff;
+    overflow: hidden;
+}
+
+@keyframes xf-highlight {
+    0%   { box-shadow: 0 0 0 3px var(--xf-accent-soft), 0 0 0 1px var(--xf-accent); }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.xf_loop .loop_wrapper_new {
+    animation: xf-highlight 1.2s ease-out;
+}
+
+.xf_loop .xf_loop_head {
+    position: relative;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 2px;
+    min-height: 40px;
+    padding: 4px 6px 4px 34px;
+    background: var(--xf-bg-soft);
+    cursor: pointer;
+    user-select: none;
+}
+
+.xf_loop .xf_loop_head .label {
+    flex: 1;
+    overflow: hidden;
+    color: var(--xf-text);
+    font-weight: 600;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.xf_loop .xf_loop_head::before {
+    content: "\f545"; /* move */
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    margin-top: -8px;
+    color: #a7aaad;
+    font: normal 16px/1 dashicons;
+    cursor: grab;
+}
+
+.xf_loop .xf_loop_head:hover {
+    background: #f0f0f1;
+}
+
+.xf_loop .xf_loop_head.open {
+    border-bottom: 1px solid var(--xf-border);
+}
+
+.xf_input .xf_toggle_field,
+.xf_input .xf_delete_field,
+.xf_input .xf_insert_field {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--xf-radius);
+    color: var(--xf-muted);
+    text-decoration: none;
+}
+
+.xf_input .xf_toggle_field::before,
+.xf_input .xf_delete_field::before,
+.xf_input .xf_insert_field::before {
+    font: normal 18px/1 dashicons;
+}
+
+.xf_input .xf_toggle_field::before { content: "\f140"; }
+.xf_input .open .xf_toggle_field::before,
+.xf_input .open > .xf_toggle_field::before { content: "\f142"; }
+.xf_input .xf_insert_field::before { content: "\f132"; }
+.xf_input .xf_delete_field::before { content: "\f182"; } /* trash */
+
+.xf_input .xf_toggle_field:hover,
+.xf_input .xf_insert_field:hover {
+    background: #fff;
+    color: var(--xf-accent);
+}
+
+.xf_input .xf_delete_field:hover {
+    background: #fcf0f1;
+    color: var(--xf-danger);
+}
+
+/* Show row actions on hover / keyboard focus only */
+.xf_loop .xf_loop_head .xf_insert_field,
+.xf_loop .xf_loop_head .xf_delete_field {
+    opacity: 0;
+    transition: opacity 0.12s ease;
+}
+
+.xf_loop .xf_loop_head:hover .xf_insert_field,
+.xf_loop .xf_loop_head:hover .xf_delete_field,
+.xf_loop .xf_loop_head:focus-within .xf_insert_field,
+.xf_loop .xf_loop_head:focus-within .xf_delete_field {
+    opacity: 1;
+}
+
+.xf_loop .xf_loop_body {
+    display: none;
+    padding: 16px;
+    background: #fff;
+}
+
+.xf_loop .xf_loop_body.open {
+    display: block;
+}
+
+.xf_input .xf_loop .field {
+    padding: 0 0 14px;
+    border: 0;
+}
+
+.xf_input .xf_loop .xf_loop_body > .field:last-child {
+    padding-bottom: 0;
+}
+
+.xf_loop .table_footer {
+    padding-top: 4px;
+}
+
+.xf_loop .table_footer .xf_add_field {
+    border-style: dashed;
+}
+
+/*--------------------------------------------------------------
+    Tabs
+--------------------------------------------------------------*/
+
+.xf-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 0;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--xf-border);
+    background: var(--xf-bg-soft);
+}
+
+.xf-tab {
+    position: relative;
+    margin-bottom: -1px;
+    padding: 12px 14px;
+    border-bottom: 3px solid transparent;
+    color: var(--xf-muted);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.xf-tab:hover {
+    color: var(--xf-text);
+}
+
+.xf-tab.active {
+    border-bottom-color: var(--xf-accent);
+    color: var(--xf-text);
+    font-weight: 600;
+}
+
+.xf-tab-content {
+    display: none;
+}
+
+.xf-tab-content.active {
+    display: block;
+}
+
+.xf-tab-notes {
+    padding: 12px 16px 0;
+    color: var(--xf-muted);
+}
+
+/*--------------------------------------------------------------
+    Small screens
+--------------------------------------------------------------*/
+
+@media (max-width: 782px) {
+    .xf_relationship,
+    .xf_term,
+    .xf_user {
+        grid-template-columns: 1fr;
+    }
+
+    .xf_loop .xf_loop_head .xf_insert_field,
+    .xf_loop .xf_loop_head .xf_delete_field {
+        opacity: 1;
+    }
 }

@@ -2,12 +2,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class cfs_term extends cfs_field
+class xf_term extends xf_field
 {
 
     function __construct() {
         $this->name = 'term';
-        $this->label = __( 'Term', 'cfs' );
+        $this->label = __( 'Term', 'x-fields' );
     }
 
 
@@ -35,7 +35,7 @@ class cfs_term extends cfs_field
             'order'      => 'ASC'
         ];
 
-        $args = apply_filters( 'cfs_field_term_query_args', $args, [ 'field' => $field ] );
+        $args = apply_filters( 'xf_field_term_query_args', $args, [ 'field' => $field ] );
 
         $query = get_terms( $args );
         $query = is_wp_error( $query ) ? [] : (array) $query;
@@ -52,7 +52,7 @@ class cfs_term extends cfs_field
             ];
         }
 
-        $field->value = implode( ',', cfs_sanitize_id_list( $field->value ) );
+        $field->value = implode( ',', xf_sanitize_id_list( $field->value ) );
 
         if ( ! empty( $field->value ) ) {
             $results = $wpdb->get_results( "SELECT term_id, name FROM $wpdb->terms WHERE term_id IN ($field->value) ORDER BY FIELD(term_id,$field->value)" );
@@ -62,19 +62,19 @@ class cfs_term extends cfs_field
         }
     ?>
         <div class="filter_posts">
-            <input type="text" class="cfs_filter_input" autocomplete="off" placeholder="<?php esc_attr_e( 'Search terms', 'cfs' ); ?>" />
+            <input type="text" class="xf_filter_input" autocomplete="off" placeholder="<?php esc_attr_e( 'Search terms', 'x-fields' ); ?>" />
         </div>
 
         <div class="available_posts post_list">
         <?php foreach ( $available_posts as $term ) : ?>
             <?php $class = ( isset( $selected_posts[ $term->term_id ] ) ) ? ' class="used"' : ''; ?>
-            <div rel="<?php echo (int) $term->term_id; ?>"<?php echo $class; ?> title="<?php echo esc_attr( $term->name ); ?>"><?php echo wp_kses_post( apply_filters( 'cfs_term_display', esc_html( $term->name ), $term->term_id, $field ) ); ?></div>
+            <div rel="<?php echo (int) $term->term_id; ?>"<?php echo $class; ?> title="<?php echo esc_attr( $term->name ); ?>"><?php echo wp_kses_post( apply_filters( 'xf_term_display', esc_html( $term->name ), $term->term_id, $field ) ); ?></div>
         <?php endforeach; ?>
         </div>
 
         <div class="selected_posts post_list">
         <?php foreach ( $selected_posts as $term ) : ?>
-            <div rel="<?php echo (int) $term->term_id; ?>"><span class="remove"></span><?php echo wp_kses_post( apply_filters( 'cfs_term_display', esc_html( $term->name ), $term->term_id, $field ) ); ?></div>
+            <div rel="<?php echo (int) $term->term_id; ?>"><span class="remove"></span><?php echo wp_kses_post( apply_filters( 'xf_term_display', esc_html( $term->name ), $term->term_id, $field ) ); ?></div>
         <?php endforeach; ?>
         </div>
         <div class="clear"></div>
@@ -85,19 +85,19 @@ class cfs_term extends cfs_field
 
     function options_html( $key, $field ) {
         $args = [ 'public' => true ];
-        $choices = apply_filters( 'cfs_field_term_taxonomies', get_taxonomies( $args ) );
+        $choices = apply_filters( 'xf_field_term_taxonomies', get_taxonomies( $args ) );
 
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e('Taxonomies', 'cfs'); ?></label>
-                <p class="description"><?php _e('Limit terms to the following taxonomies', 'cfs'); ?></p>
+                <label><?php _e('Taxonomies', 'x-fields' ); ?></label>
+                <p class="description"><?php _e('Limit terms to the following taxonomies', 'x-fields' ); ?></p>
             </td>
             <td>
                 <?php
-                    CFS()->create_field( [
+                    XF()->create_field( [
                         'type'          => 'select',
-                        'input_name'    => "cfs[fields][$key][options][taxonomies]",
+                        'input_name'    => "xf[fields][$key][options][taxonomies]",
                         'options'       => [ 'multiple' => '1', 'choices' => $choices ],
                         'value'         => $this->get_option( $field, 'taxonomies' ),
                     ] );
@@ -106,11 +106,11 @@ class cfs_term extends cfs_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Limits', 'cfs' ); ?></label>
+                <label><?php _e( 'Limits', 'x-fields' ); ?></label>
             </td>
             <td>
-                <input type="text" name="cfs[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />
-                <input type="text" name="cfs[fields][<?php echo esc_attr( $key ); ?>][options][limit_max]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_max' ) ); ?>" placeholder="max" style="width:60px" />
+                <input type="text" name="xf[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />
+                <input type="text" name="xf[fields][<?php echo esc_attr( $key ); ?>][options][limit_max]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_max' ) ); ?>" placeholder="max" style="width:60px" />
             </td>
         </tr>
     <?php
@@ -130,13 +130,13 @@ class cfs_term extends cfs_field
             }
 
             $(function() {
-                $(document).on('cfs/ready', '.cfs_add_field', function() {
-                    $('.cfs_term:not(.ready)').init_term();
+                $(document).on('xf/ready', '.xf_add_field', function() {
+                    $('.xf_term:not(.ready)').init_term();
                 });
-                $('.cfs_term').init_term();
+                $('.xf_term').init_term();
 
                 // add selected post
-                $(document).on('click', '.cfs_term .available_posts div', function() {
+                $(document).on('click', '.xf_term .available_posts div', function() {
                     var parent = $(this).closest('.field');
                     var term_id = $(this).attr('rel');
                     var html = $(this).html();
@@ -146,7 +146,7 @@ class cfs_term extends cfs_field
                 });
 
                 // remove selected post
-                $(document).on('click', '.cfs_term .selected_posts .remove', function() {
+                $(document).on('click', '.xf_term .selected_posts .remove', function() {
                     var div = $(this).parent();
                     var parent = div.closest('.field');
                     var term_id = div.attr('rel');
@@ -156,7 +156,7 @@ class cfs_term extends cfs_field
                 });
 
                 // filter posts
-                $(document).on('keyup', '.cfs_term .cfs_filter_input', function() {
+                $(document).on('keyup', '.xf_term .xf_filter_input', function() {
                     var input = $(this).val();
                     var parent = $(this).closest('.field');
                     var regex = new RegExp(input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
@@ -198,12 +198,12 @@ class cfs_term extends cfs_field
 
 
     function format_value_for_input( $value, $field = null ) {
-        return implode( ',', cfs_sanitize_id_list( $value ) );
+        return implode( ',', xf_sanitize_id_list( $value ) );
     }
 
 
     function pre_save( $value, $field = null ) {
         // Only positive integer IDs are allowed (prevents SQL injection in html())
-        return cfs_sanitize_id_list( $value );
+        return xf_sanitize_id_list( $value );
     }
 }

@@ -2,12 +2,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class cfs_user extends cfs_field
+class xf_user extends xf_field
 {
 
     function __construct() {
         $this->name = 'user';
-        $this->label = __( 'User', 'cfs' );
+        $this->label = __( 'User', 'x-fields' );
     }
 
 
@@ -22,7 +22,7 @@ class cfs_user extends cfs_field
             $available_users[] = $result;
         }
 
-        $field->value = implode( ',', cfs_sanitize_id_list( $field->value ) );
+        $field->value = implode( ',', xf_sanitize_id_list( $field->value ) );
 
         if ( ! empty( $field->value ) ) {
             $results = $wpdb->get_results( "SELECT ID, user_login FROM $wpdb->users WHERE ID IN ($field->value) ORDER BY FIELD(ID,$field->value)" );
@@ -32,19 +32,19 @@ class cfs_user extends cfs_field
         }
     ?>
         <div class="filter_posts">
-            <input type="text" class="cfs_filter_input" autocomplete="off" placeholder="<?php esc_attr_e( 'Search users', 'cfs' ); ?>" />
+            <input type="text" class="xf_filter_input" autocomplete="off" placeholder="<?php esc_attr_e( 'Search users', 'x-fields' ); ?>" />
         </div>
 
         <div class="available_posts post_list">
         <?php foreach ( $available_users as $user ) : ?>
             <?php $class = ( isset( $selected_users[ $user->ID ] ) ) ? ' class="used"' : ''; ?>
-            <div rel="<?php echo (int) $user->ID; ?>"<?php echo $class; ?>><?php echo wp_kses_post( apply_filters( 'cfs_user_display', esc_html( $user->user_login ), $user->ID, $field ) ); ?></div>
+            <div rel="<?php echo (int) $user->ID; ?>"<?php echo $class; ?>><?php echo wp_kses_post( apply_filters( 'xf_user_display', esc_html( $user->user_login ), $user->ID, $field ) ); ?></div>
         <?php endforeach; ?>
         </div>
 
         <div class="selected_posts post_list">
         <?php foreach ( $selected_users as $user ) : ?>
-            <div rel="<?php echo (int) $user->ID; ?>"><span class="remove"></span><?php echo wp_kses_post( apply_filters( 'cfs_user_display', esc_html( $user->user_login ), $user->ID, $field ) ); ?></div>
+            <div rel="<?php echo (int) $user->ID; ?>"><span class="remove"></span><?php echo wp_kses_post( apply_filters( 'xf_user_display', esc_html( $user->user_login ), $user->ID, $field ) ); ?></div>
         <?php endforeach; ?>
         </div>
         <div class="clear"></div>
@@ -57,11 +57,11 @@ class cfs_user extends cfs_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Limits', 'cfs' ); ?></label>
+                <label><?php _e( 'Limits', 'x-fields' ); ?></label>
             </td>
             <td>
-                <input type="text" name="cfs[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />
-                <input type="text" name="cfs[fields][<?php echo esc_attr( $key ); ?>][options][limit_max]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_max' ) ); ?>" placeholder="max" style="width:60px" />
+                <input type="text" name="xf[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />
+                <input type="text" name="xf[fields][<?php echo esc_attr( $key ); ?>][options][limit_max]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_max' ) ); ?>" placeholder="max" style="width:60px" />
             </td>
         </tr>
     <?php
@@ -81,13 +81,13 @@ class cfs_user extends cfs_field
             }
 
             $(function() {
-                $(document).on('cfs/ready', '.cfs_add_field', function() {
-                    $('.cfs_user:not(.ready)').init_user();
+                $(document).on('xf/ready', '.xf_add_field', function() {
+                    $('.xf_user:not(.ready)').init_user();
                 });
-                $('.cfs_user').init_user();
+                $('.xf_user').init_user();
 
                 // add selected post
-                $(document).on('click', '.cfs_user .available_posts div', function() {
+                $(document).on('click', '.xf_user .available_posts div', function() {
                     var parent = $(this).closest('.field');
                     var post_id = $(this).attr('rel');
                     var html = $(this).html();
@@ -97,7 +97,7 @@ class cfs_user extends cfs_field
                 });
 
                 // remove selected post
-                $(document).on('click', '.cfs_user .selected_posts .remove', function() {
+                $(document).on('click', '.xf_user .selected_posts .remove', function() {
                     var div = $(this).parent();
                     var parent = div.closest('.field');
                     var post_id = div.attr('rel');
@@ -107,7 +107,7 @@ class cfs_user extends cfs_field
                 });
 
                 // filter posts
-                $(document).on('keyup', '.cfs_user .cfs_filter_input', function() {
+                $(document).on('keyup', '.xf_user .xf_filter_input', function() {
                     var input = $(this).val();
                     var parent = $(this).closest('.field');
                     var regex = new RegExp(input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
@@ -149,12 +149,12 @@ class cfs_user extends cfs_field
 
 
     function format_value_for_input( $value, $field = null ) {
-        return implode( ',', cfs_sanitize_id_list( $value ) );
+        return implode( ',', xf_sanitize_id_list( $value ) );
     }
 
 
     function pre_save( $value, $field = null ) {
         // Only positive integer IDs are allowed (prevents SQL injection in html())
-        return cfs_sanitize_id_list( $value );
+        return xf_sanitize_id_list( $value );
     }
 }

@@ -1,336 +1,537 @@
-/*---------------------------------------------------------------------------------------------
-    generic
----------------------------------------------------------------------------------------------*/
+/**
+ * X-Fields — field group editor
+ * Follows WordPress admin conventions; the accent follows the user's admin color scheme.
+ */
 
-.cfs_tooltip {
-    display: inline-block;
-    border: 1px solid #ddd;
-    border-radius: 50%;
-    cursor: pointer;
-    line-height: 1;
-    width: 13px;
-    height: 13px;
-    font-size: 11px;
-    text-align: center;
+#xf_fields,
+#xf_rules,
+#xf_extras {
+    --xf-accent: var(--wp-admin-theme-color, #2271b1);
+    --xf-accent-soft: rgba(34, 113, 177, 0.08);
+    --xf-border: #dcdcde;
+    --xf-border-soft: #f0f0f1;
+    --xf-muted: #646970;
+    --xf-text: #1d2327;
+    --xf-bg-soft: #f6f7f7;
+    --xf-danger: #d63638;
+    --xf-radius: 4px;
+}
+
+/*--------------------------------------------------------------
+    Tooltips
+--------------------------------------------------------------*/
+
+.xf_tooltip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
     margin-left: 4px;
+    border-radius: 50%;
+    background: #f0f0f1;
+    color: #646970;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    vertical-align: middle;
+    cursor: help;
+}
+
+.xf_tooltip:hover {
+    background: var(--xf-accent, #2271b1);
+    color: #fff;
 }
 
 .tooltip_inner {
     display: none;
 }
 
-/*---------------------------------------------------------------------------------------------
-    #cfs_fields (container)
----------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------
+    Fields box
+--------------------------------------------------------------*/
 
-#cfs_fields .inside {
+#xf_fields .inside {
     margin: 0;
     padding: 0;
 }
 
-#cfs_fields .table_footer {
-    padding: 10px 12px;
-    text-align: right;
+/* Column header */
+#xf_fields .xf-fields-header,
+#xf_fields .field_meta {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1.4fr) minmax(0, 1fr) 140px 76px;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px 0 4px;
 }
 
-#cfs_fields .field_meta.even td {
-    background-color: #fcfcfc;
+#xf_fields .xf-fields-header {
+    min-height: 36px;
+    border-bottom: 1px solid var(--xf-border);
+    background: var(--xf-bg-soft);
+    color: var(--xf-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
-#cfs_fields .fields {
+/* Empty state */
+#xf_fields .xf-empty-state {
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--xf-muted);
+}
+
+#xf_fields .xf-empty-state[hidden] {
+    display: none;
+}
+
+#xf_fields .xf-empty-state .dashicons {
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+    color: #c3c4c7;
+}
+
+#xf_fields .xf-empty-state p {
+    margin: 6px 0 0;
+}
+
+#xf_fields .xf-empty-state strong {
+    color: var(--xf-text);
+    font-size: 14px;
+}
+
+/* List */
+#xf_fields .fields {
     margin: 0;
-    background: #0073aa;
+    padding: 0;
+    background: #fff;
 }
 
-#cfs_fields .fields a.cfs_edit_field {
-    font-weight: normal;
+#xf_fields .fields li {
+    margin: 0;
+    list-style: none;
+}
+
+/* Nested (loop children) */
+#xf_fields .fields li ul {
+    margin: 0;
+    padding: 0 0 0 28px;
+    border-left: 3px solid var(--xf-accent-soft);
+    background: #fcfcfc;
+}
+
+#xf_fields .fields li.loop > ul {
+    min-height: 12px;
+}
+
+#xf_fields .fields li.loop > ul:empty::before {
+    content: attr(data-empty);
+    display: block;
+    padding: 8px 12px;
+}
+
+/* Row */
+#xf_fields .field {
+    border-bottom: 1px solid var(--xf-border-soft);
+}
+
+#xf_fields .field_meta {
+    min-height: 48px;
+    background: #fff;
+    transition: background-color 0.12s ease;
+}
+
+#xf_fields .field_meta:hover {
+    background: var(--xf-bg-soft);
+}
+
+#xf_fields .field_order {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+    cursor: grab;
+    color: #a7aaad;
+}
+
+#xf_fields .field_meta .field_order::before {
+    content: "\f545"; /* dashicons-move */
+    font: normal 18px/1 dashicons;
+}
+
+#xf_fields .field_meta:hover .field_order {
+    color: var(--xf-muted);
+}
+
+#xf_fields .field_label .row-title {
+    display: block;
+    overflow: hidden;
+    color: var(--xf-text);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     cursor: pointer;
 }
 
-#cfs_fields .fields .button-secondary.cfs_edit_field {
-    vertical-align: baseline;
+#xf_fields .field_label .row-title:hover,
+#xf_fields .field_label .row-title:focus {
+    color: var(--xf-accent);
 }
 
-#cfs_fields .fields li {
-    margin: 0;
+#xf_fields code.field_name {
+    justify-self: start;
+    max-width: 100%;
+    overflow: hidden;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: var(--xf-bg-soft);
+    color: #50575e;
+    font-size: 12px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
-#cfs_fields .fields li li {
-    margin: 0 0 0 10px;
+#xf_fields .field_meta .field_type {
+    justify-self: start;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--xf-accent-soft);
+    color: var(--xf-accent);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
 }
 
-#cfs_fields .fields li.loop ul {
-    min-height: 10px;
+#xf_fields .field_meta .field_type.xf-type-loop {
+    background: #fcf0e3;
+    color: #8a4d00;
 }
 
-#cfs_fields .field.form_open {
-    border-bottom: 1px solid #DFDFDF;
+#xf_fields .field_meta .field_type.xf-type-tab {
+    background: #f0f0f1;
+    color: #50575e;
 }
 
-#cfs_fields .field.form_open .field_meta td {
-    background-color: #0073aa;
-    color: #fff;
+#xf_fields .field_tools {
+    display: flex;
+    justify-content: flex-end;
+    gap: 2px;
 }
 
-#cfs_fields .field.form_open .field_meta td a {
-    color: #fff;
-}
-
-/*---------------------------------------------------------------------------------------------
-    #cfs_rules (container)
----------------------------------------------------------------------------------------------*/
-
-#cfs_rules .select2 {
-    width: 99.95%;
-}
-
-/*---------------------------------------------------------------------------------------------
-    field_meta
----------------------------------------------------------------------------------------------*/
-
-.field_meta table {
+.xf-icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
     border: 0;
-    border-radius: 0;
-    border-spacing: 0;
+    border-radius: var(--xf-radius, 4px);
+    background: transparent;
+    color: #646970;
+    cursor: pointer;
 }
 
-.field_meta td {
-    border: 0;
-    border-bottom: 1px solid #dfdfdf;
-    padding: 8px 0;
+.xf-icon-button:hover,
+.xf-icon-button:focus {
+    background: #f0f0f1;
+    color: var(--xf-accent, #2271b1);
 }
 
-.field_meta td.field_order {
-    width: 48px;
-    cursor: move;
+.xf-icon-button.xf_delete_field:hover,
+.xf-icon-button.xf_delete_field:focus {
+    background: #fcf0f1;
+    color: var(--xf-danger, #d63638);
+}
+
+.xf-icon-button:focus {
+    outline: 2px solid transparent;
+    box-shadow: 0 0 0 2px var(--xf-accent, #2271b1);
+}
+
+/* Open state */
+#xf_fields .field.form_open {
     position: relative;
+    z-index: 1;
+    margin: 8px;
+    border: 1px solid var(--xf-accent);
+    border-radius: var(--xf-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.field_meta td.field_order:after {
-    content: '\f333';
+#xf_fields .field.form_open > .field_meta {
+    border-radius: var(--xf-radius) var(--xf-radius) 0 0;
+    background: var(--xf-accent-soft);
 }
 
-.form_open .field_meta td.field_order:after {
-    color: #fff;
+/* Footer */
+#xf_fields .table_footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px;
+    border-top: 1px solid var(--xf-border);
+    background: var(--xf-bg-soft);
 }
 
-.field_meta td.field_name {
-    width: 180px;
+#xf_fields .table_footer .button .dashicons {
+    margin: 4px 2px 0 -2px;
+    font-size: 16px;
 }
 
-.field_meta td.field_type {
-    width: 100px;
-    padding-left: 8px;
+/* Drag placeholder */
+#xf_fields .ui-sortable-placeholder {
+    height: 48px;
+    margin: 4px 8px;
+    border: 2px dashed var(--xf-accent);
+    border-radius: var(--xf-radius);
+    background: var(--xf-accent-soft);
+    visibility: visible !important;
 }
 
-/*---------------------------------------------------------------------------------------------
-    field_form
----------------------------------------------------------------------------------------------*/
+#xf_fields .ui-sortable-helper {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+/*--------------------------------------------------------------
+    Field settings form
+--------------------------------------------------------------*/
 
 .field_form {
     display: none;
+    border-top: 1px solid var(--xf-border, #dcdcde);
+    background: #fff;
 }
 
 .field_form table {
     width: 100%;
-    border: none;
+    border: 0;
     border-radius: 0;
     border-spacing: 0;
+    box-shadow: none;
 }
 
-.field_form td {
-    padding: 10px 12px;
+.field_form > table > tbody > tr > td {
+    padding: 14px 16px;
+    border-top: 1px solid var(--xf-border-soft, #f0f0f1);
+}
+
+.field_form > table > tbody > tr:first-child > td {
+    border-top: 0;
 }
 
 .field_form td.label {
-    width: 24%;
+    width: 200px;
     vertical-align: top;
 }
 
 .field_form td.label label {
-    color: #333;
+    color: var(--xf-text, #1d2327);
+    font-weight: 600;
 }
 
 .field_form td.label p.description {
-    color: #666;
+    margin: 4px 0 0 !important;
+    color: var(--xf-muted, #646970);
     font-style: normal;
-    margin: 6px 0 0 0 !important;
 }
 
-.field_form span.required {
-    margin-right: 5px;
-    color: red;
+/* Label / Name / Type row */
+.field_form tr.field_basics > td {
+    background: var(--xf-bg-soft, #f6f7f7);
 }
 
 .field_form tr.field_basics table {
-    padding: 10px 12px;
-    border-bottom: 1px solid #dfdfdf;
     border-spacing: 0;
 }
 
 .field_form tr.field_basics td {
-    padding: 0 20px 0 0;
-    border: none;
+    width: 33.33%;
+    padding: 0 16px 0 0;
+    border: 0;
+    vertical-align: top;
 }
 
 .field_form tr.field_basics td:last-child {
-    padding: 0;
+    padding-right: 0;
 }
 
-.field_form tr.field_label td {
-    border-top: 0;
-}
-
-.field_form tr.field_actions td {
-    background: #fff;
+.field_form tr.field_basics label {
+    font-weight: 600;
 }
 
 .field_form select,
 .field_form textarea,
 .field_form input[type="text"] {
-    width: 99.95%;
-    margin-top: 10px;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 6px;
+}
+
+.field_form textarea {
+    min-height: 80px;
 }
 
 .field_form select.multiple {
-    height: 100px;
+    height: 110px;
 }
 
-.ui-sortable-placeholder {
-    height: 5px;
-    background-color: orange;
+.field_form td .xf_true_false label,
+.field_form td label:has(> input[type="checkbox"]) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 400;
 }
 
-/*---------------------------------------------------------------------------------------------
-    Buttons, links
----------------------------------------------------------------------------------------------*/
-
-span.cfs_delete_field {
-    text-decoration: underline;
-    cursor: pointer;
-    color: red;
+.field_form tr.field_actions td {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    background: var(--xf-bg-soft, #f6f7f7);
+    text-align: right;
 }
 
-span.cfs_delete_field:hover {
-    text-decoration: none;
-    background: red;
-    color: #fff;
-}
+/*--------------------------------------------------------------
+    Placement rules & extras
+--------------------------------------------------------------*/
 
-/*---------------------------------------------------------------------------------------------
-    Options
----------------------------------------------------------------------------------------------*/
-
-#cfs_rules .inside,
-#cfs_extras .inside {
+#xf_rules .inside,
+#xf_extras .inside {
     margin: 0;
     padding: 0;
 }
 
-#cfs_rules table,
-#cfs_extras table {
+#xf_rules table,
+#xf_extras table {
     width: 100%;
     border-spacing: 0;
 }
 
-#cfs_rules table td,
-#cfs_extras table td {
-    padding: 10px 12px;
-    border-top: 1px solid #fff;
-    border-bottom: 1px solid #dfdfdf;
+#xf_rules table td,
+#xf_extras table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--xf-border-soft);
+    vertical-align: middle;
 }
 
-#cfs_rules table tr:last-child td,
-#cfs_extras table tr:last-child td {
-    border-bottom: none;
+#xf_rules table tr:last-child td,
+#xf_extras table tr:last-child td {
+    border-bottom: 0;
 }
 
-#cfs_rules table td.label,
-#cfs_extras table td.label {
-    width: 120px;
-    background: #fff;
-    vertical-align: top;
+#xf_rules table td.label,
+#xf_extras table td.label {
+    width: 170px;
+    color: var(--xf-text);
+    font-weight: 600;
 }
 
-#cfs_rules table td.label label,
-#cfs_extras table td.label label {
-    color: #333;
-    line-height: 1.5em;
+#xf_rules table td.label label,
+#xf_extras table td.label label {
+    color: var(--xf-text);
+    font-weight: 600;
 }
 
-#cfs_rules table td.label p.description,
-#cfs_extras table td.label p.description {
-    color: #666;
-    font-style: normal;
-    margin: 6px 0 0 0 !important;
+#xf_rules table select,
+#xf_extras table select,
+#xf_rules table textarea,
+#xf_extras table textarea,
+#xf_rules table input[type="text"],
+#xf_extras table input[type="text"] {
+    width: 100%;
+    max-width: 100%;
 }
 
-#cfs_rules table select,
-#cfs_extras table select,
-#cfs_rules table textarea,
-#cfs_extras table textarea,
-#cfs_rules table input[type="text"],
-#cfs_extras table input[type="text"] {
-    width: 99.95%;
-    height: auto;
-    padding: 5px;
-    outline: none;
+#xf_rules .select2,
+#xf_rules .select2-container {
+    width: 100% !important;
 }
 
-#wpcontent #cfs_extras table select.multiple {
-    height: 60px;
+#xf_rules .select2-container-multi .select2-choices {
+    min-height: 32px;
+    border-color: #8c8f94;
+    border-radius: var(--xf-radius);
+    background-image: none;
 }
 
-/*---------------------------------------------------------------------------------------------
-    Checkboxes
----------------------------------------------------------------------------------------------*/
-
-span.checkbox {
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
-    display: inline-block;
-    background: url(../images/checkbox-off.png) no-repeat;
-    vertical-align: bottom;
-    margin-right: 3px;
+#xf_rules .select2-container-multi .select2-choices .select2-search-choice {
+    border: 0;
+    border-radius: 3px;
+    background: var(--xf-accent-soft);
+    box-shadow: none;
+    color: var(--xf-accent);
 }
 
-span.checkbox.active {
-    background: url(../images/checkbox-on.png) no-repeat;
+#xf_extras input[name="xf[extras][order]"] {
+    width: 80px !important;
 }
 
-/*---------------------------------------------------------------------------------------------
-    Hide some submit buttons
----------------------------------------------------------------------------------------------*/
+#xf_extras label + input[type="radio"],
+#xf_extras input[type="radio"] {
+    margin-right: 4px;
+}
 
-#submitdiv #minor-publishing-actions,
-#submitdiv #misc-publishing-actions {
+/*--------------------------------------------------------------
+    Field group: hide irrelevant publish actions
+--------------------------------------------------------------*/
+
+.post-type-xf_group #submitdiv #minor-publishing-actions,
+.post-type-xf_group #submitdiv #misc-publishing-actions {
     display: none;
 }
 
-#submitdiv #major-publishing-actions {
-    border-top: none;
+.post-type-xf_group #submitdiv #major-publishing-actions {
+    border-top: 0;
 }
 
+/*--------------------------------------------------------------
+    Small screens
+--------------------------------------------------------------*/
 
-/*---------------------------------------------------------------------------------------------
-    Icons
----------------------------------------------------------------------------------------------*/
+@media (max-width: 782px) {
+    #xf_fields .xf-fields-header {
+        display: none;
+    }
 
-.field_meta td.field_order:after {
-    display: block;
-    color: #aaa;
+    #xf_fields .field_meta {
+        grid-template-columns: 32px minmax(0, 1fr) auto;
+        grid-template-areas:
+            "order label tools"
+            "order meta  meta";
+        row-gap: 4px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
 
-    /* dashicons */
-    font-size: 20px;
-    font-family: dashicons;
-    width: 100%;
-    height: 20px;
-    line-height: 1;
-    font-weight: 400;
-    text-decoration: inherit;
-    vertical-align: top;
-    text-align: center;
-    -webkit-font-smoothing: antialiased;
-    -mos-osx-font-smoothing: grayscale;
+    #xf_fields .field_meta .field_order { grid-area: order; }
+    #xf_fields .field_meta .field_label { grid-area: label; }
+    #xf_fields .field_meta .field_tools { grid-area: tools; }
+    #xf_fields .field_meta code.field_name { grid-area: meta; }
+    #xf_fields .field_meta .field_type { grid-area: meta; justify-self: end; }
+
+    .field_form td.label,
+    #xf_rules table td.label,
+    #xf_extras table td.label {
+        display: block;
+        width: auto;
+        padding-bottom: 0;
+        border-bottom: 0;
+    }
+
+    .field_form tr.field_basics td,
+    #xf_rules table td,
+    #xf_extras table td {
+        display: block;
+        width: auto !important;
+        padding-right: 0;
+    }
+
+    .field_form tr.field_basics td + td {
+        padding-top: 12px;
+    }
 }

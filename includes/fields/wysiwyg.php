@@ -2,12 +2,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class cfs_wysiwyg extends cfs_field
+class xf_wysiwyg extends xf_field
 {
 
     function __construct() {
         $this->name = 'wysiwyg';
-        $this->label = __( 'Wysiwyg Editor', 'cfs' );
+        $this->label = __( 'Wysiwyg Editor', 'x-fields' );
 
         // add the "code" button
         add_filter( 'mce_external_plugins', [ $this, 'mce_external_plugins' ], 20 );
@@ -32,17 +32,17 @@ class cfs_wysiwyg extends cfs_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Formatting', 'cfs' ); ?></label>
+                <label><?php _e( 'Formatting', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
-                    CFS()->create_field( [
+                    XF()->create_field( [
                         'type' => 'select',
-                        'input_name' => "cfs[fields][$key][options][formatting]",
+                        'input_name' => "xf[fields][$key][options][formatting]",
                         'options' => [
                             'choices' => [
-                                'default' => __( 'Default', 'cfs' ),
-                                'none' => __( 'None (bypass filters)', 'cfs' )
+                                'default' => __( 'Default', 'x-fields' ),
+                                'none' => __( 'None (bypass filters)', 'x-fields' )
                             ],
                             'force_single' => true,
                         ],
@@ -53,16 +53,16 @@ class cfs_wysiwyg extends cfs_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Validation', 'cfs' ); ?></label>
+                <label><?php _e( 'Validation', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
-                    CFS()->create_field( [
+                    XF()->create_field( [
                         'type' => 'true_false',
-                        'input_name' => "cfs[fields][$key][options][required]",
+                        'input_name' => "xf[fields][$key][options][required]",
                         'input_class' => 'true_false',
                         'value' => $this->get_option( $field, 'required' ),
-                        'options' => [ 'message' => __( 'This is a required field', 'cfs' ) ],
+                        'options' => [ 'message' => __( 'This is a required field', 'x-fields' ) ],
                     ] );
                 ?>
             </td>
@@ -77,7 +77,7 @@ class cfs_wysiwyg extends cfs_field
         if ( user_can_richedit() ) {
             if ( ! is_admin() ) {
     ?>
-        <div class="hidden"><?php wp_editor( '', 'cfswysi' ); ?></div>
+        <div class="hidden"><?php wp_editor( '', 'xfwysi' ); ?></div>
     <?php
             }
     ?>
@@ -89,10 +89,10 @@ class cfs_wysiwyg extends cfs_field
             var wysiwyg_count = 0;
 
             $(function() {
-                $(document).on('cfs/ready', '.cfs_add_field', function() {
-                    $('.cfs_wysiwyg:not(.ready)').init_wysiwyg();
+                $(document).on('xf/ready', '.xf_add_field', function() {
+                    $('.xf_wysiwyg:not(.ready)').init_wysiwyg();
                 });
-                $('.cfs_wysiwyg').init_wysiwyg();
+                $('.xf_wysiwyg').init_wysiwyg();
 
                 // set the active editor
                 $(document).on('click', 'a.add_media', function() {
@@ -107,7 +107,7 @@ class cfs_wysiwyg extends cfs_field
 
                     // generate css id
                     wysiwyg_count = wysiwyg_count + 1;
-                    var input_id = 'cfs_wysiwyg_' + wysiwyg_count;
+                    var input_id = 'xf_wysiwyg_' + wysiwyg_count;
 
                     // set the wysiwyg css id
                     $(this).find('.wysiwyg').attr('id', input_id);
@@ -157,7 +157,7 @@ class cfs_wysiwyg extends cfs_field
                 });
             };
 
-            $('.meta-box-sortables, .cfs_loop').on('sortstart', function(event, ui) {
+            $('.meta-box-sortables, .xf_loop').on('sortstart', function(event, ui) {
                 tinyMCE.settings.wpautop = false;
                 tinyMCE.settings.resize = 'vertical';
                 $(this).find('.wysiwyg').each(function() {
@@ -165,7 +165,7 @@ class cfs_wysiwyg extends cfs_field
                 });
             });
 
-            $('.meta-box-sortables, .cfs_loop').on('sortstop', function(event, ui) {
+            $('.meta-box-sortables, .xf_loop').on('sortstop', function(event, ui) {
                 $(this).find('.wysiwyg').each(function() {
                     tinyMCE.execCommand('mceAddEditor', false, $(this).attr('id'));
                 });
@@ -180,7 +180,7 @@ class cfs_wysiwyg extends cfs_field
 
 
     function mce_external_plugins( $plugins ) {
-        $plugins['code'] = CFS_URL . '/assets/js/tinymce/code.min.js';
+        $plugins['code'] = XF_URL . '/assets/js/tinymce/code.min.js';
         return $plugins;
     }
 

@@ -2,13 +2,13 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class cfs_select extends cfs_field
+class xf_select extends xf_field
 {
     public $select2_inserted;
 
     function __construct() {
         $this->name = 'select';
-        $this->label = __( 'Select', 'cfs' );
+        $this->label = __( 'Select', 'x-fields' );
         $this->select2_inserted = false;
     }
 
@@ -51,8 +51,8 @@ class cfs_select extends cfs_field
             return;
         }
 
-        echo '<script src="' . esc_url( CFS_URL . '/assets/js/select2/select2.min.js' ) . '"></script>';
-        echo '<link rel="stylesheet" type="text/css" href="' . esc_url( CFS_URL . '/assets/js/select2/select2.css' ) . '" />';
+        echo '<script src="' . esc_url( XF_URL . '/assets/js/select2/select2.min.js' ) . '"></script>';
+        echo '<link rel="stylesheet" type="text/css" href="' . esc_url( XF_URL . '/assets/js/select2/select2.css' ) . '" />';
 
         // Don't insert select2 code twice
         $this->select2_inserted = true;
@@ -63,10 +63,10 @@ class cfs_select extends cfs_field
         <script>
         (function($) {
             $(function() {
-                $(document).on('cfs/ready', '.cfs_add_field', function() {
-                    $('.cfs_select:not(.ready)').init_select();
+                $(document).on('xf/ready', '.xf_add_field', function() {
+                    $('.xf_select:not(.ready)').init_select();
                 });
-                $('.cfs_select').init_select();
+                $('.xf_select').init_select();
             });
 
             $.fn.init_select = function() {
@@ -101,14 +101,14 @@ class cfs_select extends cfs_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Choices', 'cfs' ); ?></label>
-                <p class="description"><?php _e( 'Enter one choice per line', 'cfs' ); ?></p>
+                <label><?php _e( 'Choices', 'x-fields' ); ?></label>
+                <p class="description"><?php _e( 'Enter one choice per line', 'x-fields' ); ?></p>
             </td>
             <td>
                 <?php
-                    CFS()->create_field( [
+                    XF()->create_field( [
                         'type' => 'textarea',
-                        'input_name' => "cfs[fields][$key][options][choices]",
+                        'input_name' => "xf[fields][$key][options][choices]",
                         'value' => $this->get_option( $field, 'choices' ),
                     ] );
                 ?>
@@ -116,48 +116,48 @@ class cfs_select extends cfs_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Multi-select?', 'cfs' ); ?></label>
+                <label><?php _e( 'Multi-select?', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
-                    CFS()->create_field( [
+                    XF()->create_field( [
                         'type' => 'true_false',
-                        'input_name' => "cfs[fields][$key][options][multiple]",
+                        'input_name' => "xf[fields][$key][options][multiple]",
                         'input_class' => 'true_false',
                         'value' => $this->get_option( $field, 'multiple' ),
-                        'options' => [ 'message' => __( 'This is a multi-select field', 'cfs' ) ],
+                        'options' => [ 'message' => __( 'This is a multi-select field', 'x-fields' ) ],
                      ] );
                 ?>
             </td>
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e('Select2', 'cfs'); ?></label>
+                <label><?php _e('Select2', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
-                    CFS()->create_field( [
+                    XF()->create_field( [
                         'type' => 'true_false',
-                        'input_name' => "cfs[fields][$key][options][select2]",
+                        'input_name' => "xf[fields][$key][options][select2]",
                         'input_class' => 'true_false',
                         'value' => $this->get_option($field, 'select2'),
-                        'options' => [ 'message' => __('Render this field with Select2', 'cfs' ) ],
+                        'options' => [ 'message' => __('Render this field with Select2', 'x-fields' ) ],
                     ] );
                 ?>
             </td>
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Validation', 'cfs' ); ?></label>
+                <label><?php _e( 'Validation', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
-                    CFS()->create_field( [
+                    XF()->create_field( [
                         'type' => 'true_false',
-                        'input_name' => "cfs[fields][$key][options][required]",
+                        'input_name' => "xf[fields][$key][options][required]",
                         'input_class' => 'true_false',
                         'value' => $this->get_option( $field, 'required' ),
-                        'options' => [ 'message' => __( 'This is a required field', 'cfs' ) ],
+                        'options' => [ 'message' => __( 'This is a required field', 'x-fields' ) ],
                     ] );
                 ?>
             </td>

@@ -2,9 +2,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
-CFS()->form->load_assets();
+XF()->form->load_assets();
 
-echo CFS()->form( [
+echo XF()->form( [
     'post_id'       => $post->ID,
     'field_groups'  => $metabox['args']['group_id'],
     'front_end'     => false,

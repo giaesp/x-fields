@@ -1,0 +1,622 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Karin Suzakura\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/custom-field-suite\n"
+"Last-Translator: Matt Gibbs <hello@facetwp.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2015-10-20 22:30-0400\n"
+"PO-Revision-Date: 2015-10-20 22:30-0400\n"
+"Language: ja_JP\n"
+"X-Poedit-Basepath: .\n"
+"X-Generator: Poedit 1.8.5\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-SearchPath-0: ..\n"
+
+#: includes/field.php:49
+#: includes/fields/text.php:10
+msgid "Text"
+msgstr "単一行テキスト"
+
+#: includes/field.php:75
+#: includes/fields/file.php:92
+#: includes/fields/select.php:151
+#: includes/fields/text.php:32
+#: includes/fields/textarea.php:60
+#: includes/fields/true_false.php:49
+#: includes/fields/wysiwyg.php:56
+msgid "Validation"
+msgstr "バリデーション"
+
+#: includes/field.php:84
+#: includes/fields/file.php:101
+#: includes/fields/select.php:160
+#: includes/fields/text.php:41
+#: includes/fields/textarea.php:69
+#: includes/fields/true_false.php:58
+#: includes/fields/wysiwyg.php:65
+msgid "This is a required field"
+msgstr "入力必須フィールド"
+
+#: includes/field_group.php:166
+msgid "Imported"
+msgstr "インポート完了しました"
+
+#: includes/field_group.php:169
+msgid "Skipped"
+msgstr "スキップしました"
+
+#: includes/field_group.php:172
+#: includes/field_group.php:177
+msgid "Nothing to import"
+msgstr "インポートできるデータがありません"
+
+#: includes/fields/color/color.php:10
+msgid "Color"
+msgstr "カラーピッカー"
+
+#: includes/fields/date/date.php:10
+msgid "Date"
+msgstr "日付フォーマット"
+
+#: includes/fields/file.php:10
+msgid "File Upload"
+msgstr "ファイルのアップロード"
+
+#: includes/fields/file.php:37
+msgid "Add File"
+msgstr "ファイルを追加"
+
+#: includes/fields/file.php:38
+msgid "Remove"
+msgstr "削除"
+
+#: includes/fields/file.php:71
+msgid "Return Value"
+msgstr "返り値"
+
+#: includes/fields/file.php:80
+msgid "File URL"
+msgstr "ファイルURL"
+
+#: includes/fields/file.php:81
+msgid "Attachment ID"
+msgstr "添付ファイルID"
+
+#: includes/fields/hyperlink.php:11
+msgid "Hyperlink"
+msgstr "ハイパーリンク"
+
+#: includes/fields/hyperlink.php:26
+msgid "URL"
+msgstr "URL"
+
+#: includes/fields/hyperlink.php:30
+msgid "Link Text"
+msgstr "リンクテキスト"
+
+#: includes/fields/hyperlink.php:34
+msgid "Link Target"
+msgstr "リンク先"
+
+#: includes/fields/hyperlink.php:51
+msgid "Output format"
+msgstr "出力フォーマット"
+
+#: includes/fields/hyperlink.php:60
+msgid "HTML"
+msgstr "ＨＴＭＬ"
+
+#: includes/fields/hyperlink.php:61
+msgid "PHP Array"
+msgstr "PHP の配列"
+
+#: includes/fields/loop.php:11
+msgid "Loop"
+msgstr "ループ（複製フィールド）"
+
+#: includes/fields/loop.php:39
+msgid "Row Display"
+msgstr "行表示"
+
+#: includes/fields/loop.php:48
+msgid "Show the values by default"
+msgstr "デフォルト値を表示"
+
+#: includes/fields/loop.php:55
+msgid "Row Label"
+msgstr "行ラベル"
+
+#: includes/fields/loop.php:62
+#: includes/fields/loop.php:118
+#: includes/fields/loop.php:203
+msgid "Loop Row"
+msgstr "ループ行"
+
+#: includes/fields/loop.php:69
+msgid "Button Label"
+msgstr "ボタンラベル"
+
+#: includes/fields/loop.php:76
+#: includes/fields/loop.php:144
+#: includes/fields/loop.php:204
+msgid "Add Row"
+msgstr "追加"
+
+#: includes/fields/loop.php:84
+#: includes/fields/relationship.php:107
+#: includes/fields/term.php:109
+#: includes/fields/user.php:60
+msgid "Limits"
+msgstr "指値"
+
+#: includes/fields/relationship.php:10
+msgid "Relationship"
+msgstr "関連ポスト選択"
+
+#: includes/fields/relationship.php:63
+msgid "Search posts"
+msgstr "検索投稿…"
+
+#: includes/fields/relationship.php:91
+#: includes/init.php:298
+#: templates/meta_box_rules.php:159
+msgid "Post Types"
+msgstr "投稿タイプ"
+
+#: includes/fields/relationship.php:92
+msgid "Limit posts to the following types"
+msgstr "表示される投稿タイプを限定"
+
+#: includes/fields/select.php:11
+msgid "Select"
+msgstr "セレクト（ドロップダウンリスト）"
+
+#: includes/fields/select.php:104
+msgid "Choices"
+msgstr "選択肢"
+
+#: includes/fields/select.php:105
+msgid "Enter one choice per line"
+msgstr "選択肢を1行ずつ入力"
+
+#: includes/fields/select.php:119
+msgid "Multi-select?"
+msgstr "複数選択"
+
+#: includes/fields/select.php:128
+msgid "This is a multi-select field"
+msgstr "複数選択を可能にする"
+
+#: includes/fields/tab.php:10
+msgid "Tab"
+msgstr "タブ"
+
+#: includes/fields/color/color.php:18
+#: includes/fields/text.php:18
+#: includes/fields/textarea.php:25
+msgid "Default Value"
+msgstr "デフォルト値"
+
+#: includes/fields/textarea.php:10
+msgid "Textarea"
+msgstr "テキストエリア"
+
+#: includes/fields/textarea.php:39
+#: includes/fields/wysiwyg.php:35
+msgid "Formatting"
+msgstr "フォーマット"
+
+#: includes/fields/textarea.php:48
+msgid "None"
+msgstr "改行変換なし"
+
+#: includes/fields/textarea.php:49
+msgid "Convert newlines to <br />"
+msgstr "改行を<br />に変換"
+
+#: includes/fields/true_false.php:10
+msgid "True / False"
+msgstr "真/偽（簡易チェックボックス）"
+
+#: includes/fields/true_false.php:34
+msgid "Message"
+msgstr "メッセージ"
+
+#: includes/fields/true_false.php:35
+msgid "The text beside the checkbox"
+msgstr "チェックボックスに表示するテキスト"
+
+#: includes/fields/user.php:10
+msgid "User"
+msgstr "ユーザー"
+
+#: includes/fields/user.php:35
+msgid "Search users"
+msgstr "ユーザーを検索する…"
+
+#: includes/fields/wysiwyg.php:10
+msgid "Wysiwyg Editor"
+msgstr "リッチエディタ"
+
+#: includes/fields/wysiwyg.php:44
+msgid "Default"
+msgstr "デフォルト"
+
+#: includes/fields/wysiwyg.php:45
+msgid "None (bypass filters)"
+msgstr "フィルターなし"
+
+#: includes/form.php:227
+msgid "Submit"
+msgstr "送信"
+
+#: includes/init.php:60
+msgid "Field Groups"
+msgstr "フィールドグループ"
+
+#: includes/init.php:61
+msgid "Field Group"
+msgstr "フィールドグループ"
+
+#: includes/init.php:63
+msgid "Add New Field Group"
+msgstr "フィールドグループを追加"
+
+#: includes/init.php:64
+msgid "Edit Field Group"
+msgstr "フィールドグループの編集"
+
+#: includes/init.php:65
+msgid "New Field Group"
+msgstr "新しいフィールドグループ"
+
+#: includes/init.php:66
+msgid "View Field Group"
+msgstr "フィールドグループを見る"
+
+#: includes/init.php:67
+msgid "Search Field Groups"
+msgstr "フィールドグループを検索"
+
+#: includes/init.php:68
+msgid "No Field Groups found"
+msgstr "フィールドグループは見つかりませんでした"
+
+#: includes/init.php:69
+msgid "No Field Groups found in Trash"
+msgstr "ゴミ箱にフィールドグループは見つかりませんでした"
+
+#: templates/page_tools.php:90
+msgid "Tools"
+msgstr "ツール"
+
+#: includes/init.php:152
+msgid "Fields"
+msgstr "フィールド"
+
+#: includes/init.php:153
+msgid "Placement Rules"
+msgstr "配置ルール"
+
+#: includes/init.php:154
+msgid "Extras"
+msgstr "エクストラ"
+
+#: includes/init.php:284
+msgid "Title"
+msgstr "タイトル"
+
+#: includes/init.php:285
+msgid "Placement"
+msgstr "配置"
+
+#: includes/init.php:299
+#: templates/meta_box_rules.php:225
+msgid "User Roles"
+msgstr "ユーザー権限グループ"
+
+#: includes/init.php:300
+#: templates/meta_box_rules.php:257
+msgid "Posts"
+msgstr "投稿"
+
+#: includes/init.php:301
+msgid "Term IDs"
+msgstr "分類ID"
+
+#: includes/init.php:302
+#: templates/meta_box_rules.php:313
+msgid "Page Templates"
+msgstr "固定ページテンプレート"
+
+#: includes/init.php:303
+#: templates/meta_box_rules.php:192
+msgid "Post Formats"
+msgstr "記事のフォーマット"
+
+#: includes/revision.php:28
+msgid "Post Meta"
+msgstr "ポストメタ"
+
+#: templates/admin_head.php:29
+msgid "New Field"
+msgstr "新規フィールド"
+
+#: templates/field_html.php:26
+#: templates/meta_box_fields.php:6
+msgid "Label"
+msgstr "ラベル"
+
+#: templates/field_html.php:28
+msgid "The field label that editors will see."
+msgstr "投稿編集画面で表示されるラベル"
+
+#: templates/field_html.php:35
+#: templates/meta_box_fields.php:7
+msgid "Name"
+msgstr "名前"
+
+#: templates/field_html.php:38
+msgid "The field name is passed into get() to retrieve values. Use only lowercase letters, numbers, and underscores."
+msgstr "get() メソッドでの引数に使用されるので、半角英数字・アンダースコアのみで記述"
+
+#: templates/field_html.php:45
+msgid "Field Type"
+msgstr "フィールドタイプ"
+
+#: templates/field_html.php:63
+msgid "Notes"
+msgstr "概要"
+
+#: templates/field_html.php:65
+msgid "Notes for editors during data entry"
+msgstr "データ入力時の説明や覚え書きなどを記述"
+
+#: templates/meta_box_extras.php:35
+msgid "Order"
+msgstr "順序"
+
+#: templates/meta_box_extras.php:37
+msgid "The field group with the lowest order will appear first."
+msgstr "最も低い順序のフィールド グループが最初に表示されます。"
+
+#: templates/meta_box_extras.php:47
+msgid "Position"
+msgstr "位置"
+
+#: templates/meta_box_extras.php:50
+msgid "Normal"
+msgstr "通常"
+
+#: templates/meta_box_extras.php:51
+msgid "Side"
+msgstr "サイド"
+
+#: templates/meta_box_extras.php:56
+msgid "Display Settings"
+msgstr "表示設定"
+
+#: templates/meta_box_extras.php:66
+msgid "Hide the content editor"
+msgstr "コンテンツエディタを隠す"
+
+#: templates/meta_box_rules.php:10
+msgid "equals"
+msgstr "等しい"
+
+#: templates/meta_box_rules.php:11
+msgid "is not"
+msgstr "等しくない"
+
+#: templates/meta_box_rules.php:117
+msgid "Leave blank to skip this rule"
+msgstr "このルールをスキップするには空白のままにしておいてください"
+
+#: templates/meta_box_rules.php:281
+msgid "Taxonomy Terms"
+msgstr "分類"
+
+#: templates/page_tools.php:95
+msgid "Export"
+msgstr "エクスポート"
+
+#: templates/page_tools.php:96
+#: templates/page_tools.php:133
+msgid "Import"
+msgstr "インポート"
+
+#: templates/page_tools.php:97
+msgid "Reset"
+msgstr "リセット"
+
+#: templates/page_tools.php:140
+msgid "Reset and deactivate."
+msgstr "リセット＆プラグイン無効化"
+
+#: templates/page_tools.php:141
+msgid "This will delete all X-Fields data and deactivate the plugin."
+msgstr "X-Fieldsデータを削除し、プラグインを無効化します"
+
+#: templates/page_tools.php:142
+msgid "Delete everything"
+msgstr "全てを削除"
+
+#. Plugin Name of the plugin
+#: x-fields.php
+#: includes/init.php:62
+#~ msgid "X-Fields"
+#~ msgstr "X-Fields"
+
+#. Plugin URI of the plugin
+#: x-fields.php
+msgid "https://github.com/giaesp/x-fields"
+msgstr ""
+
+#. Description of the plugin
+#: x-fields.php
+msgid "Simple, secure custom fields for WordPress: field groups, placement rules, loops (repeaters), relationships and front-end forms."
+msgstr ""
+
+#. Author of the plugin
+#: x-fields.php
+msgid "Gianluca Esposito"
+msgstr ""
+
+#. Author URI of the plugin
+#: x-fields.php
+msgid "https://github.com/giaesp"
+msgstr ""
+
+#: includes/fields/file.php:48
+msgid "File Type"
+msgstr ""
+
+#: includes/fields/file.php:57
+msgid "Any"
+msgstr ""
+
+#: includes/fields/file.php:58
+msgid "Image"
+msgstr ""
+
+#: includes/fields/file.php:59
+msgid "Audio"
+msgstr ""
+
+#: includes/fields/file.php:60
+msgid "Video"
+msgstr ""
+
+#: includes/fields/loop.php:308
+msgid "Remove this row?"
+msgstr ""
+
+#: includes/fields/select.php:135
+msgid "Select2"
+msgstr ""
+
+#: includes/fields/select.php:144
+msgid "Render this field with Select2"
+msgstr ""
+
+#: includes/fields/term.php:10
+msgid "Term"
+msgstr ""
+
+#: includes/fields/term.php:65
+msgid "Search terms"
+msgstr ""
+
+#: includes/fields/term.php:93
+msgid "Taxonomies"
+msgstr ""
+
+#: includes/fields/term.php:94
+msgid "Limit terms to the following taxonomies"
+msgstr ""
+
+#: includes/form.php:49
+msgid "Your session has expired."
+msgstr ""
+
+#: includes/form.php:61
+msgid "Sorry, you are not allowed to edit this item."
+msgstr ""
+
+#: includes/form.php:203
+msgid "One (or more) of your fields had validation errors. More information is available below."
+msgstr ""
+
+#: includes/form.php:407
+msgid "Toggle row visibility"
+msgstr ""
+
+#: includes/init.php:144
+msgid "X-Fields Tools"
+msgstr ""
+
+#. translators: 1: number of field groups, 2: number of value rows
+#: includes/migration.php:120
+#, php-format
+msgid "X-Fields imported %1$d field groups and %2$d values from Custom Field Suite. The old CFS tables were kept as a backup."
+msgstr ""
+
+#: templates/admin_head.php:45
+msgid "Delete this field and its saved values?"
+msgstr ""
+
+#: templates/field_html.php:5
+msgid "Drag to reorder"
+msgstr ""
+
+#: templates/field_html.php:12
+msgid "Edit"
+msgstr ""
+
+#: templates/field_html.php:13
+msgid "Delete"
+msgstr ""
+
+#: templates/field_html.php:78
+msgid "Done"
+msgstr ""
+
+#: templates/meta_box_fields.php:8
+msgid "Type"
+msgstr ""
+
+#: templates/meta_box_fields.php:14
+msgid "No fields yet"
+msgstr ""
+
+#: templates/meta_box_fields.php:15
+msgid "Add your first field, then choose where the group appears in “Placement Rules”."
+msgstr ""
+
+#: templates/meta_box_fields.php:75
+msgid "Add field"
+msgstr ""
+
+#: templates/page_tools.php:74
+msgid "This will delete all X-Fields data. Are you sure?"
+msgstr ""
+
+#: templates/page_tools.php:92
+msgid "Move field groups between sites, or remove all X-Fields data."
+msgstr ""
+
+#: templates/page_tools.php:107
+msgid "Export field groups"
+msgstr ""
+
+#: templates/page_tools.php:108
+msgid "Select one or more groups (Ctrl/Cmd + click), then copy the generated code."
+msgstr ""
+
+#: templates/page_tools.php:117
+msgid "Generate export code"
+msgstr ""
+
+#: templates/page_tools.php:121
+msgid "Export code"
+msgstr ""
+
+#: templates/page_tools.php:130
+msgid "Import field groups"
+msgstr ""
+
+#: templates/page_tools.php:131
+msgid "Groups whose slug already exists on this site are skipped."
+msgstr ""
+
+#: templates/page_tools.php:132
+msgid "Paste the import code here"
+msgstr ""
+
+#: x-fields.php:37
+msgid "X-Fields is not active: please deactivate Custom Field Suite first. Your CFS data will be migrated automatically."
+msgstr ""

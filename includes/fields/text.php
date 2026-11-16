@@ -2,12 +2,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class cfs_text extends cfs_field
+class xf_text extends xf_field
 {
 
     function __construct() {
         $this->name = 'text';
-        $this->label = __( 'Text', 'cfs' );
+        $this->label = __( 'Text', 'x-fields' );
     }
 
 
@@ -15,13 +15,13 @@ class cfs_text extends cfs_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Default Value', 'cfs' ); ?></label>
+                <label><?php _e( 'Default Value', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
-                    CFS()->create_field( [
+                    XF()->create_field( [
                         'type' => 'text',
-                        'input_name' => "cfs[fields][$key][options][default_value]",
+                        'input_name' => "xf[fields][$key][options][default_value]",
                         'value' => $this->get_option( $field, 'default_value' ),
                     ] );
                 ?>
@@ -29,16 +29,16 @@ class cfs_text extends cfs_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Validation', 'cfs' ); ?></label>
+                <label><?php _e( 'Validation', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
-                    CFS()->create_field( [
+                    XF()->create_field( [
                         'type' => 'true_false',
-                        'input_name' => "cfs[fields][$key][options][required]",
+                        'input_name' => "xf[fields][$key][options][required]",
                         'input_class' => 'true_false',
                         'value' => $this->get_option( $field, 'required' ),
-                        'options' => [ 'message' => __( 'This is a required field', 'cfs' ) ],
+                        'options' => [ 'message' => __( 'This is a required field', 'x-fields' ) ],
                     ] );
                 ?>
             </td>
