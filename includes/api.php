@@ -418,6 +418,7 @@ class xf_api
                     'depth'                 => 0,
                     // Values from forms are untrusted: filter HTML for users without unfiltered_html
                     'kses'                  => ( 'input' == $options['format'] && ! current_user_can( 'unfiltered_html' ) ),
+                    'anonymous'             => ( 'input' == $options['format'] && ! is_user_logged_in() ),
                 ]
             );
         }
@@ -480,8 +481,14 @@ class xf_api
 
             // Filter untrusted HTML before the field type transforms (e.g. serializes) the value
             if ( ! empty( $params['kses'] ) ) {
-                $values = map_deep( $values, function( $v ) {
-                    return is_string( $v ) ? wp_kses_post( $v ) : $v;
+                $neutralize_shortcodes = ! empty( $params['anonymous'] );
+                $values = map_deep( $values, function( $v ) use ( $neutralize_shortcodes ) {
+                    if ( ! is_string( $v ) ) {
+                        return $v;
+                    }
+                    $v = wp_kses_post( $v );
+                    // Anonymous visitors must not be able to run shortcodes when the theme outputs the value
+                    return $neutralize_shortcodes ? str_replace( [ '[', ']' ], [ '&#91;', '&#93;' ], $v ) : $v;
                 } );
             }
 

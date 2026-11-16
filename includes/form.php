@@ -77,6 +77,11 @@ class xf_form
                 // Content
                 if ( isset( $_POST['xf']['post_content'] ) && is_string( $_POST['xf']['post_content'] ) ) {
                     $post_data['post_content'] = sanitize_post_field( 'post_content', wp_unslash( $_POST['xf']['post_content'] ), $post_id, 'db' );
+
+                    // Anonymous visitors must not be able to inject shortcodes
+                    if ( ! is_user_logged_in() ) {
+                        $post_data['post_content'] = str_replace( [ '[', ']' ], [ '&#91;', '&#93;' ], $post_data['post_content'] );
+                    }
                 }
 
                 // New posts
@@ -130,7 +135,9 @@ class xf_form
                         $redirect_url = $session['confirmation_url'];
                     }
 
-                    wp_redirect( esc_url_raw( $redirect_url ) );
+                    // Only same-site (or allowed_redirect_hosts) destinations: prevents open redirects
+                    // such as //evil.example in REQUEST_URI
+                    wp_safe_redirect( wp_validate_redirect( esc_url_raw( $redirect_url ), home_url( '/' ) ) );
                     exit;
                 }
             }

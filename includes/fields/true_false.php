@@ -97,6 +97,12 @@ class xf_true_false extends xf_field
 
 
 
+    function pre_save( $value, $field = null ) {
+        $value = is_array( $value ) ? reset( $value ) : $value;
+        return ( is_scalar( $value ) && 0 < (int) $value ) ? 1 : 0;
+    }
+
+
     function format_value_for_api( $value, $field = null ) {
         return ( is_scalar( $value ) && 0 < (int) $value ) ? 1 : 0;
     }

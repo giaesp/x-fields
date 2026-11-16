@@ -167,6 +167,65 @@ $msg = XF()->field_group->import( [ 'import_code' => $export ] );
 xf_t( 'import escapes output', false === strpos( $msg, '<img' ) );
 xf_t( 'import with garbage is safe', 0 === strpos( XF()->field_group->import( [ 'import_code' => [ 'x', 5, null ] ] ), '<div>' . esc_html__( 'Nothing to import', 'x-fields' ) ) );
 
+// ---- Round 2 hardening ------------------------------------------------------
+// Editors can't manage field groups
+$editor = wp_insert_user( [ 'user_login' => 'xf_editor_' . wp_rand(), 'user_pass' => wp_generate_password(), 'role' => 'editor' ] );
+wp_set_current_user( $editor );
+xf_t( 'editor cannot edit field groups', ! current_user_can( 'edit_post', $group_id ) && ! current_user_can( get_post_type_object( 'xf_group' )->cap->create_posts ) );
+wp_set_current_user( 1 );
+xf_t( 'admin can edit field groups', current_user_can( 'edit_post', $group_id ) );
+
+// Select only accepts configured choices
+XF()->save( [ 'choice' => [ 'b', '<script>x</script>', 'zzz' ] ], [ 'ID' => $page ] );
+XF()->api->cache = [];
+xf_t( 'select drops values outside choices', [ 'b' => 'Beta' ] === XF()->get( 'choice', $page ) );
+
+// true_false is normalized
+XF()->save( [ 'flag' => 'yes<script>' ], [ 'ID' => $page ] );
+XF()->api->cache = [];
+xf_t( 'true_false normalized to 0/1', in_array( XF()->get( 'flag', $page, [ 'format' => 'raw' ] ), [ '0', '1', 0, 1 ], true ) );
+
+// Anonymous visitors can't inject shortcodes
+wp_set_current_user( 0 );
+XF()->save( [ $ids['title_bx'] => [ 'value' => '[gallery ids="1"]hello' ] ], [ 'ID' => $page ], [ 'format' => 'input', 'field_groups' => [ $group_id ] ] );
+wp_set_current_user( 1 );
+XF()->api->cache = [];
+xf_t( 'anonymous shortcodes neutralized', false === strpos( (string) XF()->get( 'title_bx', $page ), '[gallery' ) );
+
+// Field options are not double-encoded on re-save
+$f = new xf_text();
+xf_t( 'get_option returns raw value (no double encoding)', 'A & B' === $f->get_option( (object) [ 'options' => [ 'default_value' => 'A & B' ] ], 'default_value' ) );
+
+// Open redirect protection used by front-end forms
+xf_t( 'protocol-relative redirect rejected', home_url( '/' ) === wp_validate_redirect( esc_url_raw( '//evil.example/x' ), home_url( '/' ) ) );
+
+// Relationship field never reveals unreadable posts
+$private = wp_insert_post( [ 'post_type' => 'page', 'post_status' => 'draft', 'post_title' => 'Secret draft title', 'post_author' => 1 ] );
+$contrib = wp_insert_user( [ 'user_login' => 'xf_contrib_' . wp_rand(), 'user_pass' => wp_generate_password(), 'role' => 'contributor' ] );
+wp_set_current_user( $contrib );
+ob_start();
+XF()->create_field( [ 'type' => 'relationship', 'value' => (string) $private, 'options' => [ 'post_types' => [ 'page' ] ] ] );
+$rel_html = ob_get_clean();
+wp_set_current_user( 1 );
+xf_t( 'relationship hides unreadable post titles', false === strpos( $rel_html, 'Secret draft title' ) );
+
+// User field shows display names, not login names
+wp_set_current_user( $contrib );
+ob_start();
+XF()->create_field( [ 'type' => 'user', 'value' => '' ] );
+$user_html = ob_get_clean();
+wp_set_current_user( 1 );
+xf_t( 'user field does not expose login names', false === strpos( $user_html, '>' . get_userdata( $contrib )->user_login . '<' ) );
+
+// Expired sessions are purged
+$wpdb->insert( $wpdb->prefix . 'xf_sessions', [ 'id' => str_repeat( 'a', 32 ), 'data' => 'x', 'expires' => (string) ( time() - 10 ) ] );
+( new xf_session() )->cleanup();
+xf_t( 'expired sessions purged', 0 === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}xf_sessions WHERE id = '" . str_repeat( 'a', 32 ) . "'" ) );
+xf_t( 'session cleanup cron scheduled', (bool) wp_next_scheduled( 'xf_cleanup_sessions' ) );
+
+require_once ABSPATH . 'wp-admin/includes/user.php';
+wp_delete_user( $editor ); wp_delete_user( $contrib ); wp_delete_post( $private, true );
+
 // ---- Cleanup ----------------------------------------------------------------
 $imported = (int) $wpdb->get_var( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'xf_group' AND post_name = 'imported-copy'" );
 foreach ( array_filter( [ $group_id, $other_group, $target, $page, $imported ] ) as $id ) {

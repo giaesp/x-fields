@@ -21,6 +21,10 @@ class xf_init
         add_action( 'save_post',                        [ $this, 'save_post' ] );
         add_action( 'delete_post',                      [ $this, 'delete_post' ] );
         add_action( 'add_meta_boxes',                   [ $this, 'add_meta_boxes' ] );
+        add_action( 'xf_cleanup_sessions',             [ $this, 'cleanup_sessions' ] );
+        if ( ! wp_next_scheduled( 'xf_cleanup_sessions' ) ) {
+            wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'xf_cleanup_sessions' );
+        }
         add_action( 'wp_ajax_xf_ajax_handler',         [ $this, 'ajax_handler' ] );
         add_filter( 'manage_xf_group_posts_columns',         [ $this, 'xf_columns' ] );
         add_action( 'manage_xf_group_posts_custom_column',   [ $this, 'xf_column_content' ], 10, 2 );
@@ -52,7 +56,9 @@ class xf_init
             'public'            => false,
             'show_ui'           => true,
             'show_in_menu'      => 'options-general.php',
-            'capability_type'   => 'page',
+            // Field groups are site configuration: administrators only (filterable)
+            'capabilities'      => xf_group_capabilities(),
+            'map_meta_cap'      => false,
             'hierarchical'      => false,
             'supports'          => [ 'title' ],
             'query_var'         => false,
@@ -141,7 +147,7 @@ class xf_init
     */
     function admin_menu() {
         if ( false === apply_filters( 'xf_disable_admin', false ) ) {
-            add_submenu_page( 'tools.php', __( 'X-Fields Tools', 'x-fields' ), __( 'X-Fields Tools', 'x-fields' ), 'manage_options', 'xf-tools', [ $this, 'page_tools' ] );
+            add_submenu_page( 'tools.php', __( 'X-Fields Tools', 'x-fields' ), __( 'X-Fields Tools', 'x-fields' ), xf_manage_capability(), 'xf-tools', [ $this, 'page_tools' ] );
         }
     }
 
@@ -236,8 +242,8 @@ class xf_init
      * ajax_handler
      */
     function ajax_handler() {
-        if ( ! current_user_can( 'manage_options' ) ) {
-            exit;
+        if ( ! current_user_can( xf_manage_capability() ) ) {
+            wp_die( '', '', [ 'response' => 403 ] );
         }
 
         if ( ! check_ajax_referer( 'xf_admin_nonce', 'nonce', false ) ) {
@@ -272,6 +278,14 @@ class xf_init
         }
 
         exit;
+    }
+
+
+    /**
+     * Daily purge of expired form sessions
+     */
+    function cleanup_sessions() {
+        ( new xf_session() )->cleanup();
     }
 
 

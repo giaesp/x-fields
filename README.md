@@ -62,7 +62,15 @@ echo XF()->form( [
 ] );
 ```
 
-Values submitted by users without the `unfiltered_html` capability are filtered with KSES.
+Values submitted by users without the `unfiltered_html` capability are filtered with KSES, and shortcodes from anonymous visitors are neutralized. After submit, visitors are redirected only within the site: to use an external `confirmation_url`, whitelist its host with the `allowed_redirect_hosts` filter.
+
+### Permissions
+
+Managing field groups and tools requires `manage_options`. Change it with:
+
+```php
+add_filter( 'xf_manage_capability', fn() => 'edit_theme_options' );
+```
 
 ### Field types
 

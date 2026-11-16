@@ -174,9 +174,7 @@ class xf_field
      */
     function get_option( $field, $option_name, $default_value = '' ) {
         if ( is_object( $field ) && isset( $field->options[ $option_name ] ) ) {
-            if ( is_string( $field->options[ $option_name ] ) ) {
-                return esc_attr( $field->options[ $option_name ] );
-            }
+            // Raw value: callers escape on output (escaping here caused double-encoding on every save)
             return $field->options[ $option_name ];
         }
         return $default_value;

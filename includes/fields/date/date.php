@@ -42,6 +42,14 @@ class xf_date extends xf_field
     }
 
 
+    // YYYY-MM-DD with an optional time; anything else is dropped
+    function pre_save( $value, $field = null ) {
+        $value = is_array( $value ) ? reset( $value ) : $value;
+        $value = is_scalar( $value ) ? trim( (string) $value ) : '';
+        return preg_match( '/^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?)?$/', $value ) ? $value : '';
+    }
+
+
     function load_assets() {
         wp_register_script( 'bootstrap-datepicker', XF_URL . '/includes/fields/date/bootstrap-datepicker.js', [ 'jquery' ] );
         wp_enqueue_script( 'bootstrap-datepicker' );

@@ -189,6 +189,23 @@ class xf_select extends xf_field
     }
 
 
+    // Only accept values that exist in the configured choices
+    function pre_save( $value, $field = null ) {
+        $choices = ( is_object( $field ) && isset( $field->options['choices'] ) ) ? (array) $field->options['choices'] : [];
+        $value = array_filter( (array) $value, 'is_scalar' );
+
+        if ( empty( $choices ) ) {
+            return array_values( $value );
+        }
+
+        $allowed = array_map( 'strval', array_keys( $choices ) );
+        $allowed[] = ''; // "{empty}" choice
+        return array_values( array_filter( $value, function( $v ) use ( $allowed ) {
+            return in_array( (string) $v, $allowed, true );
+        } ) );
+    }
+
+
     function pre_save_field( $field ) {
         $new_choices = [];
 

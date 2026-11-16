@@ -3,7 +3,7 @@
  * Plugin Name:       X-Fields
  * Plugin URI:        https://github.com/giaesp/x-fields
  * Description:       Simple, secure custom fields for WordPress: field groups, placement rules, loops (repeaters), relationships and front-end forms.
- * Version:           1.0.0
+ * Version:           1.0.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Gianluca Esposito
@@ -26,7 +26,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'XF_VERSION', '1.0.0' );
+define( 'XF_VERSION', '1.0.1' );
 define( 'XF_FILE', __FILE__ );
 define( 'XF_DIR', __DIR__ );
 define( 'XF_URL', plugins_url( '', __FILE__ ) );
@@ -41,6 +41,9 @@ if ( class_exists( 'Custom_Field_Suite' ) ) {
 
 require_once XF_DIR . '/includes/migration.php';
 register_activation_hook( __FILE__, [ 'xf_migration', 'activate' ] );
+register_deactivation_hook( __FILE__, function() {
+    wp_clear_scheduled_hook( 'xf_cleanup_sessions' );
+} );
 
 class X_Fields
 {
@@ -136,6 +139,28 @@ class X_Fields
 
         XF()->fields[ $field->type ]->html( $field );
     }
+}
+
+
+/**
+ * Capability required to manage field groups and X-Fields tools.
+ * @return string
+ */
+function xf_manage_capability() {
+    return (string) apply_filters( 'xf_manage_capability', 'manage_options' );
+}
+
+
+/**
+ * Map every field group capability to the manage capability.
+ * @return array
+ */
+function xf_group_capabilities() {
+    $cap = xf_manage_capability();
+    $keys = [ 'edit_post', 'read_post', 'delete_post', 'edit_posts', 'edit_others_posts', 'publish_posts',
+        'read_private_posts', 'delete_posts', 'delete_private_posts', 'delete_published_posts',
+        'delete_others_posts', 'edit_private_posts', 'edit_published_posts', 'create_posts' ];
+    return array_fill_keys( $keys, $cap );
 }
 
 

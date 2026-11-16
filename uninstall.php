@@ -12,6 +12,8 @@
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
+wp_clear_scheduled_hook( 'xf_cleanup_sessions' );
+
 if ( ! defined( 'XF_REMOVE_ALL_DATA' ) || true !== XF_REMOVE_ALL_DATA ) {
     return;
 }

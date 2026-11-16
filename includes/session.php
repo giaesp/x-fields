@@ -62,6 +62,11 @@ class xf_session
 
         $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}xf_sessions WHERE id = %s LIMIT 1", $this->session_id ) );
 
+        // Every rendered form creates a row: purge expired ones regularly (1% of writes + daily cron)
+        if ( 1 === wp_rand( 1, 100 ) ) {
+            $this->cleanup();
+        }
+
         $wpdb->query(
             $wpdb->prepare(
                 "INSERT INTO {$wpdb->prefix}xf_sessions VALUES (%s, %s, %s)",

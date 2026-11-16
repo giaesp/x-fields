@@ -38,6 +38,9 @@ class xf_relationship extends xf_field
 
         $args = apply_filters( 'xf_field_relationship_query_args', $args, [ 'field' => $field ] );
         $query = new WP_Query( $args );
+        $query->posts = array_filter( $query->posts, function( $p ) {
+            return current_user_can( 'read_post', $p->ID );
+        } );
 
         foreach ( $query->posts as $post_obj ) {
             $post_title = ( 'private' == $post_obj->post_status ) ? '(Private) ' . $post_obj->post_title : $post_obj->post_title;
@@ -54,6 +57,10 @@ class xf_relationship extends xf_field
         if ( ! empty( $field->value ) ) {
             $results = $wpdb->get_results( "SELECT ID, post_status, post_title FROM $wpdb->posts WHERE ID IN ($field->value) ORDER BY FIELD(ID,$field->value)" );
             foreach ( $results as $result ) {
+                // Never reveal titles the current user can't read (IDs can be tampered with)
+                if ( ! current_user_can( 'read_post', $result->ID ) ) {
+                    continue;
+                }
                 $result->post_title = ( 'private' == $result->post_status ) ? '(Private) ' . $result->post_title : $result->post_title;
                 $selected_posts[ $result->ID ] = $result;
             }

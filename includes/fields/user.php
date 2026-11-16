@@ -17,7 +17,7 @@ class xf_user extends xf_field
         $selected_users = [];
         $available_users = [];
 
-        $results = $wpdb->get_results( "SELECT ID, user_login FROM $wpdb->users ORDER BY user_login" );
+        $results = $wpdb->get_results( "SELECT ID, display_name FROM $wpdb->users ORDER BY display_name" );
         foreach ( $results as $result ) {
             $available_users[] = $result;
         }
@@ -25,7 +25,7 @@ class xf_user extends xf_field
         $field->value = implode( ',', xf_sanitize_id_list( $field->value ) );
 
         if ( ! empty( $field->value ) ) {
-            $results = $wpdb->get_results( "SELECT ID, user_login FROM $wpdb->users WHERE ID IN ($field->value) ORDER BY FIELD(ID,$field->value)" );
+            $results = $wpdb->get_results( "SELECT ID, display_name FROM $wpdb->users WHERE ID IN ($field->value) ORDER BY FIELD(ID,$field->value)" );
             foreach ( $results as $result ) {
                 $selected_users[ $result->ID ] = $result;
             }
@@ -38,18 +38,43 @@ class xf_user extends xf_field
         <div class="available_posts post_list">
         <?php foreach ( $available_users as $user ) : ?>
             <?php $class = ( isset( $selected_users[ $user->ID ] ) ) ? ' class="used"' : ''; ?>
-            <div rel="<?php echo (int) $user->ID; ?>"<?php echo $class; ?>><?php echo wp_kses_post( apply_filters( 'xf_user_display', esc_html( $user->user_login ), $user->ID, $field ) ); ?></div>
+            <div rel="<?php echo (int) $user->ID; ?>"<?php echo $class; ?>><?php echo wp_kses_post( apply_filters( 'xf_user_display', esc_html( $this->user_label( $user->ID ) ), $user->ID, $field ) ); ?></div>
         <?php endforeach; ?>
         </div>
 
         <div class="selected_posts post_list">
         <?php foreach ( $selected_users as $user ) : ?>
-            <div rel="<?php echo (int) $user->ID; ?>"><span class="remove"></span><?php echo wp_kses_post( apply_filters( 'xf_user_display', esc_html( $user->user_login ), $user->ID, $field ) ); ?></div>
+            <div rel="<?php echo (int) $user->ID; ?>"><span class="remove"></span><?php echo wp_kses_post( apply_filters( 'xf_user_display', esc_html( $this->user_label( $user->ID ) ), $user->ID, $field ) ); ?></div>
         <?php endforeach; ?>
         </div>
         <div class="clear"></div>
         <input type="hidden" name="<?php echo esc_attr( $field->input_name ); ?>" class="<?php echo esc_attr( $field->input_class ); ?>" value="<?php echo esc_attr( $field->value ); ?>" />
     <?php
+    }
+
+
+    /**
+     * Public label for a user. Login names are never shown to users who can't list users
+     * (by default display_name equals user_login, which would help brute-force attacks).
+     * @param int $user_id
+     * @return string
+     * @since 1.0.0
+     */
+    function user_label( $user_id ) {
+        $user = get_userdata( (int) $user_id );
+        if ( ! $user ) {
+            return '#' . (int) $user_id;
+        }
+
+        $name = trim( $user->first_name . ' ' . $user->last_name );
+        $name = ( '' !== $name ) ? $name : $user->display_name;
+
+        if ( ( '' === $name || $name === $user->user_login ) && ! current_user_can( 'list_users' ) ) {
+            /* translators: %d: user ID */
+            return sprintf( __( 'User #%d', 'x-fields' ), $user->ID );
+        }
+
+        return $name;
     }
 
 

@@ -5,6 +5,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-16
+
+### Security
+- Field groups and X-Fields Tools now require `manage_options` (filter `xf_manage_capability`); previously anyone with page capabilities (Editors) could create field groups.
+- Front-end form redirects are restricted to the same site (`wp_safe_redirect`), fixing an open redirect via protocol-relative `REQUEST_URI` (e.g. `//evil.example`). External confirmation URLs must be whitelisted with `allowed_redirect_hosts`.
+- Shortcodes submitted by anonymous visitors (field values and post content) are neutralized.
+- User field no longer exposes login names to users who can't list users.
+- Relationship field never shows titles of posts the current user can't read.
+- Select values are restricted to configured choices; True/False, Color and Date values are validated server-side.
+- Expired form sessions are purged (daily cron + on write), preventing unbounded table growth from public forms.
+
+### Fixed
+- Field option values were HTML-encoded again on every save (`&` → `&amp;amp;…`).
+
+### Tests
+- Smoke/security suite extended to 38 checks (roles, redirects, shortcodes, validation, sessions).
+
 ## [1.0.0] - 2026-11-16
 
 First release of X-Fields, forked from Custom Field Suite 2.6.7.
@@ -41,5 +58,6 @@ First release of X-Fields, forked from Custom Field Suite 2.6.7.
 - Double-encoded HTML entities in text/textarea values.
 - Tables are created with the site charset/collation (utf8mb4).
 
-[Unreleased]: https://github.com/giaesp/x-fields/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/giaesp/x-fields/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/giaesp/x-fields/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/giaesp/x-fields/releases/tag/v1.0.0

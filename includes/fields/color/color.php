@@ -31,6 +31,14 @@ class xf_color extends xf_field
     }
 
 
+    // Hex colors only (#rgb, #rrggbb, #rrggbbaa)
+    function pre_save( $value, $field = null ) {
+        $value = is_array( $value ) ? reset( $value ) : $value;
+        $value = is_scalar( $value ) ? trim( (string) $value ) : '';
+        return preg_match( '/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/', $value ) ? $value : '';
+    }
+
+
     function input_head( $field = null ) {
         wp_register_script( 'miniColors', XF_URL . '/includes/fields/color/jquery.miniColors.min.js' );
         wp_enqueue_script( 'miniColors' );
