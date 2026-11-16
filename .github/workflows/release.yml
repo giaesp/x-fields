@@ -24,3 +24,28 @@ jobs:
         with:
           files: x-fields-${{ github.ref_name }}.zip
           generate_release_notes: true
+
+  # Publish to WordPress.org. Lives here (not in a separate "on: release" workflow) because
+  # releases created with GITHUB_TOKEN don't trigger other workflows.
+  # Requires the repository secrets SVN_USERNAME and SVN_PASSWORD; skipped until they exist.
+  wporg:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      HAS_SVN: ${{ secrets.SVN_USERNAME != '' && secrets.SVN_PASSWORD != '' }}
+    steps:
+      - name: Skip (WordPress.org credentials not configured)
+        if: env.HAS_SVN != 'true'
+        run: echo "SVN_USERNAME / SVN_PASSWORD not set; skipping WordPress.org deploy."
+      - uses: actions/checkout@v4
+        if: env.HAS_SVN == 'true'
+      - name: Deploy plugin and assets to WordPress.org
+        if: env.HAS_SVN == 'true'
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: x-fields
+          ASSETS_DIR: .wordpress-org
