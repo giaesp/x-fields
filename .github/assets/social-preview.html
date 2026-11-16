@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 640px; overflow: hidden; }
+  body {
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background:
+      radial-gradient(900px 500px at 85% 20%, rgba(56, 132, 255, 0.28), transparent 60%),
+      radial-gradient(700px 500px at 0% 100%, rgba(0, 196, 180, 0.16), transparent 60%),
+      #0b1220;
+    color: #e8eefc;
+    position: relative;
+  }
+  /* subtle grid */
+  body::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: linear-gradient(90deg, #000 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+  }
+  .wrap { position: relative; display: flex; height: 100%; padding: 72px 72px; gap: 56px; align-items: center; }
+
+  /* Left */
+  .left { flex: 1 1 0; min-width: 0; }
+  .brand { display: flex; align-items: center; gap: 20px; margin-bottom: 28px; }
+  .logo {
+    width: 76px; height: 76px; border-radius: 20px;
+    background: linear-gradient(135deg, #3884ff 0%, #1a5fd6 55%, #00b8a9 130%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 12px 30px rgba(56,132,255,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+    font-weight: 800; font-size: 34px; letter-spacing: -1px; color: #fff;
+  }
+  .logo span { opacity: 0.7; }
+  h1 { font-size: 76px; font-weight: 800; letter-spacing: -2.5px; line-height: 1; }
+  h1 em { font-style: normal; color: #6ea8ff; }
+  .tagline { font-size: 29px; line-height: 1.32; color: #b9c6e4; font-weight: 500; max-width: 560px; margin-bottom: 36px; }
+  .tagline strong { color: #fff; font-weight: 700; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; max-width: 580px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 15px; border-radius: 999px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+    font-size: 18px; font-weight: 600; color: #dbe5fb;
+  }
+  .chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .foot { position: absolute; left: 72px; bottom: 34px; font-size: 18px; color: #7f8db0; font-weight: 500; letter-spacing: 0.2px; }
+  .foot b { color: #c8d4f0; font-weight: 600; }
+
+  /* Right: editor mock */
+  .card {
+    width: 470px; flex: 0 0 470px;
+    background: #ffffff; color: #1d2327;
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
+    transform: perspective(1400px) rotateY(-9deg) rotateX(3deg);
+  }
+  .bar { display: flex; align-items: center; gap: 8px; padding: 14px 18px; background: #f6f7f7; border-bottom: 1px solid #dcdcde; }
+  .bar i { width: 11px; height: 11px; border-radius: 50%; background: #dcdcde; display: inline-block; }
+  .bar span { margin-left: 10px; font-size: 14px; font-weight: 600; color: #50575e; }
+  .head, .row { display: grid; grid-template-columns: 22px 1.25fr 1fr 96px; gap: 12px; align-items: center; padding: 0 18px; }
+  .head { height: 34px; font-size: 11px; font-weight: 700; color: #8c8f94; letter-spacing: 0.6px; text-transform: uppercase; border-bottom: 1px solid #f0f0f1; }
+  .row { height: 54px; border-bottom: 1px solid #f0f0f1; }
+  .row.open { background: rgba(56,132,255,0.07); box-shadow: inset 3px 0 0 #2271b1; }
+  .grip { width: 12px; height: 16px; background-image: radial-gradient(#a7aaad 1.4px, transparent 1.6px); background-size: 6px 5.5px; }
+  .label { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  code { font: 12.5px "SF Mono", Menlo, monospace; background: #f6f7f7; color: #50575e; padding: 3px 7px; border-radius: 4px; justify-self: start; }
+  .type { justify-self: start; font-size: 12.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(34,113,177,0.1); color: #2271b1; }
+  .type.loop { background: #fcf0e3; color: #8a4d00; }
+  .child { background: #fcfcfc; }
+  .child .grip { margin-left: 4px; }
+  .child .label { padding-left: 22px; position: relative; font-weight: 600; color: #3c434a; }
+  .child .label::before { content: ""; position: absolute; left: 4px; top: 50%; width: 10px; height: 1.5px; background: #c3c4c7; }
+  .child .grip { opacity: 0.7; }
+  .foot-bar { display: flex; justify-content: flex-end; padding: 14px 18px; background: #f6f7f7; }
+  .btn { background: #2271b1; color: #fff; font-size: 14px; font-weight: 600; padding: 9px 16px; border-radius: 4px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="left">
+      <div class="brand">
+        <div class="logo">X<span>F</span></div>
+        <h1>X-<em>Fields</em></h1>
+      </div>
+      <p class="tagline"><strong>Simple, secure custom fields</strong> for WordPress — field groups, repeaters, relationships and front-end forms.</p>
+      <div class="chips">
+        <span class="chip"><i style="background:#22c55e"></i>Security hardened</span>
+        <span class="chip"><i style="background:#a78bfa"></i>PHP 7.4 – 8.4</span>
+        <span class="chip"><i style="background:#38bdf8"></i>Polylang ready</span>
+        <span class="chip"><i style="background:#fbbf24"></i>14 field types</span>
+        <span class="chip"><i style="background:#94a3b8"></i>GPL · Open source</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="bar"><i></i><i></i><i></i><span>Field group · Page</span></div>
+      <div class="head"><span></span><span>Label</span><span>Name</span><span>Type</span></div>
+      <div class="row"><span class="grip"></span><span class="label">Subtitle</span><code>subtitle</code><span class="type">Text</span></div>
+      <div class="row open"><span class="grip"></span><span class="label">Cover image</span><code>cover</code><span class="type">File Upload</span></div>
+      <div class="row"><span class="grip"></span><span class="label">Related pages</span><code>related</code><span class="type">Relationship</span></div>
+      <div class="row"><span class="grip"></span><span class="label">FAQ</span><code>faq</code><span class="type loop">Loop</span></div>
+      <div class="row child"><span class="grip"></span><span class="label">Question</span><code>question</code><span class="type">Text</span></div>
+      <div class="row child"><span class="grip"></span><span class="label">Answer</span><code>answer</code><span class="type">Wysiwyg</span></div>
+      <div class="foot-bar"><span class="btn">+ Add field</span></div>
+    </div>
+  </div>
+  <div class="foot"><b>github.com/giaesp/x-fields</b></div>
+</body>
+</html>
