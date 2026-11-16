@@ -1,3 +1,4 @@
+<?php defined( 'ABSPATH' ) || exit; ?>
 <div class="field">
     <div class="field_meta">
         <table class="widefat">
@@ -32,7 +33,7 @@
                                             <div class="tooltip_inner"><?php _e( 'The field label that editors will see.', 'cfs' ); ?></div>
                                         </div>
                                     </label>
-                                    <input type="text" name="cfs[fields][<?php echo $field->weight; ?>][label]" value="<?php echo empty( $field->id ) ? '' : esc_attr( $field->label ); ?>" />
+                                    <input type="text" name="cfs[fields][<?php echo esc_attr( $field->weight ); ?>][label]" value="<?php echo empty( $field->id ) ? '' : esc_attr( $field->label ); ?>" />
                                 </td>
                                 <td class="field_name">
                                     <label>
@@ -43,11 +44,11 @@
                                             </div>
                                         </div>
                                     </label>
-                                    <input type="text" name="cfs[fields][<?php echo $field->weight; ?>][name]" value="<?php echo empty( $field->id ) ? '' : esc_attr( $field->name ); ?>" />
+                                    <input type="text" name="cfs[fields][<?php echo esc_attr( $field->weight ); ?>][name]" value="<?php echo empty( $field->id ) ? '' : esc_attr( $field->name ); ?>" />
                                 </td>
                                 <td class="field_type">
                                     <label><?php _e( 'Field Type', 'cfs' ); ?></label>
-                                    <select name="cfs[fields][<?php echo $field->weight; ?>][type]">
+                                    <select name="cfs[fields][<?php echo esc_attr( $field->weight ); ?>][type]">
                                         <?php foreach ( CFS()->fields as $type ) : ?>
                                         <?php $selected = ($type->name == $field->type) ? ' selected' : ''; ?>
                                         <option value="<?php echo esc_attr( $type->name ); ?>"<?php echo $selected; ?>><?php echo esc_html( $type->label ); ?></option>
@@ -59,7 +60,7 @@
                     </td>
                 </tr>
 
-                <?php CFS()->fields[ $field->type ]->options_html( $field->weight, $field ); ?>
+                <?php if ( isset( CFS()->fields[ $field->type ] ) ) { CFS()->fields[ $field->type ]->options_html( $field->weight, $field ); } ?>
 
                 <tr class="field_notes">
                     <td class="label">
@@ -71,14 +72,14 @@
                         </label>
                     </td>
                     <td>
-                        <textarea name="cfs[fields][<?php echo $field->weight; ?>][notes]"><?php echo esc_textarea( $field->notes ); ?></textarea>
+                        <textarea name="cfs[fields][<?php echo esc_attr( $field->weight ); ?>][notes]"><?php echo esc_textarea( $field->notes ); ?></textarea>
                     </td>
                 </tr>
                 <tr class="field_actions">
                     <td class="label"></td>
                     <td style="vertical-align:middle">
-                        <input type="hidden" name="cfs[fields][<?php echo $field->weight; ?>][id]" class="field_id" value="<?php echo $field->id; ?>" />
-                        <input type="hidden" name="cfs[fields][<?php echo $field->weight; ?>][parent_id]" class="parent_id" value="<?php echo $field->parent_id; ?>" />
+                        <input type="hidden" name="cfs[fields][<?php echo esc_attr( $field->weight ); ?>][id]" class="field_id" value="<?php echo (int) $field->id; ?>" />
+                        <input type="hidden" name="cfs[fields][<?php echo esc_attr( $field->weight ); ?>][parent_id]" class="parent_id" value="<?php echo (int) $field->parent_id; ?>" />
                         <input type="button" value="<?php _e( 'Close', 'cfs' ); ?>" class="button-secondary cfs_edit_field" />
                         &nbsp; -<?php _e( 'or', 'cfs' ); ?>- &nbsp; <span class="cfs_delete_field"><?php _e( 'delete', 'cfs' ); ?></span>
                     </td>

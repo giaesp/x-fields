@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_session
 {
     public $session_id;
@@ -11,11 +13,12 @@ class cfs_session
      * Constructor
      */
     public function __construct() {
-        if ( isset( $_POST['cfs']['session_id'] ) && $this->is_valid( $_POST['cfs']['session_id'] ) ) {
+        if ( isset( $_POST['cfs']['session_id'] ) && is_string( $_POST['cfs']['session_id'] ) && $this->is_valid( $_POST['cfs']['session_id'] ) ) {
             $this->session_id = $_POST['cfs']['session_id'];
         }
         else {
-            $this->session_id = md5( uniqid() );
+            // Cryptographically secure, unpredictable ID (was md5( uniqid() ))
+            $this->session_id = bin2hex( random_bytes( 16 ) );
         }
     }
 
@@ -27,11 +30,20 @@ class cfs_session
     public function get() {
         global $wpdb;
 
-        $now = time();
         $output = [];
-        $session_data = $wpdb->get_var( "SELECT data FROM {$wpdb->prefix}cfs_sessions WHERE id = '$this->session_id' AND expires > '$now'" );
-        if ( ! empty( $session_data ) ) {
-            $output = unserialize( $session_data );
+        $session_data = $wpdb->get_var( $wpdb->prepare(
+            "SELECT data FROM {$wpdb->prefix}cfs_sessions WHERE id = %s AND expires > %d",
+            $this->session_id, time()
+        ) );
+
+        if ( ! empty( $session_data ) && is_serialized( $session_data ) ) {
+            $output = @unserialize( $session_data, [ 'allowed_classes' => false ] );
+            $output = is_array( $output ) ? $output : [];
+        }
+
+        // Sessions are bound to the user that created them
+        if ( ! isset( $output['user_id'] ) || (int) $output['user_id'] !== get_current_user_id() ) {
+            return [];
         }
 
         return $output;
@@ -45,7 +57,10 @@ class cfs_session
     public function set( $session_data ) {
         global $wpdb;
 
-        $wpdb->query( "DELETE FROM {$wpdb->prefix}cfs_sessions WHERE id = '$this->session_id' LIMIT 1" );
+        $session_data = (array) $session_data;
+        $session_data['user_id'] = get_current_user_id();
+
+        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}cfs_sessions WHERE id = %s LIMIT 1", $this->session_id ) );
 
         $wpdb->query(
             $wpdb->prepare(
@@ -62,8 +77,7 @@ class cfs_session
     public function cleanup() {
         global $wpdb;
 
-        $now = time();
-        $wpdb->query( "DELETE FROM {$wpdb->prefix}cfs_sessions WHERE expires <= '$now'" );
+        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}cfs_sessions WHERE CAST(expires AS UNSIGNED) <= %d", time() ) );
     }
 
 
@@ -73,6 +87,6 @@ class cfs_session
      * @return boolean
      */
     public function is_valid( $session_id ) {
-        return preg_match( "/^([a-f0-9]{32})$/", $session_id ) ? true : false;
+        return (bool) preg_match( '/^[a-f0-9]{32}$/', (string) $session_id );
     }
 }

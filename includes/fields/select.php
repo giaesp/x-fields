@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_select extends cfs_field
 {
     public $select2_inserted;
@@ -33,10 +35,10 @@ class cfs_select extends cfs_field
         }
     ?>
         <select name="<?php echo esc_attr( $field->input_name ); ?>" class="<?php echo esc_attr( $field->input_class ); ?>"<?php echo $multiple; ?>>
-        <?php foreach ( $field->options['choices'] as $val => $label ) : ?>
+        <?php foreach ( ( isset( $field->options['choices'] ) ? (array) $field->options['choices'] : [] ) as $val => $label ) : ?>
             <?php $val = ( '{empty}' == $val ) ? '' : $val; ?>
             <?php $selected = in_array( $val, (array) $field->value ) ? ' selected' : ''; ?>
-            <option value="<?php echo esc_attr( $val ); ?>"<?php echo $selected; ?>><?php echo esc_attr( $label ); ?></option>
+            <option value="<?php echo esc_attr( $val ); ?>"<?php echo $selected; ?>><?php echo esc_html( $label ); ?></option>
         <?php endforeach; ?>
         </select>
     <?php
@@ -49,8 +51,8 @@ class cfs_select extends cfs_field
             return;
         }
 
-        echo '<script src="' . CFS_URL . '/assets/js/select2/select2.min.js"></script>';
-        echo '<link rel="stylesheet" type="text/css" href="' . CFS_URL . '/assets/js/select2/select2.css" />';
+        echo '<script src="' . esc_url( CFS_URL . '/assets/js/select2/select2.min.js' ) . '"></script>';
+        echo '<link rel="stylesheet" type="text/css" href="' . esc_url( CFS_URL . '/assets/js/select2/select2.css' ) . '" />';
 
         // Don't insert select2 code twice
         $this->select2_inserted = true;
@@ -97,7 +99,7 @@ class cfs_select extends cfs_field
             $field->options['choices'] = '';
         }
     ?>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Choices', 'cfs' ); ?></label>
                 <p class="description"><?php _e( 'Enter one choice per line', 'cfs' ); ?></p>
@@ -112,7 +114,7 @@ class cfs_select extends cfs_field
                 ?>
             </td>
         </tr>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Multi-select?', 'cfs' ); ?></label>
             </td>
@@ -128,7 +130,7 @@ class cfs_select extends cfs_field
                 ?>
             </td>
         </tr>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e('Select2', 'cfs'); ?></label>
             </td>
@@ -144,7 +146,7 @@ class cfs_select extends cfs_field
                 ?>
             </td>
         </tr>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Validation', 'cfs' ); ?></label>
             </td>
@@ -166,11 +168,14 @@ class cfs_select extends cfs_field
 
     function format_value_for_api( $value, $field = null ) {
         $value_array = [];
-        $choices = $field->options['choices'];
+        $choices = isset( $field->options['choices'] ) ? (array) $field->options['choices'] : [];
 
         // Return an associative array (value, label)
         if ( is_array( $value ) ) {
             foreach ( $value as $val ) {
+                if ( ! is_scalar( $val ) ) {
+                    continue;
+                }
                 $value_array[ $val ] = isset( $choices[ $val ] ) ? $choices[ $val ] : $val;
             }
         }
@@ -186,7 +191,19 @@ class cfs_select extends cfs_field
 
     function pre_save_field( $field ) {
         $new_choices = [];
-        $choices = trim( $field['options']['choices'] );
+
+        // Already parsed (e.g. saved programmatically or re-saved): keep scalar pairs only
+        if ( isset( $field['options']['choices'] ) && is_array( $field['options']['choices'] ) ) {
+            foreach ( $field['options']['choices'] as $k => $v ) {
+                if ( is_scalar( $v ) ) {
+                    $new_choices[ $k ] = (string) $v;
+                }
+            }
+            $field['options']['choices'] = $new_choices;
+            return $field;
+        }
+
+        $choices = isset( $field['options']['choices'] ) && is_string( $field['options']['choices'] ) ? trim( $field['options']['choices'] ) : '';
 
         if ( ! empty( $choices ) ) {
             $choices = str_replace( "\r\n", "\n", $choices );

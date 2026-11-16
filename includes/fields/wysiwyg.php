@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_wysiwyg extends cfs_field
 {
 
@@ -19,7 +21,7 @@ class cfs_wysiwyg extends cfs_field
                 <?php do_action( 'media_buttons' ); ?>
             </div>
             <div class="wp-editor-container">
-                <textarea name="<?php echo esc_attr( $field->input_name ); ?>" class="wp-editor-area <?php echo esc_attr( $field->input_class ); ?>" style="height:300px"><?php echo $field->value; ?></textarea>
+                <textarea name="<?php echo esc_attr( $field->input_name ); ?>" class="wp-editor-area <?php echo esc_attr( $field->input_class ); ?>" style="height:300px"><?php echo is_scalar( $field->value ) ? $field->value : ''; ?></textarea>
             </div>
         </div>
     <?php
@@ -28,7 +30,7 @@ class cfs_wysiwyg extends cfs_field
 
     function options_html( $key, $field ) {
     ?>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Formatting', 'cfs' ); ?></label>
             </td>
@@ -49,7 +51,7 @@ class cfs_wysiwyg extends cfs_field
                 ?>
             </td>
         </tr>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Validation', 'cfs' ); ?></label>
             </td>
@@ -72,7 +74,7 @@ class cfs_wysiwyg extends cfs_field
     function input_head( $field = null ) {
 
         // make sure the user has WYSIWYG enabled
-        if ( 'true' == get_user_meta( get_current_user_id(), 'rich_editing', true ) ) {
+        if ( user_can_richedit() ) {
             if ( ! is_admin() ) {
     ?>
         <div class="hidden"><?php wp_editor( '', 'cfswysi' ); ?></div>
@@ -178,20 +180,14 @@ class cfs_wysiwyg extends cfs_field
 
 
     function mce_external_plugins( $plugins ) {
-        if ( version_compare( get_bloginfo( 'version' ), '3.9', '>=' ) ) {
-            $plugins['code'] = CFS_URL . '/assets/js/tinymce/code.min.js';
-        }
+        $plugins['code'] = CFS_URL . '/assets/js/tinymce/code.min.js';
         return $plugins;
     }
 
 
+    // format_for_editor() escapes the value (htmlspecialchars), so html() can echo it
     function format_value_for_input( $value, $field = null ) {
-        if ( version_compare( get_bloginfo( 'version' ), '4.3', '>=' ) ) {
-            return format_for_editor( $value );
-        }
-        else {
-            return wp_richedit_pre( $value );
-        }
+        return format_for_editor( is_scalar( $value ) ? (string) $value : '' );
     }
 
 

@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 global $wpdb;
 
 // Post types
@@ -37,7 +39,7 @@ if ( ! isset( $extras['context'] ) ) {
             </label>
         </td>
         <td style="vertical-align:top">
-            <input type="text" name="cfs[extras][order]" value="<?php echo $extras['order']; ?>" style="width:80px" />
+            <input type="text" name="cfs[extras][order]" value="<?php echo (int) $extras['order']; ?>" style="width:80px" />
         </td>
     </tr>
     <tr>

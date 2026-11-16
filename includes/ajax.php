@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_ajax
 {
     /**
@@ -10,16 +12,18 @@ class cfs_ajax
     public function search_posts( $options ) {
         global $wpdb;
 
+        $q = isset( $options['q'] ) && is_string( $options['q'] ) ? wp_unslash( $options['q'] ) : '';
+
         $sql = $wpdb->prepare("
         SELECT ID, post_type, post_title, post_parent
         FROM $wpdb->posts
         WHERE
             post_status IN ('publish', 'private') AND
             post_type NOT IN ('cfs', 'attachment', 'revision', 'nav_menu_item') AND
-            post_title LIKE '%s'
+            post_title LIKE %s
         ORDER BY post_type, post_title
         LIMIT 10",
-        '%'.$options['q'].'%' );
+        '%' . $wpdb->esc_like( $q ) . '%' );
 
         $results = $wpdb->get_results( $sql );
 
@@ -40,7 +44,7 @@ class cfs_ajax
                 'text' => "($result->post_type) $parent $result->post_title (#$result->ID)"
             ];
         }
-        return json_encode( $output );
+        return wp_json_encode( $output );
     }
 
 
@@ -64,8 +68,8 @@ class cfs_ajax
         $wpdb->query( $sql );
 
         // Drop tables
-        $wpdb->query( "DROP TABLE {$wpdb->prefix}cfs_values" );
-        $wpdb->query( "DROP TABLE {$wpdb->prefix}cfs_sessions" );
+        $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}cfs_values" );
+        $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}cfs_sessions" );
         delete_option( 'cfs_version' );
         delete_option( 'cfs_next_field_id' );
     }

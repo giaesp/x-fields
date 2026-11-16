@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_init
 {
 
@@ -139,7 +141,7 @@ class cfs_init
     function show_credits() {
         $screen = get_current_screen();
 
-        if ( 'edit' == $screen->base && 'cfs' == $screen->post_type ) {
+        if ( is_object( $screen ) && 'edit' == $screen->base && 'cfs' == $screen->post_type ) {
             include( CFS_DIR . '/templates/credits.php' );
         }
     }
@@ -169,8 +171,11 @@ class cfs_init
      * @param array $metabox
      */
     function meta_box( $post, $metabox ) {
-        $box = $metabox['args']['box'];
-        include( CFS_DIR . "/templates/meta_box_$box.php" );
+        $box = isset( $metabox['args']['box'] ) ? $metabox['args']['box'] : '';
+
+        if ( in_array( $box, [ 'fields', 'rules', 'extras', 'input' ], true ) ) {
+            include( CFS_DIR . "/templates/meta_box_$box.php" );
+        }
     }
 
 
@@ -190,7 +195,7 @@ class cfs_init
             return;
         }
 
-        if ( ! isset( $_POST['cfs']['save'] ) ) {
+        if ( ! isset( $_POST['cfs']['save'] ) || ! is_string( $_POST['cfs']['save'] ) ) {
             return;
         }
 
@@ -198,10 +203,19 @@ class cfs_init
             return;
         }
 
+        // Only field groups are handled here
+        if ( 'cfs' !== get_post_type( $post_id ) ) {
+            return;
+        }
+
+        if ( ! current_user_can( 'edit_post', $post_id ) ) {
+            return;
+        }
+
         if ( wp_verify_nonce( $_POST['cfs']['save'], 'cfs_save_fields' ) ) {
-            $fields = isset( $_POST['cfs']['fields'] ) ? $_POST['cfs']['fields'] : [];
-            $rules = isset( $_POST['cfs']['rules'] ) ? $_POST['cfs']['rules'] : [];
-            $extras = isset( $_POST['cfs']['extras'] ) ? $_POST['cfs']['extras'] : [];
+            $fields = isset( $_POST['cfs']['fields'] ) && is_array( $_POST['cfs']['fields'] ) ? $_POST['cfs']['fields'] : [];
+            $rules = isset( $_POST['cfs']['rules'] ) && is_array( $_POST['cfs']['rules'] ) ? $_POST['cfs']['rules'] : [];
+            $extras = isset( $_POST['cfs']['extras'] ) && is_array( $_POST['cfs']['extras'] ) ? $_POST['cfs']['extras'] : [];
 
             CFS()->field_group->save( [
                 'post_id'   => $post_id,
@@ -221,8 +235,7 @@ class cfs_init
         global $wpdb;
 
         if ( 'cfs' != get_post_type( $post_id ) ) {
-            $post_id = (int) $post_id;
-            $wpdb->query( "DELETE FROM {$wpdb->prefix}cfs_values WHERE post_id = $post_id" );
+            $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}cfs_values WHERE post_id = %d", $post_id ) );
         }
 
         return true;
@@ -241,28 +254,30 @@ class cfs_init
             exit;
         }
 
-        $ajax_method = isset( $_POST['action_type'] ) ? $_POST['action_type'] : false;
+        $ajax_method = isset( $_POST['action_type'] ) && is_string( $_POST['action_type'] ) ? $_POST['action_type'] : false;
 
         if ( $ajax_method && is_admin() ) {
-            include( CFS_DIR . '/includes/ajax.php' );
+            include_once( CFS_DIR . '/includes/ajax.php' );
             $ajax = new cfs_ajax();
 
             if ( 'import' == $ajax_method ) {
+                $import_code = isset( $_POST['import_code'] ) && is_string( $_POST['import_code'] ) ? wp_unslash( $_POST['import_code'] ) : '';
                 $options = [
-                    'import_code' => json_decode( stripslashes( $_POST['import_code'] ), true ),
+                    'import_code' => json_decode( $import_code, true ),
                 ];
                 echo CFS()->field_group->import( $options );
             }
-            elseif ('export' == $ajax_method) {
-                echo json_encode( CFS()->field_group->export( $_POST ) );
+            elseif ( 'export' == $ajax_method ) {
+                echo wp_json_encode( CFS()->field_group->export( $_POST ) );
             }
-            elseif ('reset' == $ajax_method) {
+            elseif ( 'reset' == $ajax_method ) {
                 $ajax->reset();
-                deactivate_plugins( plugin_basename( __FILE__ ) );
-                echo admin_url( 'plugins.php' );
+                // __FILE__ pointed to includes/init.php, so the plugin was never deactivated
+                deactivate_plugins( plugin_basename( CFS_DIR . '/cfs.php' ) );
+                echo esc_url_raw( admin_url( 'plugins.php' ) );
             }
-            elseif ( method_exists( $ajax, $ajax_method ) ) {
-                echo $ajax->$ajax_method( $_POST );
+            elseif ( 'search_posts' == $ajax_method ) {
+                echo $ajax->search_posts( $_POST );
             }
         }
 
@@ -306,10 +321,12 @@ class cfs_init
                 $rules = $field_groups[ $post_id ]['rules'];
             }
 
-            foreach ( $rules as $criteria => $data ) {
-                $label = $labels[ $criteria ];
-                $values = $data['values'];
-                $operator = ( '==' == $data['operator'] ) ? '=' : '!=';
+            foreach ( (array) $rules as $criteria => $data ) {
+                $label = isset( $labels[ $criteria ] ) ? $labels[ $criteria ] : $criteria;
+                $values = isset( $data['values'] ) ? (array) $data['values'] : [];
+                $op = isset( $data['operator'] ) ? $data['operator'] : '==';
+                $op = is_array( $op ) ? reset( $op ) : $op;
+                $operator = ( '==' == $op ) ? '=' : '!=';
 
                 // Get post titles
                 if ( 'post_ids' == $criteria ) {
@@ -320,7 +337,7 @@ class cfs_init
                     $values = $temp;
                 }
 
-                echo "<div><strong>$label</strong> " . $operator . ' ' . esc_html( implode( ', ', $values ) ) . '</div>';
+                echo '<div><strong>' . esc_html( $label ) . '</strong> ' . $operator . ' ' . esc_html( implode( ', ', $values ) ) . '</div>';
             }
         }
     }

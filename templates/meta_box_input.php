@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 CFS()->form->load_assets();
 
 echo CFS()->form( [

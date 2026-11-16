@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_textarea extends cfs_field
 {
 
@@ -11,14 +13,14 @@ class cfs_textarea extends cfs_field
 
     function html( $field ) {
     ?>
-        <textarea name="<?php echo esc_attr( $field->input_name ); ?>" class="<?php echo esc_attr( $field->input_class ); ?>" rows="4"><?php echo $field->value; ?></textarea>
+        <textarea name="<?php echo esc_attr( $field->input_name ); ?>" class="<?php echo esc_attr( $field->input_class ); ?>" rows="4"><?php echo esc_textarea( is_scalar( $field->value ) ? (string) $field->value : '' ); ?></textarea>
     <?php
     }
 
 
     function options_html($key, $field) {
     ?>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Default Value', 'cfs' ); ?></label>
             </td>
@@ -32,7 +34,7 @@ class cfs_textarea extends cfs_field
                 ?>
             </td>
         </tr>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Formatting', 'cfs' ); ?></label>
             </td>
@@ -53,7 +55,7 @@ class cfs_textarea extends cfs_field
                 ?>
             </td>
         </tr>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Validation', 'cfs' ); ?></label>
             </td>
@@ -73,13 +75,14 @@ class cfs_textarea extends cfs_field
     }
 
 
+    // Escaping happens in html() via esc_textarea()
     function format_value_for_input( $value, $field = null ) {
-        return htmlspecialchars( $value, ENT_QUOTES );
+        return is_scalar( $value ) ? (string) $value : '';
     }
 
 
     function format_value_for_api( $value, $field = null ) {
         $formatting = $this->get_option( $field, 'formatting', 'none' );
-        return ( 'none' == $formatting ) ? $value : nl2br( $value );
+        return ( 'none' == $formatting ) ? $value : nl2br( (string) $value );
     }
 }

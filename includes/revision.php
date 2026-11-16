@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 if ( defined( 'CFS_REVISIONS' ) && CFS_REVISIONS ) {
     new cfs_revision();
 }
@@ -23,7 +25,7 @@ class cfs_revision
      * @see wp-includes/revision.php - wp_save_post_revision()
      */
     function _wp_post_revision_fields( $fields ) {
-        $fields[ 'cfs_postmeta' ] = __( 'Post Meta' );
+        $fields[ 'cfs_postmeta' ] = __( 'Post Meta', 'cfs' );
         return $fields;
     }
 
@@ -37,22 +39,23 @@ class cfs_revision
         $fields = CFS()->get( false, $post->ID );
         $field_info = CFS()->get_field_info( false, $post->ID );
 
-        foreach ( $fields as $field_name => $field_data ) {
+        foreach ( (array) $fields as $field_name => $field_data ) {
             $output .= '[' . $field_name . "]\n";
 
             if ( is_array( $field_data ) ) {
-                $props = $field_info[ $field_name ];
+                $props = isset( $field_info[ $field_name ] ) ? $field_info[ $field_name ] : [ 'type' => '' ];
                 if ( 'relationship' == $props['type'] ) {
                     $values = [];
                     if ( ! empty( $field_data ) ) {
                         foreach ( $field_data as $item_id ) {
-                            $values[] = get_post( $item_id )->post_title;
+                            $item = get_post( $item_id );
+                            $values[] = $item ? $item->post_title : '#' . (int) $item_id;
                         }
                     }
-                    $output .= json_encode( $values ) . "\n";
+                    $output .= wp_json_encode( $values ) . "\n";
                 }
                 else {
-                    $output .= json_encode( $field_data ) . "\n";
+                    $output .= wp_json_encode( $field_data ) . "\n";
                 }
             }
             else {
@@ -113,7 +116,6 @@ class cfs_revision
     function wp_delete_post_revision( $revision_id ) {
         global $wpdb;
 
-        $revision_id = (int) $revision_id;
-        $wpdb->query( "DELETE FROM {$wpdb->prefix}cfs_values WHERE post_id = $revision_id" );
+        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}cfs_values WHERE post_id = %d", $revision_id ) );
     }
 }

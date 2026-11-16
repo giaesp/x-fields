@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_upgrade
 {
 
@@ -9,7 +11,7 @@ class cfs_upgrade
 
     public function __construct() {
         $this->version = CFS_VERSION;
-        $this->last_version = get_option('cfs_version');
+        $this->last_version = (string) get_option( 'cfs_version', '' );
 
         if ( version_compare( $this->last_version, $this->version, '<' ) ) {
             if ( version_compare( $this->last_version, '1.0.0', '<' ) ) {
@@ -27,6 +29,8 @@ class cfs_upgrade
     private function clean_install() {
         global $wpdb;
 
+        $charset_collate = $wpdb->get_charset_collate();
+
         $sql = "
         CREATE TABLE {$wpdb->prefix}cfs_values (
             id INT unsigned not null auto_increment,
@@ -41,7 +45,7 @@ class cfs_upgrade
             PRIMARY KEY (id),
             INDEX field_id_idx (field_id),
             INDEX post_id_idx (post_id)
-        ) DEFAULT CHARSET=utf8";
+        ) $charset_collate";
         dbDelta( $sql );
 
         $sql = "
@@ -50,7 +54,7 @@ class cfs_upgrade
             data TEXT,
             expires VARCHAR(10),
             PRIMARY KEY (id)
-        ) DEFAULT CHARSET=utf8";
+        ) $charset_collate";
         dbDelta( $sql );
 
         // Set the field counter

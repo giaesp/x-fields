@@ -1,6 +1,11 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 global $post, $wpdb, $wp_roles;
+
+$user_roles = [];
+$term_ids = [];
 
 $equals_text = __( 'equals', 'cfs' );
 $not_equals_text = __( 'is not', 'cfs' );
@@ -17,9 +22,11 @@ $rule_types = [
 ];
 
 foreach ( $rule_types as $type ) {
-    if ( ! isset( $rules[ $type ] ) ) {
+    if ( ! isset( $rules[ $type ] ) || ! is_array( $rules[ $type ] ) ) {
         $rules[ $type ] = [ 'operator' => [ '==' ], 'values' => [] ];
     }
+    $rules[ $type ]['values'] = isset( $rules[ $type ]['values'] ) ? (array) $rules[ $type ]['values'] : [];
+    $rules[ $type ]['operator'] = isset( $rules[ $type ]['operator'] ) ? $rules[ $type ]['operator'] : '==';
 }
 
 // Post types
@@ -37,7 +44,7 @@ if ( current_theme_supports( 'post-formats' ) ) {
     $post_formats = [ 'standard' => 'Standard' ];
     $post_formats_slugs = get_theme_support( 'post-formats' );
 
-    if ( is_array( $post_formats_slugs[0] ) ) {
+    if ( isset( $post_formats_slugs[0] ) && is_array( $post_formats_slugs[0] ) ) {
         foreach ( $post_formats_slugs[0] as $post_format ) {
             $post_formats[ $post_format ] = get_post_format_string( $post_format );
         }
@@ -45,7 +52,7 @@ if ( current_theme_supports( 'post-formats' ) ) {
 }
 
 // User roles
-foreach ( $wp_roles->roles as $key => $role ) {
+foreach ( wp_roles()->roles as $key => $role ) {
     $user_roles[ $key ] = $key;
 }
 
@@ -53,8 +60,10 @@ foreach ( $wp_roles->roles as $key => $role ) {
 $post_ids = [];
 $json_posts = [];
 
-if ( ! empty( $rules['post_ids']['values'] ) ) {
-    $post_in = implode( ',', $rules['post_ids']['values'] );
+$post_in = array_filter( array_map( 'absint', $rules['post_ids']['values'] ) );
+
+if ( ! empty( $post_in ) ) {
+    $post_in = implode( ',', $post_in );
 
     $sql = "
     SELECT ID, post_type, post_title, post_parent
@@ -75,7 +84,7 @@ if ( ! empty( $rules['post_ids']['values'] ) ) {
         }
 
         $json_posts[] = [ 'id' => $result->ID, 'text' => "($result->post_type) $parent $result->post_title (#$result->ID)" ];
-        $post_ids[] = $result->ID;
+        $post_ids[] = (int) $result->ID;
     }
 }
 
@@ -104,15 +113,16 @@ foreach ( $templates as $template_name => $filename ) {
 <script>
 (function($) {
     $(function() {
-        var cfs_nonce = '<?php echo wp_create_nonce( 'cfs_admin_nonce' ); ?>';
+        var cfs_nonce = <?php echo wp_json_encode( wp_create_nonce( 'cfs_admin_nonce' ) ); ?>;
+        var cfs_placeholder = <?php echo wp_json_encode( __( 'Leave blank to skip this rule', 'cfs' ) ); ?>;
 
         $('.select2').select2({
-            placeholder: '<?php _e( 'Leave blank to skip this rule', 'cfs' ); ?>'
+            placeholder: cfs_placeholder
         });
 
         $('.select2-ajax').select2({
             multiple: true,
-            placeholder: '<?php _e( 'Leave blank to skip this rule', 'cfs' ); ?>',
+            placeholder: cfs_placeholder,
             minimumInputLength: 2,
             ajax: {
                 url: ajaxurl,
@@ -132,7 +142,7 @@ foreach ( $templates as $template_name => $filename ) {
             },
             initSelection: function(element, callback) {
                 var data = [];
-                var post_ids = <?php echo json_encode( $json_posts ); ?>;
+                var post_ids = <?php echo wp_json_encode( $json_posts, JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
                 $(post_ids).each(function(idx, val) {
                     data.push({ id: val.id, text: val.text });
                 });

@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_true_false extends cfs_field
 {
 
@@ -12,11 +14,11 @@ class cfs_true_false extends cfs_field
 
 
     function html( $field ) {
-        $field->value = ( 0 < (int) $field->value ) ? 1 : 0;
+        $field->value = ( is_scalar( $field->value ) && 0 < (int) $field->value ) ? 1 : 0;
     ?>
 		<label>
 			<input type="checkbox" <?php echo $field->value ? ' checked' : ''; ?>>
-			<span><?php echo $field->options['message']; ?></span>
+			<span><?php echo isset( $field->options['message'] ) ? esc_html( $field->options['message'] ) : ''; ?></span>
 			<input type="hidden" name="<?php echo esc_attr( $field->input_name ); ?>" class="<?php echo esc_attr( $field->input_class ); ?>" value="<?php echo esc_attr( $field->value ); ?>" />
 		</label>
     <?php
@@ -27,7 +29,7 @@ class cfs_true_false extends cfs_field
 
     function options_html( $key, $field ) {
     ?>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Message', 'cfs' ); ?></label>
                 <p class="description"><?php _e( 'The text beside the checkbox', 'cfs' ); ?></p>
@@ -42,7 +44,7 @@ class cfs_true_false extends cfs_field
                 ?>
             </td>
         </tr>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Validation', 'cfs' ); ?></label>
             </td>
@@ -96,6 +98,6 @@ class cfs_true_false extends cfs_field
 
 
     function format_value_for_api( $value, $field = null ) {
-        return ( 0 < (int) $value ) ? 1 : 0;
+        return ( is_scalar( $value ) && 0 < (int) $value ) ? 1 : 0;
     }
 }

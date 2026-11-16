@@ -1,11 +1,12 @@
-<input type="hidden" name="cfs[save]" value="<?php echo wp_create_nonce('cfs_save_fields'); ?>" />
+<?php defined( 'ABSPATH' ) || exit; ?>
+<input type="hidden" name="cfs[save]" value="<?php echo esc_attr( wp_create_nonce( 'cfs_save_fields' ) ); ?>" />
 
 <ul class="fields">
 <?php
 
 global $post;
 
-$results = CFS()->api->get_input_fields( [ 'group_id' => $post->ID ] );
+$results = CFS()->api->get_input_fields( [ 'group_id' => $post->ID, 'post_id_values' => 0 ] );
 
 /*---------------------------------------------------------------------------------------------
     Create <ul> based on field structure

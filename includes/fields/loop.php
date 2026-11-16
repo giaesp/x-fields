@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_loop extends cfs_field
 {
     public $values;
@@ -19,7 +21,7 @@ class cfs_loop extends cfs_field
     function html( $field ) {
         global $post;
 
-        $this->values = CFS()->api->get_fields( $post->ID, [ 'format' => 'input' ] );
+        $this->values = empty( $post->ID ) ? [] : CFS()->api->get_fields( $post->ID, [ 'format' => 'input' ] );
         $this->recursive_clone( $field->group_id, $field->id );
         $this->recursive_html( $field->group_id, $field->id );
     }
@@ -32,7 +34,7 @@ class cfs_loop extends cfs_field
     */
     function options_html( $key, $field ) {
     ?>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Row Display', 'cfs' ); ?></label>
             </td>
@@ -48,7 +50,7 @@ class cfs_loop extends cfs_field
                 ?>
             </td>
         </tr>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Row Label', 'cfs' ); ?></label>
             </td>
@@ -62,7 +64,7 @@ class cfs_loop extends cfs_field
                 ?>
             </td>
         </tr>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Button Label', 'cfs' ); ?></label>
             </td>
@@ -77,13 +79,13 @@ class cfs_loop extends cfs_field
             </td>
         </tr>
 
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Limits', 'cfs' ); ?></label>
             </td>
             <td>
-                <input type="text" name="cfs[fields][<?php echo $key; ?>][options][limit_min]" value="<?php echo $this->get_option( $field, 'limit_min' ); ?>" placeholder="min" style="width:60px" />
-                <input type="text" name="cfs[fields][<?php echo $key; ?>][options][limit_max]" value="<?php echo $this->get_option( $field, 'limit_max' ); ?>" placeholder="max" style="width:60px" />
+                <input type="text" name="cfs[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />
+                <input type="text" name="cfs[fields][<?php echo esc_attr( $key ); ?>][options][limit_max]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_max' ) ); ?>" placeholder="max" style="width:60px" />
             </td>
         </tr>
 
@@ -110,8 +112,10 @@ class cfs_loop extends cfs_field
             'parent_id' => $field_id
         ] );
 
+        $loop_field_obj = isset( $loop_field[ $field_id ] ) ? $loop_field[ $field_id ] : null;
+
         $row_label = $this->dynamic_label(
-            $this->get_option( $loop_field[ $field_id ], 'row_label', __( 'Loop Row', 'cfs' ) )
+            $this->get_option( $loop_field_obj, 'row_label', __( 'Loop Row', 'cfs' ) )
         );
 
         ob_start();
@@ -121,7 +125,7 @@ class cfs_loop extends cfs_field
                 <a class="cfs_delete_field" href="javascript:;"></a>
                 <a class="cfs_toggle_field" href="javascript:;"></a>
                 <a class="cfs_insert_field" href="javascript:;"></a>
-                <span class="label"><?php echo esc_attr( $row_label ); ?></span>
+                <span class="label"><?php echo esc_html( $row_label ); ?></span>
             </div>
             <div class="cfs_loop_body open">
             <?php foreach ( $results as $field ) : ?>
@@ -137,7 +141,7 @@ class cfs_loop extends cfs_field
                     $loop_field_ids[] = $field->id;
                 ?>
                     <div class="table_footer">
-                        <input type="button" class="button-primary cfs_add_field" value="<?php echo esc_attr( $this->get_option( $field, 'button_label', __( 'Add Row', 'cfs' ) ) ); ?>" data-loop-tag="[clone][<?php echo $field->id; ?>]" data-rows="0" />
+                        <input type="button" class="button-primary cfs_add_field" value="<?php echo esc_attr( $this->get_option( $field, 'button_label', __( 'Add Row', 'cfs' ) ) ); ?>" data-loop-tag="[clone][<?php echo (int) $field->id; ?>]" data-rows="0" />
                     </div>
                 <?php else : ?>
                 <?php
@@ -159,7 +163,7 @@ class cfs_loop extends cfs_field
     ?>
 
         <script>
-        CFS.loop_buffer[<?php echo $field_id; ?>] = <?php echo json_encode( $buffer ); ?>;
+        CFS.loop_buffer[<?php echo (int) $field_id; ?>] = <?php echo wp_json_encode( $buffer ); ?>;
         </script>
 
     <?php
@@ -188,20 +192,30 @@ class cfs_loop extends cfs_field
         ] );
 
         // Dynamically build the $values array
+        // (previously done with eval(), which allowed code execution through crafted row keys)
+        $field_id = (int) $field_id;
         $parent_tag = empty( $parent_tag ) ? "[$field_id]" : $parent_tag;
-        eval( "\$values = isset(\$this->values{$parent_tag} ) ? \$this->values{$parent_tag} : false;" );
+        $values = $this->get_nested_value( $this->values, $parent_tag );
 
         // Row options
-        $row_display = $this->get_option( $loop_field[ $field_id ], 'row_display', 0 );
-        $row_label = $this->get_option( $loop_field[ $field_id ], 'row_label', __( 'Loop Row', 'cfs' ) );
-        $button_label = $this->get_option( $loop_field[ $field_id ], 'button_label', __( 'Add Row', 'cfs' ) );
+        $loop_field_obj = isset( $loop_field[ $field_id ] ) ? $loop_field[ $field_id ] : null;
+        $row_display = $this->get_option( $loop_field_obj, 'row_display', 0 );
+        $row_label = $this->get_option( $loop_field_obj, 'row_label', __( 'Loop Row', 'cfs' ) );
+        $button_label = $this->get_option( $loop_field_obj, 'button_label', __( 'Add Row', 'cfs' ) );
         $css_class = ( 0 < (int) $row_display ) ? ' open' : '';
 
         // Do the dirty work
         $row_offset = -1;
 
-        if ( $values ) :
+        if ( is_array( $values ) && $values ) :
             foreach ( $values as $i => $value ) :
+
+                // Row indexes must be integers
+                if ( ! is_int( $i ) && ! ctype_digit( (string) $i ) ) {
+                    continue;
+                }
+                $i = (int) $i;
+
                 $row_offset = max( $i, $row_offset );
     ?>
         <div class="loop_wrapper">
@@ -209,7 +223,7 @@ class cfs_loop extends cfs_field
                 <a class="cfs_delete_field" href="javascript:;"></a>
                 <a class="cfs_toggle_field" href="javascript:;"></a>
                 <a class="cfs_insert_field" href="javascript:;"></a>
-                <span class="label"><?php echo esc_attr( $this->dynamic_label( $row_label, $results, $values[ $i ] ) ); ?>&nbsp;</span>
+                <span class="label"><?php echo esc_html( $this->dynamic_label( $row_label, $results, $values[ $i ] ) ); ?>&nbsp;</span>
             </div>
             <div class="cfs_loop_body<?php echo $css_class; ?>">
             <?php foreach ( $results as $field ) : ?>
@@ -249,7 +263,7 @@ class cfs_loop extends cfs_field
         <?php endforeach; endif; ?>
 
         <div class="table_footer">
-            <input type="button" class="button-primary cfs_add_field" value="<?php echo esc_attr( $button_label ); ?>" data-loop-tag="<?php echo esc_attr( $parent_tag ); ?>" data-rows="<?php echo ( $row_offset + 1 ); ?>" />
+            <input type="button" class="button-primary cfs_add_field" value="<?php echo esc_attr( $button_label ); ?>" data-loop-tag="<?php echo esc_attr( $parent_tag ); ?>" data-rows="<?php echo (int) ( $row_offset + 1 ); ?>" />
         </div>
     <?php
     }
@@ -276,7 +290,11 @@ class cfs_loop extends cfs_field
 
                 $(document).on('click', '.cfs_insert_field', function(event) {
                     event.stopPropagation();
-                    var $add_field = $('.cfs_add_field');
+                    // Use the "Add Row" button of THIS loop (previously the first one on the page)
+                    var $add_field = $(this).closest('.loop_wrapper').siblings('.table_footer').find('.cfs_add_field').first();
+                    if (!$add_field.length) {
+                        return;
+                    }
                     var num_rows = $add_field.attr('data-rows');
                     var loop_tag = $add_field.attr('data-loop-tag');
                     var loop_id = loop_tag.match(/.*\[(.*?)\]/)[1];
@@ -286,8 +304,8 @@ class cfs_loop extends cfs_field
                     $add_field.trigger('cfs/ready');
                 });
 
-                $(document).on('click', '.cfs_delete_field', function(event) {
-                    if (confirm('Remove this row?')) {
+                $(document).on('click', '.cfs_loop_head .cfs_delete_field', function(event) {
+                    if (confirm(<?php echo wp_json_encode( __( 'Remove this row?', 'cfs' ) ); ?>)) {
                         $(this).closest('.loop_wrapper').remove();
                     }
                     event.stopPropagation();
@@ -370,13 +388,17 @@ class cfs_loop extends cfs_field
             }
         }
 
-        if ( ! empty( $field ) && isset( $values[ $field->id ] ) ) {
+        if ( ! empty( $field ) && is_array( $values ) && isset( $values[ $field->id ] ) ) {
             if ( 'select' == $field->type ) {
                 $select_key = reset( $values[ $field->id ] );
-                $row_label = $field->options['choices'][ $select_key ];
+                $row_label = isset( $field->options['choices'][ $select_key ] ) ? $field->options['choices'][ $select_key ] : $select_key;
             }
             else {
                 $row_label = $values[ $field->id ];
+            }
+
+            if ( is_array( $row_label ) ) {
+                $row_label = implode( ', ', array_filter( $row_label, 'is_scalar' ) );
             }
         }
         elseif ( false !== $fallback ) {
@@ -384,6 +406,30 @@ class cfs_loop extends cfs_field
         }
 
         return $row_label;
+    }
+
+
+    /**
+     * Safely walk $array using a tag like "[12][0][15]"
+     * @param array $array
+     * @param string $tag
+     * @return mixed false if the path doesn't exist
+     * @since 2.7.0
+     */
+    function get_nested_value( $array, $tag ) {
+        if ( ! preg_match_all( '/\[(\d+)\]/', (string) $tag, $matches ) ) {
+            return false;
+        }
+
+        $value = $array;
+        foreach ( $matches[1] as $key ) {
+            if ( ! is_array( $value ) || ! array_key_exists( (int) $key, $value ) ) {
+                return false;
+            }
+            $value = $value[ (int) $key ];
+        }
+
+        return $value;
     }
 
 

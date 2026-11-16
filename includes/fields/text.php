@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_text extends cfs_field
 {
 
@@ -11,7 +13,7 @@ class cfs_text extends cfs_field
 
     function options_html( $key, $field ) {
     ?>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Default Value', 'cfs' ); ?></label>
             </td>
@@ -25,7 +27,7 @@ class cfs_text extends cfs_field
                 ?>
             </td>
         </tr>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Validation', 'cfs' ); ?></label>
             </td>
@@ -45,7 +47,8 @@ class cfs_text extends cfs_field
     }
 
 
+    // Escaping happens in html() via esc_attr(); escaping here too caused double-encoding
     function format_value_for_input( $value, $field = null ) {
-        return htmlspecialchars( $value, ENT_QUOTES );
+        return is_scalar( $value ) ? (string) $value : '';
     }
 }

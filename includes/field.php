@@ -1,5 +1,38 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Normalize a list of IDs (array, comma-separated string, or nested array from a loop)
+ * into an array of positive integers.
+ * @param mixed $value
+ * @return array
+ * @since 2.7.0
+ */
+function cfs_sanitize_id_list( $value ) {
+    $ids = [];
+
+    foreach ( (array) $value as $item ) {
+        if ( is_array( $item ) ) {
+            $ids = array_merge( $ids, cfs_sanitize_id_list( $item ) );
+            continue;
+        }
+
+        if ( ! is_scalar( $item ) ) {
+            continue;
+        }
+
+        foreach ( explode( ',', (string) $item ) as $id ) {
+            $id = absint( trim( $id ) );
+            if ( 0 < $id ) {
+                $ids[] = $id;
+            }
+        }
+    }
+
+    return array_values( array_unique( $ids ) );
+}
+
 class cfs_field
 {
     public $name;
@@ -37,7 +70,7 @@ class cfs_field
      */
     function options_html( $key, $field ) {
     ?>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Validation', 'cfs' ); ?></label>
             </td>
@@ -80,7 +113,7 @@ class cfs_field
      * @since 1.6.9
      */
     function prepare_value( $value, $field = null ) {
-        return $value[0];
+        return is_array( $value ) ? ( isset( $value[0] ) ? $value[0] : null ) : $value;
     }
 
 
@@ -140,7 +173,7 @@ class cfs_field
      * @since 1.4.3
      */
     function get_option( $field, $option_name, $default_value = '' ) {
-        if ( isset( $field->options[ $option_name ] ) ) {
+        if ( is_object( $field ) && isset( $field->options[ $option_name ] ) ) {
             if ( is_string( $field->options[ $option_name ] ) ) {
                 return esc_attr( $field->options[ $option_name ] );
             }

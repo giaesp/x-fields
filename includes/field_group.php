@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_field_group
 {
     public $cache;
@@ -33,15 +35,38 @@ class cfs_field_group
         foreach ( $results as $result ) {
             $output[ $result->ID ] = [
                 'title'     => $result->post_title,
-                'fields'    => unserialize( $result->fields ),
-                'rules'     => unserialize( $result->rules ),
-                'extras'    => unserialize( $result->extras )
+                'fields'    => (array) $this->safe_unserialize( $result->fields ),
+                'rules'     => (array) $this->safe_unserialize( $result->rules ),
+                'extras'    => (array) $this->safe_unserialize( $result->extras ),
             ];
         }
 
         $this->cache['field_groups'] = $output;
 
         return $output;
+    }
+
+
+    /**
+     * Unserialize without instantiating objects (prevents PHP object injection)
+     * @param string $value
+     * @return mixed
+     */
+    public function safe_unserialize( $value ) {
+        if ( ! is_string( $value ) || ! is_serialized( $value ) ) {
+            return $value;
+        }
+        return @unserialize( $value, [ 'allowed_classes' => false ] );
+    }
+
+
+    /**
+     * Sanitize a field name (used as meta_key, CSS class and API key)
+     * @param string $name
+     * @return string
+     */
+    public function sanitize_field_name( $name ) {
+        return preg_replace( '/[^A-Za-z0-9_\-]/', '', (string) $name );
     }
 
 
@@ -53,7 +78,7 @@ class cfs_field_group
     public function import( $options ) {
         global $wpdb;
 
-        if ( ! empty( $options['import_code'] ) ) {
+        if ( ! empty( $options['import_code'] ) && is_array( $options['import_code'] ) ) {
 
             // Collect stats
             $stats = [];
@@ -63,6 +88,17 @@ class cfs_field_group
 
             // Loop through field groups
             foreach ( $options['import_code'] as $group ) {
+
+                // Validate the structure
+                if ( ! is_array( $group ) || empty( $group['post_name'] ) || ! isset( $group['post_title'] ) ) {
+                    continue;
+                }
+
+                $group['post_title'] = sanitize_text_field( $group['post_title'] );
+                $group['post_name'] = sanitize_title( $group['post_name'] );
+                $group['cfs_fields'] = isset( $group['cfs_fields'] ) && is_array( $group['cfs_fields'] ) ? $group['cfs_fields'] : [];
+                $group['cfs_rules'] = isset( $group['cfs_rules'] ) && is_array( $group['cfs_rules'] ) ? $this->sanitize_rules( $group['cfs_rules'] ) : [];
+                $group['cfs_extras'] = isset( $group['cfs_extras'] ) && is_array( $group['cfs_extras'] ) ? $this->sanitize_extras( $group['cfs_extras'] ) : [];
 
                 // Make sure this field group doesn't exist
                 if ( ! in_array( $group['post_name'], $existing_groups ) ) {
@@ -83,17 +119,35 @@ class cfs_field_group
                     // Generate new field IDs
                     $field_id_mapping = [];
                     $next_field_id = (int) get_option( 'cfs_next_field_id' );
-                    foreach ( $group['cfs_fields'] as $key => $data ) {
+                    $clean_fields = [];
 
-                        $id = $group['cfs_fields'][ $key ]['id'];
-                        $parent_id = $group['cfs_fields'][ $key ]['parent_id'];
-                        $field_id_mapping[ $id ] = $next_field_id;
-                        $group['cfs_fields'][ $key ]['id'] = $next_field_id;
-                        if ( 0 < (int) $parent_id ) {
-                            $group['cfs_fields'][ $key ]['parent_id'] = $field_id_mapping[ $parent_id ];
+                    // First pass: assign new IDs
+                    foreach ( $group['cfs_fields'] as $data ) {
+                        if ( ! is_array( $data ) || ! isset( $data['id'], $data['type'] ) || ! isset( CFS()->fields[ $data['type'] ] ) ) {
+                            continue;
                         }
+                        $field_id_mapping[ (int) $data['id'] ] = $next_field_id;
                         $next_field_id++;
                     }
+
+                    // Second pass: remap IDs and sanitize
+                    foreach ( $group['cfs_fields'] as $data ) {
+                        if ( ! is_array( $data ) || ! isset( $data['id'], $data['type'] ) || ! isset( CFS()->fields[ $data['type'] ] ) ) {
+                            continue;
+                        }
+                        $parent_id = isset( $data['parent_id'] ) ? (int) $data['parent_id'] : 0;
+                        $clean_fields[] = [
+                            'id'        => $field_id_mapping[ (int) $data['id'] ],
+                            'name'      => $this->sanitize_field_name( isset( $data['name'] ) ? $data['name'] : '' ),
+                            'label'     => sanitize_text_field( isset( $data['label'] ) ? $data['label'] : '' ),
+                            'type'      => $data['type'],
+                            'notes'     => sanitize_textarea_field( isset( $data['notes'] ) ? $data['notes'] : '' ),
+                            'parent_id' => ( 0 < $parent_id && isset( $field_id_mapping[ $parent_id ] ) ) ? $field_id_mapping[ $parent_id ] : 0,
+                            'weight'    => isset( $data['weight'] ) ? (int) $data['weight'] : 0,
+                            'options'   => isset( $data['options'] ) && is_array( $data['options'] ) ? $data['options'] : [],
+                        ];
+                    }
+                    $group['cfs_fields'] = $clean_fields;
 
                     update_option( 'cfs_next_field_id', $next_field_id );
                     update_post_meta( $post_id, 'cfs_fields', $group['cfs_fields'] );
@@ -109,15 +163,18 @@ class cfs_field_group
 
             $return = '';
             if ( ! empty( $stats['imported'] ) ) {
-                $return .= '<div>' . __( 'Imported', 'cfs' ) . ': ' . implode( ', ', $stats['imported'] ) . '</div>';
+                $return .= '<div>' . esc_html__( 'Imported', 'cfs' ) . ': ' . esc_html( implode( ', ', $stats['imported'] ) ) . '</div>';
             }
             if ( ! empty( $stats['skipped'] ) ) {
-                $return .= '<div>' . __( 'Skipped', 'cfs' ) . ': ' . implode( ', ', $stats['skipped'] ) . '</div>';
+                $return .= '<div>' . esc_html__( 'Skipped', 'cfs' ) . ': ' . esc_html( implode( ', ', $stats['skipped'] ) ) . '</div>';
+            }
+            if ( '' === $return ) {
+                $return = '<div>' . esc_html__( 'Nothing to import', 'cfs' ) . '</div>';
             }
             return $return;
         }
         else {
-            return '<div>' . __( 'Nothing to import', 'cfs' ) . '</div>';
+            return '<div>' . esc_html__( 'Nothing to import', 'cfs' ) . '</div>';
         }
     }
 
@@ -132,8 +189,14 @@ class cfs_field_group
 
         $post_ids = [];
         $field_groups = [];
-        foreach ( $options['field_groups'] as $post_id ) {
+        $requested = isset( $options['field_groups'] ) ? (array) $options['field_groups'] : [];
+        foreach ( $requested as $post_id ) {
             $post_ids[] = (int) $post_id;
+        }
+
+        $post_ids = array_filter( $post_ids );
+        if ( empty( $post_ids ) ) {
+            return [];
         }
 
         $post_ids = implode( ',', $post_ids );
@@ -146,9 +209,12 @@ class cfs_field_group
             ];
         }
 
-        $meta_data = $wpdb->get_results( "SELECT * FROM {$wpdb->postmeta} WHERE meta_key LIKE 'cfs_%' AND post_id IN ($post_ids)" );
+        $meta_data = $wpdb->get_results( "SELECT * FROM {$wpdb->postmeta} WHERE meta_key IN ('cfs_fields','cfs_rules','cfs_extras') AND post_id IN ($post_ids)" );
         foreach ( $meta_data as $row ) {
-            $value = unserialize( $row->meta_value );
+            if ( ! isset( $field_groups[ $row->post_id ] ) ) {
+                continue;
+            }
+            $value = $this->safe_unserialize( $row->meta_value );
             $field_groups[ $row->post_id ][ $row->meta_key ] = $value;
         }
 
@@ -170,7 +236,10 @@ class cfs_field_group
     function save( $params = [] ) {
         global $wpdb;
 
-        $post_id = $params['post_id'];
+        $post_id = (int) $params['post_id'];
+        $params['fields'] = isset( $params['fields'] ) && is_array( $params['fields'] ) ? $params['fields'] : [];
+        $params['rules'] = isset( $params['rules'] ) && is_array( $params['rules'] ) ? $params['rules'] : [];
+        $params['extras'] = isset( $params['extras'] ) && is_array( $params['extras'] ) ? $params['extras'] : [];
 
         /*---------------------------------------------------------------------------------------------
             Save fields
@@ -182,21 +251,46 @@ class cfs_field_group
         $next_field_id = (int) get_option( 'cfs_next_field_id' );
         $existing_fields = get_post_meta( $post_id, 'cfs_fields', true );
 
-        if ( ! empty( $existing_fields ) ) {
+        if ( ! empty( $existing_fields ) && is_array( $existing_fields ) ) {
             foreach ( $existing_fields as $item ) {
-                $prev_fields[ $item['id'] ] = $item['name'];
+                if ( isset( $item['id'] ) ) {
+                    $prev_fields[ (int) $item['id'] ] = isset( $item['name'] ) ? $item['name'] : '';
+                }
             }
         }
+
+        // Map submitted (possibly temporary) IDs to final IDs, so loop children keep their parent
+        $id_map = [];
 
         $new_fields = [];
 
         foreach ( $params['fields'] as $key => $field ) {
 
+            if ( ! is_array( $field ) ) {
+                continue;
+            }
+
             // Sanitize the field
             $field = stripslashes_deep( $field );
 
+            // Skip unknown field types (avoids a fatal error on PHP 8)
+            if ( empty( $field['type'] ) || ! isset( CFS()->fields[ $field['type'] ] ) ) {
+                continue;
+            }
+
+            $field = array_merge( [ 'id' => 0, 'name' => '', 'label' => '', 'notes' => '', 'parent_id' => 0, 'options' => [] ], $field );
+            $field['options'] = is_array( $field['options'] ) ? $field['options'] : [];
+
             // Allow for field customizations
             $field = CFS()->fields[ $field['type'] ]->pre_save_field( $field );
+
+            $field['name'] = $this->sanitize_field_name( $field['name'] );
+            $field['label'] = sanitize_text_field( $field['label'] );
+            $field['notes'] = sanitize_textarea_field( $field['notes'] );
+
+            if ( '' === $field['name'] ) {
+                continue;
+            }
 
             // Set the parent ID
             $field['parent_id'] = empty( $field['parent_id'] ) ? 0 : (int) $field['parent_id'];
@@ -204,11 +298,14 @@ class cfs_field_group
             // Save empty array for fields without options
             $field['options'] = empty( $field['options'] ) ? [] : $field['options'];
 
-            // Use an existing ID if available
-            if ( 0 < (int) $field['id'] ) {
+            // Only reuse IDs that belong to this field group (prevents hijacking other groups' fields)
+            $field['id'] = (int) $field['id'];
+            if ( 0 < $field['id'] && isset( $prev_fields[ $field['id'] ] ) ) {
 
                 // We use this variable to check for deleted fields
                 $current_field_ids[] = $field['id'];
+
+                $id_map[ $field['id'] ] = $field['id'];
 
                 // Rename the postmeta key if necessary
                 if ( $field['name'] != $prev_fields[ $field['id'] ] ) {
@@ -224,6 +321,9 @@ class cfs_field_group
                 }
             }
             else {
+                if ( 0 < $field['id'] ) {
+                    $id_map[ $field['id'] ] = $next_field_id;
+                }
                 $field['id'] = $next_field_id;
                 $next_field_id++;
             }
@@ -244,6 +344,15 @@ class cfs_field_group
             $weight++;
         }
 
+        // Fix parent references; drop dangling parents
+        $valid_ids = wp_list_pluck( $new_fields, 'id' );
+        foreach ( $new_fields as &$nf ) {
+            if ( 0 < $nf['parent_id'] && ! in_array( $nf['parent_id'], $valid_ids ) ) {
+                $nf['parent_id'] = isset( $id_map[ $nf['parent_id'] ] ) ? $id_map[ $nf['parent_id'] ] : 0;
+            }
+        }
+        unset( $nf );
+
         // Save the fields
         update_post_meta( $post_id, 'cfs_fields', $new_fields );
 
@@ -255,6 +364,8 @@ class cfs_field_group
 
         // Filter deleted field IDs before deleting meta
         $deleted_field_ids = apply_filters( 'cfs_deleted_field_ids', $deleted_field_ids );
+
+        $deleted_field_ids = array_filter( array_map( 'intval', (array) $deleted_field_ids ) );
 
         if ( 0 < count( $deleted_field_ids ) ) {
             $deleted_field_ids = implode( ',', $deleted_field_ids );
@@ -272,22 +383,24 @@ class cfs_field_group
 
         $data = [];
         $rule_types = [ 'post_types', 'post_formats', 'user_roles', 'post_ids', 'term_ids', 'page_templates' ];
+        $rules_in = stripslashes_deep( $params['rules'] );
 
         foreach ( $rule_types as $type ) {
-            if ( ! empty( $params['rules'][ $type ] ) ) {
+            if ( ! empty( $rules_in[ $type ] ) ) {
 
                 // Break apart the autocomplete string
-                if ( 'post_ids' == $type ) {
-                    $params['rules'][ $type ] = explode( ',', $params['rules'][ $type ] );
+                if ( 'post_ids' == $type && is_string( $rules_in[ $type ] ) ) {
+                    $rules_in[ $type ] = explode( ',', $rules_in[ $type ] );
                 }
 
                 $data[ $type ] = [
-                    'operator' => $params['rules']['operator'][ $type ],
-                    'values' => $params['rules'][ $type ],
+                    'operator' => isset( $rules_in['operator'][ $type ] ) ? $rules_in['operator'][ $type ] : '==',
+                    'values' => $rules_in[ $type ],
                 ];
             }
         }
 
+        $data = $this->sanitize_rules( $data );
         $data = apply_filters( 'cfs_save_field_group_rules', $data, $post_id );
         update_post_meta( $post_id, 'cfs_rules', $data );
 
@@ -295,7 +408,61 @@ class cfs_field_group
             Save extras
         ---------------------------------------------------------------------------------------------*/
 
-        update_post_meta( $post_id, 'cfs_extras', $params['extras'] );
+        update_post_meta( $post_id, 'cfs_extras', $this->sanitize_extras( stripslashes_deep( $params['extras'] ) ) );
+    }
+
+
+    /**
+     * Sanitize placement rules
+     * @param array $rules
+     * @return array
+     */
+    public function sanitize_rules( $rules ) {
+        $clean = [];
+        $allowed = [ 'post_types', 'post_formats', 'user_roles', 'post_ids', 'term_ids', 'page_templates' ];
+
+        foreach ( (array) $rules as $type => $rule ) {
+            if ( ! in_array( $type, $allowed, true ) || ! is_array( $rule ) ) {
+                continue;
+            }
+
+            $operator = isset( $rule['operator'] ) ? $rule['operator'] : '==';
+            $operator = is_array( $operator ) ? reset( $operator ) : $operator;
+            $operator = ( '!=' === $operator ) ? '!=' : '==';
+
+            $values = isset( $rule['values'] ) ? (array) $rule['values'] : [];
+
+            if ( in_array( $type, [ 'post_ids', 'term_ids' ], true ) ) {
+                $values = array_values( array_filter( array_map( 'absint', $values ) ) );
+            }
+            else {
+                $values = array_values( array_filter( array_map( function( $v ) {
+                    return is_scalar( $v ) ? sanitize_text_field( (string) $v ) : '';
+                }, $values ), 'strlen' ) );
+            }
+
+            if ( ! empty( $values ) ) {
+                $clean[ $type ] = [ 'operator' => $operator, 'values' => $values ];
+            }
+        }
+
+        return $clean;
+    }
+
+
+    /**
+     * Sanitize field group extras
+     * @param array $extras
+     * @return array
+     */
+    public function sanitize_extras( $extras ) {
+        $extras = (array) $extras;
+
+        return [
+            'order'       => isset( $extras['order'] ) ? (int) $extras['order'] : 0,
+            'context'     => ( isset( $extras['context'] ) && 'side' === $extras['context'] ) ? 'side' : 'normal',
+            'hide_editor' => empty( $extras['hide_editor'] ) ? 0 : 1,
+        ];
     }
 }
 

@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_third_party
 {
 
@@ -47,7 +49,8 @@ class cfs_third_party
         if ( function_exists( 'get_current_screen' ) ) {
             $screen = get_current_screen();
 
-            if ( isset( $current_screen->id ) && 'cfs' == $current_screen->id ) {
+            // Was $current_screen (undefined), so this never matched
+            if ( isset( $screen->id ) && 'cfs' == $screen->id ) {
                 $args = [ 'public' => false, 'show_ui' => true ];
             }
         }

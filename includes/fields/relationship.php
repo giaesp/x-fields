@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_relationship extends cfs_field
 {
 
@@ -17,12 +19,13 @@ class cfs_relationship extends cfs_field
 
         $post_types = [];
         if ( ! empty( $field->options['post_types'] ) ) {
-            foreach ( $field->options['post_types'] as $type ) {
+            foreach ( (array) $field->options['post_types'] as $type ) {
                 $post_types[] = $type;
             }
         }
         else {
-            $post_types = get_post_types( [ 'exclude_from_search' => true ] );
+            // Same list offered in the field settings (was exclude_from_search => true)
+            $post_types = array_values( get_post_types( [ 'exclude_from_search' => false ] ) );
         }
 
         $args = [
@@ -46,6 +49,8 @@ class cfs_relationship extends cfs_field
             ];
         }
 
+        $field->value = implode( ',', cfs_sanitize_id_list( $field->value ) );
+
         if ( ! empty( $field->value ) ) {
             $results = $wpdb->get_results( "SELECT ID, post_status, post_title FROM $wpdb->posts WHERE ID IN ($field->value) ORDER BY FIELD(ID,$field->value)" );
             foreach ( $results as $result ) {
@@ -55,19 +60,19 @@ class cfs_relationship extends cfs_field
         }
     ?>
         <div class="filter_posts">
-            <input type="text" class="cfs_filter_input" autocomplete="off" placeholder="<?php _e( 'Search posts', 'cfs' ); ?>" />
+            <input type="text" class="cfs_filter_input" autocomplete="off" placeholder="<?php esc_attr_e( 'Search posts', 'cfs' ); ?>" />
         </div>
 
         <div class="available_posts post_list">
         <?php foreach ( $available_posts as $post ) : ?>
             <?php $class = ( isset( $selected_posts[ $post->ID ] ) ) ? ' class="used"' : ''; ?>
-            <div rel="<?php echo $post->ID; ?>"<?php echo $class; ?> title="<?php echo esc_attr( $post->post_type ); ?>"><?php echo apply_filters( 'cfs_relationship_display', $post->post_title, $post->ID, $field ); ?></div>
+            <div rel="<?php echo (int) $post->ID; ?>"<?php echo $class; ?> title="<?php echo esc_attr( $post->post_type ); ?>"><?php echo wp_kses_post( apply_filters( 'cfs_relationship_display', esc_html( $post->post_title ), $post->ID, $field ) ); ?></div>
         <?php endforeach; ?>
         </div>
 
         <div class="selected_posts post_list">
         <?php foreach ( $selected_posts as $post ) : ?>
-            <div rel="<?php echo $post->ID; ?>"><span class="remove"></span><?php echo apply_filters( 'cfs_relationship_display', $post->post_title, $post->ID, $field ); ?></div>
+            <div rel="<?php echo (int) $post->ID; ?>"><span class="remove"></span><?php echo wp_kses_post( apply_filters( 'cfs_relationship_display', esc_html( $post->post_title ), $post->ID, $field ) ); ?></div>
         <?php endforeach; ?>
         </div>
         <div class="clear"></div>
@@ -81,7 +86,7 @@ class cfs_relationship extends cfs_field
         $choices = apply_filters( 'cfs_field_relationship_post_types', get_post_types( $args ) );
 
     ?>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e('Post Types', 'cfs'); ?></label>
                 <p class="description"><?php _e('Limit posts to the following types', 'cfs'); ?></p>
@@ -97,13 +102,13 @@ class cfs_relationship extends cfs_field
                 ?>
             </td>
         </tr>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Limits', 'cfs' ); ?></label>
             </td>
             <td>
-                <input type="text" name="cfs[fields][<?php echo $key; ?>][options][limit_min]" value="<?php echo $this->get_option( $field, 'limit_min' ); ?>" placeholder="min" style="width:60px" />
-                <input type="text" name="cfs[fields][<?php echo $key; ?>][options][limit_max]" value="<?php echo $this->get_option( $field, 'limit_max' ); ?>" placeholder="max" style="width:60px" />
+                <input type="text" name="cfs[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />
+                <input type="text" name="cfs[fields][<?php echo esc_attr( $key ); ?>][options][limit_max]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_max' ) ); ?>" placeholder="max" style="width:60px" />
             </td>
         </tr>
     <?php
@@ -114,7 +119,7 @@ class cfs_relationship extends cfs_field
     ?>
         <script>
         (function($) {
-            update_relationship_values = function(field) {
+            window.update_relationship_values = function(field) {
                 var post_ids = [];
                 field.find('.selected_posts div').each(function(idx) {
                     post_ids[idx] = $(this).attr('rel');
@@ -143,7 +148,7 @@ class cfs_relationship extends cfs_field
                     var div = $(this).parent();
                     var parent = div.closest('.field');
                     var post_id = div.attr('rel');
-                    parent.find('.available_posts div[rel='+post_id+']').removeClass('used');
+                    parent.find('.available_posts div[rel="'+parseInt(post_id, 10)+'"]').removeClass('used');
                     div.remove();
                     update_relationship_values(parent);
                 });
@@ -152,7 +157,7 @@ class cfs_relationship extends cfs_field
                 $(document).on('keyup', '.cfs_relationship .cfs_filter_input', function() {
                     var input = $(this).val();
                     var parent = $(this).closest('.field');
-                    var regex = new RegExp(input, 'i');
+                    var regex = new RegExp(input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
                     parent.find('.available_posts div:not(.used)').each(function() {
                         if (-1 < $(this).html().search(regex)) {
                             $(this).removeClass('hidden');
@@ -191,24 +196,12 @@ class cfs_relationship extends cfs_field
 
 
     function format_value_for_input( $value, $field = null ) {
-        return empty( $value ) ? '' : implode( ',', $value );
+        return implode( ',', cfs_sanitize_id_list( $value ) );
     }
 
 
     function pre_save( $value, $field = null ) {
-        if ( ! empty( $value ) ) {
-
-            // Inside a loop, the value is $value[0]
-            $value = (array) $value;
-
-            // The raw input saves a comma-separated string
-            if ( false !== strpos( $value[0], ',' ) ) {
-                return explode( ',', $value[0] );
-            }
-
-            return $value;
-        }
-
-        return [];
+        // Only positive integer IDs are allowed (prevents SQL injection in html())
+        return cfs_sanitize_id_list( $value );
     }
 }

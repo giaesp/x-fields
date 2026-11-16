@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 global $wpdb;
 
 $sql = "
@@ -21,7 +23,7 @@ $results = $wpdb->get_results($sql);
 <script>
 (function($) {
     $(function() {
-        var cfs_nonce = '<?php echo wp_create_nonce( 'cfs_admin_nonce' ); ?>';
+        var cfs_nonce = <?php echo wp_json_encode( wp_create_nonce( 'cfs_admin_nonce' ) ); ?>;
 
         $('.nav-tab').click(function() {
             $('.tab-content').removeClass('active');
@@ -59,7 +61,7 @@ $results = $wpdb->get_results($sql);
         });
 
         $('#button-reset').click(function() {
-            if (confirm('This will delete all CFS data. Are you sure?')) {
+            if (confirm(<?php echo wp_json_encode( __( 'This will delete all CFS data. Are you sure?', 'cfs' ) ); ?>)) {
                 $.post(ajaxurl, {
                     action: 'cfs_ajax_handler',
                     action_type: 'reset',
@@ -94,7 +96,7 @@ $results = $wpdb->get_results($sql);
                         <div>
                             <select id="export-field-groups" style="width:300px; height:120px" multiple="multiple">
                                 <?php foreach ($results as $result) : ?>
-                                <option value="<?php echo $result->ID; ?>"><?php echo $result->post_title; ?></option>
+                                <option value="<?php echo (int) $result->ID; ?>"><?php echo esc_html( $result->post_title ); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -116,7 +118,7 @@ $results = $wpdb->get_results($sql);
         <!-- Import -->
 
         <div class="tab-content import">
-            <textarea id="import-code" style="width:100%; height:120px" placeholder="Paste the import code here"></textarea>
+            <textarea id="import-code" style="width:100%; height:120px" placeholder="<?php esc_attr_e( 'Paste the import code here', 'cfs' ); ?>"></textarea>
             <div><input type="button" id="button-import" class="button" value="<?php _e('Import', 'cfs'); ?>" /></div>
             <div id="import-message"></div>
         </div>

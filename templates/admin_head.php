@@ -1,6 +1,10 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 global $post;
+
+$options_html = [];
 
 /*---------------------------------------------------------------------------------------------
     Field management screen
@@ -9,7 +13,8 @@ global $post;
 if ( 'cfs' == $screen->post_type ) {
     foreach ( CFS()->fields as $field_name => $field_data ) {
         ob_start();
-        CFS()->fields[ $field_name ]->options_html( 'clone', $field_data );
+        // Pass an empty field object (passing the field type object caused dynamic properties on PHP 8.2+)
+        CFS()->fields[ $field_name ]->options_html( 'clone', (object) [ 'options' => [] ] );
         $options_html[ $field_name ] = ob_get_clean();
     }
 
@@ -34,16 +39,16 @@ if ( 'cfs' == $screen->post_type ) {
 
 <script>
 var CFS = CFS || {};
-CFS['field_index'] = <?php echo $field_count; ?>;
+CFS['field_index'] = <?php echo (int) $field_count; ?>;
 CFS['field_clone'] = <?php echo json_encode( $field_clone ); ?>;
 CFS['options_html'] = <?php echo json_encode( $options_html ); ?>;
 </script>
-<script src="<?php echo CFS_URL; ?>/assets/js/fields.js"></script>
-<script src="<?php echo CFS_URL; ?>/assets/js/select2/select2.min.js"></script>
-<script src="<?php echo CFS_URL; ?>/assets/js/jquery-powertip/jquery.powertip.min.js"></script>
-<link rel="stylesheet" type="text/css" href="<?php echo CFS_URL; ?>/assets/css/fields.css" />
-<link rel="stylesheet" type="text/css" href="<?php echo CFS_URL; ?>/assets/js/select2/select2.css" />
-<link rel="stylesheet" type="text/css" href="<?php echo CFS_URL; ?>/assets/js/jquery-powertip/jquery.powertip.css" />
+<script src="<?php echo esc_url( CFS_URL . '/assets/js/fields.js?ver=' . CFS_VERSION ); ?>"></script>
+<script src="<?php echo esc_url( CFS_URL . '/assets/js/select2/select2.min.js?ver=' . CFS_VERSION ); ?>"></script>
+<script src="<?php echo esc_url( CFS_URL . '/assets/js/jquery-powertip/jquery.powertip.min.js?ver=' . CFS_VERSION ); ?>"></script>
+<link rel="stylesheet" type="text/css" href="<?php echo esc_url( CFS_URL . '/assets/css/fields.css?ver=' . CFS_VERSION ); ?>" />
+<link rel="stylesheet" type="text/css" href="<?php echo esc_url( CFS_URL . '/assets/js/select2/select2.css?ver=' . CFS_VERSION ); ?>" />
+<link rel="stylesheet" type="text/css" href="<?php echo esc_url( CFS_URL . '/assets/js/jquery-powertip/jquery.powertip.css?ver=' . CFS_VERSION ); ?>" />
 
 <?php
 }
@@ -65,8 +70,8 @@ else {
         foreach ( $field_groups as $group_id => $title ) {
 
             // Get field group options
-            $extras = get_post_meta( $group_id, 'cfs_extras', true );
-            $context = isset( $extras['context'] ) ? $extras['context'] : 'normal';
+            $extras = (array) get_post_meta( $group_id, 'cfs_extras', true );
+            $context = ( isset( $extras['context'] ) && 'side' === $extras['context'] ) ? 'side' : 'normal';
             $priority = ( 'normal' == $context ) ? 'high' : 'core';
 
             if ( isset( $extras['hide_editor'] ) && 0 < (int) $extras['hide_editor'] ) {
@@ -88,7 +93,9 @@ else {
     }
 }
 
-function cfs_postbox_classes( $classes ) {
-    $classes[] = 'cfs_input';
-    return $classes;
+if ( ! function_exists( 'cfs_postbox_classes' ) ) {
+    function cfs_postbox_classes( $classes ) {
+        $classes[] = 'cfs_input';
+        return $classes;
+    }
 }

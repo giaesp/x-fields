@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_hyperlink extends cfs_field
 {
 
@@ -11,6 +13,7 @@ class cfs_hyperlink extends cfs_field
 
 
     function html( $field ) {
+        $field->value = is_array( $field->value ) ? $field->value : [];
         $field->value = [
             'url'    => isset( $field->value['url'] ) ? $field->value['url'] : '',
             'text'   => isset( $field->value['text'] ) ? $field->value['text'] : '',
@@ -43,7 +46,7 @@ class cfs_hyperlink extends cfs_field
 
     function options_html( $key, $field = null ) {
     ?>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e('Output format', 'cfs'); ?></label>
             </td>
@@ -77,21 +80,45 @@ class cfs_hyperlink extends cfs_field
                 'target' => $value[2]['target'],
             ];
         }
-        return serialize( $value );
+        // Keep only known string keys
+        $clean = [];
+        foreach ( [ 'url', 'text', 'class', 'target' ] as $k ) {
+            if ( isset( $value[ $k ] ) && is_scalar( $value[ $k ] ) ) {
+                $clean[ $k ] = (string) $value[ $k ];
+            }
+        }
+        if ( isset( $clean['url'] ) ) {
+            $clean['url'] = esc_url_raw( $clean['url'] );
+        }
+        if ( isset( $clean['target'] ) && ! in_array( $clean['target'], [ 'none', '_blank', '_self', '_top' ], true ) ) {
+            $clean['target'] = '';
+        }
+
+        return serialize( $clean );
     }
 
 
     function prepare_value( $value, $field = null ) {
-        return unserialize( $value[0] );
+        $raw = is_array( $value ) ? ( isset( $value[0] ) ? $value[0] : '' ) : $value;
+
+        if ( ! is_string( $raw ) || ! is_serialized( $raw ) ) {
+            return [];
+        }
+
+        // Never instantiate objects from stored data
+        $data = @unserialize( $raw, [ 'allowed_classes' => false ] );
+        return is_array( $data ) ? $data : [];
     }
 
 
     function format_value_for_api( $value, $field = null ) {
+        $value  = is_array( $value ) ? $value : [];
         $url    = isset( $value['url'] ) ? $value['url'] : '';
-        $text   = isset( $value['text'] ) ? $value['text'] : $value['url'];
+        $text   = ( isset( $value['text'] ) && '' !== $value['text'] ) ? $value['text'] : $url;
         $target = isset( $value['target'] ) ? $value['target'] : '';
         $format = $this->get_option( $field, 'format', 'html' );
-        
+        $output = '';
+
         // target="none" (sometimes?) opens a new tab
         if ( 'none' == $target ) {
             $target = '';
@@ -101,7 +128,9 @@ class cfs_hyperlink extends cfs_field
         if ( 'html' == $format ) {
             $output = '';
             if ( ! empty( $url ) ) {
-                $output = '<a class="cfs-hyperlink" href="' . esc_url( $url ) . '" target="' . $target . '"><span class="text">' . esc_html( $text ) . '</span></a>';
+                $target_attr = empty( $target ) ? '' : ' target="' . esc_attr( $target ) . '"';
+                $rel_attr = ( '_blank' === $target ) ? ' rel="noopener noreferrer"' : '';
+                $output = '<a class="cfs-hyperlink" href="' . esc_url( $url ) . '"' . $target_attr . $rel_attr . '><span class="text">' . esc_html( $text ) . '</span></a>';
             }
         }
 

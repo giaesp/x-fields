@@ -2,11 +2,15 @@
 /*
 Plugin Name: Custom Field Suite
 Description: Visually add custom fields to your WordPress edit pages.
-Version: 2.6.7
+Version: 2.7.0
 Author: Matt Gibbs
+Requires PHP: 7.4
+Requires at least: 5.0
 Text Domain: cfs
 Domain Path: /languages/
 */
+
+defined( 'ABSPATH' ) || exit;
 
 class Custom_Field_Suite
 {
@@ -15,13 +19,15 @@ class Custom_Field_Suite
     public $form;
     public $fields;
     public $field_group;
+    public $validators = [];
+    public $group_ids = [];
     private static $instance;
 
 
     function __construct() {
 
         // setup variables
-        define( 'CFS_VERSION', '2.6.7' );
+        define( 'CFS_VERSION', '2.7.0' );
         define( 'CFS_DIR', dirname( __FILE__ ) );
         define( 'CFS_URL', plugins_url( '', __FILE__ ) );
 
@@ -97,6 +103,12 @@ class Custom_Field_Suite
         ];
 
         $field = (object) array_merge( $defaults, (array) $field );
+
+        // Skip unknown field types (avoids a fatal error on PHP 8)
+        if ( ! isset( CFS()->fields[ $field->type ] ) ) {
+            return;
+        }
+
         CFS()->fields[ $field->type ]->html( $field );
     }
 }

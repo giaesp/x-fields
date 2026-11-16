@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_file extends cfs_field
 {
 
@@ -10,27 +12,30 @@ class cfs_file extends cfs_field
 
 
     function html( $field ) {
-        $file_url = $field->value;
+        $field->value = is_scalar( $field->value ) ? (string) $field->value : '';
+        $file_url = esc_html( $field->value );
 
-        if ( ctype_digit( $field->value ) ) {
-            if ( wp_attachment_is_image( $field->value ) ) {
-                $file_url = wp_get_attachment_image_src( $field->value );
-                $file_url = '<img src="' . $file_url[0] . '" />';
+        if ( '' !== $field->value && ctype_digit( $field->value ) ) {
+            if ( wp_attachment_is_image( (int) $field->value ) ) {
+                $src = wp_get_attachment_image_src( (int) $field->value );
+                $file_url = $src ? '<img src="' . esc_url( $src[0] ) . '" />' : '';
             }
             else
             {
-                $file_url = wp_get_attachment_url( $field->value );
-                $filename = substr( $file_url, strrpos( $file_url, '/' ) + 1 );
-                $file_url = '<a href="'. $file_url .'" target="_blank">'. $filename .'</a>';
+                $url = (string) wp_get_attachment_url( (int) $field->value );
+                $filename = wp_basename( $url );
+                $file_url = '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $filename ) . '</a>';
             }
         }
+
+        $file_type = $this->get_option( $field, 'file_type', 'file' );
 
         // CSS logic for "Add" / "Remove" buttons
         $css = empty( $field->value ) ? [ '', ' hidden' ] : [ ' hidden', '' ];
     ?>
         <span class="file_url"><?php echo $file_url; ?></span>
-        <input type="button" class="media button add<?php echo $css[0]; ?>" value="<?php _e( 'Add File', 'cfs' ); ?>" />
-        <input type="button" class="media button remove<?php echo $css[1]; ?>" value="<?php _e( 'Remove', 'cfs' ); ?>" />
+        <input type="button" class="media button add<?php echo $css[0]; ?>" data-file-type="<?php echo esc_attr( $file_type ); ?>" value="<?php esc_attr_e( 'Add File', 'cfs' ); ?>" />
+        <input type="button" class="media button remove<?php echo $css[1]; ?>" value="<?php esc_attr_e( 'Remove', 'cfs' ); ?>" />
         <input type="hidden" name="<?php echo esc_attr( $field->input_name ); ?>" class="file_value" value="<?php echo esc_attr( $field->value ); ?>" />
     <?php
     }
@@ -38,7 +43,7 @@ class cfs_file extends cfs_field
 
     function options_html( $key, $field ) {
     ?>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'File Type', 'cfs' ); ?></label>
             </td>
@@ -61,7 +66,7 @@ class cfs_file extends cfs_field
                 ?>
             </td>
         </tr>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Return Value', 'cfs' ); ?></label>
             </td>
@@ -82,7 +87,7 @@ class cfs_file extends cfs_field
                 ?>
             </td>
         </tr>
-        <tr class="field_option field_option_<?php echo $this->name; ?>">
+        <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
                 <label><?php _e( 'Validation', 'cfs' ); ?></label>
             </td>
@@ -122,45 +127,49 @@ class cfs_file extends cfs_field
         (function($) {
             $(function() {
 
-                var cfs_frame;
+                var cfs_frames = {};
+                var $cfs_button = null;
 
                 $(document).on('click', '.cfs_input .media.button.add', function(e) {
-                    $this = $(this);
+                    $cfs_button = $(this);
 
-                    if (cfs_frame) {
-                        cfs_frame.open();
+                    // One frame per file type (the "File Type" option was previously ignored)
+                    var file_type = $cfs_button.attr('data-file-type') || 'file';
+                    var library = ('file' === file_type) ? {} : { type: file_type };
+
+                    if (cfs_frames[file_type]) {
+                        cfs_frames[file_type].open();
                         return;
                     }
 
-                    cfs_frame = wp.media.frames.cfs_frame = wp.media({
+                    var frame = cfs_frames[file_type] = wp.media({
                         className: 'media-frame cfs_frame',
                         frame: 'post',
                         multiple: false,
-                        library: {
-                            type: 'image'
-                        }
+                        library: library
                     });
 
-                    cfs_frame.on('insert', function() {
-                        var attachment = cfs_frame.state().get('selection').first().toJSON();
+                    frame.on('insert', function() {
+                        var attachment = frame.state().get('selection').first().toJSON();
+                        var $preview;
                         if ('image' == attachment.type && 'undefined' != typeof attachment.sizes) {
-                            file_url = attachment.sizes.full.url;
+                            var file_url = attachment.sizes.full.url;
                             if ('undefined' != typeof attachment.sizes.thumbnail) {
                                 file_url = attachment.sizes.thumbnail.url;
                             }
-                            file_url = '<img src="' + file_url + '" />';
+                            $preview = $('<img />').attr('src', file_url);
                         }
                         else {
-                            file_url = '<a href="' + attachment.url + '" target="_blank">' + attachment.filename + '</a>';
+                            $preview = $('<a target="_blank" rel="noopener noreferrer"></a>').attr('href', attachment.url).text(attachment.filename);
                         }
-                        $this.hide();
-                        $this.siblings('.media.button.remove').show();
-                        $this.siblings('.file_value').val(attachment.id);
-                        $this.siblings('.file_url').html(file_url);
+                        $cfs_button.hide();
+                        $cfs_button.siblings('.media.button.remove').show();
+                        $cfs_button.siblings('.file_value').val(attachment.id);
+                        $cfs_button.siblings('.file_url').empty().append($preview);
                     });
 
-                    cfs_frame.open();
-                    cfs_frame.content.mode('upload');
+                    frame.open();
+                    frame.content.mode('upload');
                 });
 
                 $(document).on('click', '.cfs_input .media.button.remove', function() {
@@ -177,7 +186,7 @@ class cfs_file extends cfs_field
 
 
     function format_value_for_api( $value, $field = null ) {
-        if ( ctype_digit( $value ) ) {
+        if ( is_int( $value ) || ( is_string( $value ) && '' !== $value && ctype_digit( $value ) ) ) {
             $return_value = $this->get_option( $field, 'return_value', 'url' );
             return ( 'id' == $return_value ) ? (int) $value : wp_get_attachment_url( $value );
         }

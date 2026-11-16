@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_form
 {
 
@@ -39,20 +41,26 @@ class cfs_form
         $this->session = new cfs_session();
 
         // Save the form
-        if ( isset( $_POST['cfs']['save'] ) ) {
+        if ( isset( $_POST['cfs']['save'] ) && is_string( $_POST['cfs']['save'] ) ) {
             if ( wp_verify_nonce( $_POST['cfs']['save'], 'cfs_save_input' ) ) {
                 $session = $this->session->get();
 
                 if ( empty( $session ) ) {
-                    die( 'Your session has expired.' );
+                    wp_die( esc_html__( 'Your session has expired.', 'cfs' ), '', [ 'response' => 403 ] );
                 }
 
-                $field_data = isset( $_POST['cfs']['input'] ) ? $_POST['cfs']['input'] : [];
+                $field_data = isset( $_POST['cfs']['input'] ) && is_array( $_POST['cfs']['input'] ) ? $_POST['cfs']['input'] : [];
                 $post_data = [];
+                $is_front_end = ! empty( $session['front_end'] );
 
                 // Form settings are session-based for added security
-                $post_id = (int) $session['post_id'];
-                $field_groups = isset( $session['field_groups'] ) ? $session['field_groups'] : [];
+                $post_id = isset( $session['post_id'] ) ? (int) $session['post_id'] : 0;
+
+                // Admin (meta box) saves require the right to edit the post
+                if ( ! $is_front_end && ( $post_id < 1 || ! current_user_can( 'edit_post', $post_id ) ) ) {
+                    wp_die( esc_html__( 'Sorry, you are not allowed to edit this item.', 'cfs' ), '', [ 'response' => 403 ] );
+                }
+                $field_groups = isset( $session['field_groups'] ) ? (array) $session['field_groups'] : [];
 
                 // Sanitize field groups
                 foreach ( $field_groups as $key => $val ) {
@@ -60,13 +68,15 @@ class cfs_form
                 }
 
                 // Title
-                if ( isset( $_POST['cfs']['post_title'] ) ) {
-                    $post_data['post_title'] = stripslashes( $_POST['cfs']['post_title'] );
+                // (sanitized through the core *_save_pre filters, which apply KSES
+                // for users without the unfiltered_html capability)
+                if ( isset( $_POST['cfs']['post_title'] ) && is_string( $_POST['cfs']['post_title'] ) ) {
+                    $post_data['post_title'] = sanitize_post_field( 'post_title', wp_unslash( $_POST['cfs']['post_title'] ), $post_id, 'db' );
                 }
 
                 // Content
-                if ( isset( $_POST['cfs']['post_content'] ) ) {
-                    $post_data['post_content'] = stripslashes( $_POST['cfs']['post_content'] );
+                if ( isset( $_POST['cfs']['post_content'] ) && is_string( $_POST['cfs']['post_content'] ) ) {
+                    $post_data['post_content'] = sanitize_post_field( 'post_content', wp_unslash( $_POST['cfs']['post_content'] ), $post_id, 'db' );
                 }
 
                 // New posts
@@ -114,13 +124,13 @@ class cfs_form
                 $this->session->cleanup();
 
                 // Redirect public forms
-                if ( true === $session['front_end'] ) {
-                    $redirect_url = $_SERVER['REQUEST_URI'];
+                if ( $is_front_end ) {
+                    $redirect_url = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : home_url( '/' );
                     if ( ! empty( $session['confirmation_url'] ) ) {
                         $redirect_url = $session['confirmation_url'];
                     }
 
-                    header( 'Location: ' . $redirect_url );
+                    wp_redirect( esc_url_raw( $redirect_url ) );
                     exit;
                 }
             }
@@ -183,9 +193,9 @@ CFS['loop_buffer'] = [];
      * @since 2.6
      */
     function admin_notice() {
-        $screen = get_current_screen();
+        $screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 
-        if ( !isset($screen->base) || $screen->base !== 'post' ) {
+        if ( ! isset( $screen->base ) || $screen->base !== 'post' ) {
             return;
         }
 
@@ -218,8 +228,13 @@ CFS['loop_buffer'] = [];
             'front_end'             => true,
         ];
 
-        $params = array_merge( $defaults, $params );
+        $params = array_merge( $defaults, (array) $params );
         $input_fields = [];
+
+        // The session isn't created during AJAX / autosave requests
+        if ( ! ( $this->session instanceof cfs_session ) ) {
+            $this->session = new cfs_session();
+        }
 
         // Keep track of field validators
         CFS()->validators = [];
@@ -240,7 +255,8 @@ CFS['loop_buffer'] = [];
 
         if ( ! empty( $field_groups ) ) {
             $input_fields = CFS()->api->get_input_fields( [
-                'group_id' => $field_groups
+                'group_id' => $field_groups,
+                'post_id_values' => $post_id,
             ] );
         }
 
@@ -251,6 +267,7 @@ CFS['loop_buffer'] = [];
         // passes 1 field group at a time, we use CFS()->group_ids from admin_head.php
         // to store all group IDs needed for the SESSION.
         $all_group_ids = ( false === $params['front_end'] ) ? CFS()->group_ids : $field_groups;
+        $all_group_ids = array_map( 'intval', (array) $all_group_ids );
 
         $session_data = [
             'post_id'               => $post_id,
@@ -278,7 +295,7 @@ CFS['loop_buffer'] = [];
     ?>
 
         <div class="field" data-validator="required">
-            <label><?php echo $params['post_title']; ?></label>
+            <label><?php echo esc_html( $params['post_title'] ); ?></label>
             <input type="text" name="cfs[post_title]" value="<?php echo empty( $post_id ) ? '' : esc_attr( $post->post_title ); ?>" />
         </div>
 
@@ -289,7 +306,7 @@ CFS['loop_buffer'] = [];
     ?>
 
         <div class="field">
-            <label><?php echo $params['post_content']; ?></label>
+            <label><?php echo esc_html( $params['post_content'] ); ?></label>
             <textarea name="cfs[post_content]"><?php echo empty( $post_id ) ? '' : esc_textarea( $post->post_content ); ?></textarea>
         </div>
 
@@ -327,7 +344,7 @@ CFS['loop_buffer'] = [];
             if ( 'tab' == $field->type && $is_first_tab ) {
                 echo '<div class="cfs-tabs">';
                 foreach ( $tabs as $key => $tab ) {
-                    echo '<div class="cfs-tab" rel="' . $tab->name . '">' . $tab->label . '</div>';
+                    echo '<div class="cfs-tab" rel="' . esc_attr( $tab->name ) . '">' . esc_html( $tab->label ) . '</div>';
                 }
                 echo '</div>';
                 $is_first_tab = false;
@@ -373,7 +390,7 @@ CFS['loop_buffer'] = [];
                 if ( 'tab' == $field->type ) {
 
                     // Close the previous tab
-                    if ( $field->name != $tabs[0]->name ) {
+                    if ( isset( $tabs[0] ) && $field->name != $tabs[0]->name ) {
                         echo '</div>';
                     }
                     echo '<div class="cfs-tab-content cfs-tab-content-' . esc_attr( $field->name ) . '">';
@@ -385,7 +402,7 @@ CFS['loop_buffer'] = [];
                 else {
     ?>
 
-        <div class="field field-<?php echo esc_attr( $field->name ); ?>" data-type="<?php echo esc_attr( $field->type ); ?>" data-name="<?php echo esc_attr( $field->name ); ?>"">
+        <div class="field field-<?php echo esc_attr( $field->name ); ?>" data-type="<?php echo esc_attr( $field->type ); ?>" data-name="<?php echo esc_attr( $field->name ); ?>">
             <?php if ( 'loop' == $field->type ) : ?>
             <a href="javascript:;" class="cfs_loop_toggle" title="<?php esc_html_e( 'Toggle row visibility', 'cfs' ); ?>"></a>
             <?php endif; ?>
@@ -435,11 +452,11 @@ CFS['loop_buffer'] = [];
         <script>
         (function($) {
             CFS.field_rules = CFS.field_rules || {};
-            $.extend( CFS.field_rules, <?php echo json_encode( CFS()->validators ); ?> );
+            $.extend( CFS.field_rules, <?php echo wp_json_encode( CFS()->validators, JSON_HEX_TAG | JSON_HEX_AMP ); ?> );
         })(jQuery);
         </script>
-        <input type="hidden" name="cfs[save]" value="<?php echo wp_create_nonce( 'cfs_save_input' ); ?>" />
-        <input type="hidden" name="cfs[session_id]" value="<?php echo $this->session->session_id; ?>" />
+        <input type="hidden" name="cfs[save]" value="<?php echo esc_attr( wp_create_nonce( 'cfs_save_input' ) ); ?>" />
+        <input type="hidden" name="cfs[session_id]" value="<?php echo esc_attr( $this->session->session_id ); ?>" />
 
         <?php if ( false !== $params['front_end'] ) : ?>
 

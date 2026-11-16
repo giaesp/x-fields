@@ -2,7 +2,8 @@
 Contributors: mgibbs189
 Tags: custom fields, fields, postmeta, relationship, repeater, file upload
 Requires at least: 5.0
-Tested up to: 6.5.2
+Tested up to: 6.9
+Requires PHP: 7.4
 Stable tag: trunk
 License: GPLv2
 
@@ -45,6 +46,25 @@ Custom Field Suite (CFS) lets you add custom fields to your posts. It's lightwei
 * [Github →](https://github.com/mgibbs189/custom-field-suite)
 
 == Changelog ==
+
+= 2.7.0 =
+* Security: removed eval() in the Loop field (remote code execution via crafted row keys)
+* Security: fixed SQL injection in Relationship / Term / User fields and in get_reverse_related()
+* Security: form sessions now use random_bytes() and are bound to the user; admin saves require edit_post
+* Security: front-end post_title / post_content and field values are filtered with KSES for users without unfiltered_html
+* Security: field group save checks post type and capability; names, labels, rules and extras are sanitized
+* Security: forged field IDs can no longer hijack fields of other groups
+* Security: hardened import/export, object-injection-safe unserialize, escaped output (XSS) across admin screens
+* Security: hyperlink URLs sanitized, target whitelisted, rel="noopener" on _blank
+* PHP 8: fixed fatal errors on unknown field types, TypeErrors and undefined index/property warnings; no dynamic properties
+* Fix: CFS Tools "Reset" now actually deactivates the plugin
+* Fix: Relationship field listed the wrong post types when none were selected
+* Fix: File field ignored the "File Type" option in the media library
+* Fix: "Insert row" in Loop fields used the first loop on the page instead of the current one
+* Fix: search filters crashed on regex special characters
+* Fix: Post Type Switcher integration never matched (undefined variable)
+* Fix: text/textarea values with HTML entities were double-encoded
+* Fix: tables are created with the site charset/collation (utf8mb4)
 
 = 2.6.7 =
 * Reverted some int casting to prevent errors

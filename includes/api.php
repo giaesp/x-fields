@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 class cfs_api
 {
     public $cache;
@@ -29,7 +31,7 @@ class cfs_api
         global $post;
 
         $defaults = [ 'format' => 'api' ]; // "api", "input", or "raw"
-        $options = array_merge( $defaults, $options );
+        $options = array_merge( $defaults, (array) $options );
 
         if ( empty( $post_id ) && empty( $post ) ) {
             return null;
@@ -57,8 +59,15 @@ class cfs_api
         global $post, $wpdb;
 
         $defaults = [ 'format' => 'api' ]; // "api", "input", or "raw"
-        $options = array_merge( $defaults, $options );
-        $post_id = empty( $post_id ) ? $post->ID : (int) $post_id;
+        $options = array_merge( $defaults, (array) $options );
+
+        if ( empty( $post_id ) ) {
+            if ( empty( $post->ID ) ) {
+                return [];
+            }
+            $post_id = $post->ID;
+        }
+        $post_id = (int) $post_id;
 
         // Return cached results
         if ( isset( $this->cache[ $post_id ][ $options['format'] ] ) ) {
@@ -80,14 +89,14 @@ class cfs_api
 
             if ( ! empty( $fields ) ) {
                 // Make sure we're using active field groups
-                $field_ids = implode( ',', array_keys( $fields ) );
+                $field_ids = implode( ',', array_map( 'intval', array_keys( $fields ) ) );
 
                 // Get all the field data
                 $sql = "
                 SELECT m.meta_value, v.field_id, v.hierarchy, v.weight
                 FROM {$wpdb->prefix}cfs_values v
                 INNER JOIN {$wpdb->postmeta} m ON m.meta_id = v.meta_id
-                WHERE v.field_id IN ($field_ids) AND v.post_id IN ($post_id)
+                WHERE v.field_id IN ($field_ids) AND v.post_id = $post_id
                 ORDER BY v.depth, FIELD(v.field_id, $field_ids), v.weight, v.sub_weight";
 
                 $results = $wpdb->get_results( $sql );
@@ -98,7 +107,11 @@ class cfs_api
                 $prev_item = '';
 
                 foreach ( $results as $row_count => $result ) {
-                    $field = $fields[$result->field_id];
+                    if ( ! isset( $fields[ $result->field_id ] ) ) {
+                        continue;
+                    }
+
+                    $field = $fields[ $result->field_id ];
                     $current_item = "{$result->hierarchy}.{$result->weight}.{$result->field_id}";
 
                     if ( ! empty( $result->hierarchy ) ) {
@@ -107,7 +120,7 @@ class cfs_api
                         if ( 'api' == $options['format'] || 'raw' == $options['format'] ) {
                             $tmp = explode( ':', $result->hierarchy );
                             foreach ( $tmp as $key => $val ) {
-                                if ( 0 == ( $key % 2 ) ) {
+                                if ( 0 == ( $key % 2 ) && isset( $fields[ $val ] ) ) {
                                     $tmp[ $key ] = $fields[ $val ]->name;
                                 }
                             }
@@ -138,7 +151,7 @@ class cfs_api
                     }
 
                     // Assemble the values
-                    if ( $current_item != $prev_item && '' != $prev_item ) { // call assemble_value_array on previous field
+                    if ( $current_item != $prev_item && '' != $prev_item && isset( $fields[ $prev_field_id ] ) ) { // call assemble_value_array on previous field
                         $this->assemble_value_array( $field_data, $prev_hierarchy, $fields[ $prev_field_id ], false, $options );
                     }
 
@@ -166,7 +179,13 @@ class cfs_api
     public function get_field_info( $field_name = false, $post_id = false ) {
         global $post, $wpdb;
 
-        $post_id = empty( $post_id ) ? $post->ID : (int) $post_id;
+        if ( empty( $post_id ) ) {
+            if ( empty( $post->ID ) ) {
+                return [];
+            }
+            $post_id = $post->ID;
+        }
+        $post_id = (int) $post_id;
 
         // Get all field groups for this post
         $group_ids = $this->get_matching_groups( $post_id, true );
@@ -198,22 +217,26 @@ class cfs_api
     public function get_reverse_related( $post_id, $options = [] ) {
         global $wpdb;
 
-        $where = "m.meta_value = '$post_id'";
+        $options = (array) $options;
+        $where = $wpdb->prepare( 'm.meta_value = %s', (string) (int) $post_id );
 
-        if ( isset( $options['field_name'] ) ) {
-            $field_name = implode( "','", (array) $options['field_name'] );
-            $where .= " AND m.meta_key IN ('$field_name')";
+        // Build a safe, escaped IN() list
+        $in_list = function( $values ) {
+            $values = array_map( function( $v ) { return "'" . esc_sql( (string) $v ) . "'"; }, (array) $values );
+            return implode( ',', $values );
+        };
+
+        if ( ! empty( $options['field_name'] ) ) {
+            $where .= ' AND m.meta_key IN (' . $in_list( $options['field_name'] ) . ')';
         }
         if ( isset( $options['field_type'] ) ) {
             $field_type = $options['field_type'];
         }
-        if ( isset( $options['post_type'] ) ) {
-            $post_type = implode( "','", (array) $options['post_type'] );
-            $where .= " AND p.post_type IN ('$post_type')";
+        if ( ! empty( $options['post_type'] ) ) {
+            $where .= ' AND p.post_type IN (' . $in_list( $options['post_type'] ) . ')';
         }
-        if ( isset( $options['post_status'] ) ) {
-            $post_status = implode( "','", (array) $options['post_status'] );
-            $where .= " AND p.post_status IN ('$post_status')";
+        if ( ! empty( $options['post_status'] ) ) {
+            $where .= ' AND p.post_status IN (' . $in_list( $options['post_status'] ) . ')';
         }
 
         // Limit to specific field types
@@ -223,7 +246,7 @@ class cfs_api
         if ( ! empty( $results ) ) {
             $field_ids = [];
             foreach ( $results as $result ) {
-                $field_ids[] = $result['id'];
+                $field_ids[] = (int) $result['id'];
             }
             $where .= " AND v.field_id IN (" . implode( ',', $field_ids ) . ")";
         }
@@ -257,10 +280,16 @@ class cfs_api
             'format'            => 'api', // "api" or "input"
             'field_groups'      => [],
         ];
-        $options = array_merge( $defaults, $options );
+        $options = array_merge( $defaults, (array) $options );
+        $field_data = (array) $field_data;
+        $post_data = (array) $post_data;
 
         // Log saved fields
         $this->saved_fields = [];
+
+        $fields = [];
+        $field_id_lookup = [];
+        $group_ids = [];
 
         // create post if the ID is missing
         if ( empty( $post_data['ID'] ) ) {
@@ -279,6 +308,7 @@ class cfs_api
             $post_id = (int) $post_data['ID'];
 
             if ( 1 < count( $post_data ) ) {
+                unset( $post_data['ID'] );
                 $wpdb->update( $wpdb->posts, $post_data, [ 'ID' => $post_id ] );
                 clean_post_cache( $post_id );
             }
@@ -286,8 +316,12 @@ class cfs_api
 
         // For input forms, get the group IDs from the HTTP POST
         // Otherwise, the field group might not match anymore (e.g. the taxonomy changed)
+        if ( empty( $post_id ) || is_wp_error( $post_id ) ) {
+            return 0;
+        }
+
         if ( 'input' == $options['format'] ) {
-            $group_ids = $options['field_groups'];
+            $group_ids = array_map( 'intval', (array) $options['field_groups'] );
         }
         elseif ( 'api' == $options['format'] ) {
 
@@ -337,7 +371,7 @@ class cfs_api
             DELETE v, m
             FROM {$wpdb->prefix}cfs_values v
             LEFT JOIN {$wpdb->postmeta} m ON m.meta_id = v.meta_id
-            WHERE v.post_id = '$post_id' AND (v.field_id IN ($field_ids) OR v.base_field_id IN ($field_ids))";
+            WHERE v.post_id = $post_id AND (v.field_id IN ($field_ids) OR v.base_field_id IN ($field_ids))";
 
             if ( ! empty( $field_ids ) ) {
                 $wpdb->query( $sql );
@@ -346,11 +380,11 @@ class cfs_api
         elseif ( 'input' == $options['format'] ) {
 
             // If saving raw input, delete existing postdata
-            $results = $this->find_input_fields( [ 'group_id' => $group_ids ] );
+            $results = empty( $group_ids ) ? [] : $this->find_input_fields( [ 'group_id' => $group_ids ] );
             if ( ! empty( $results ) ) {
                 $field_ids = [];
                 foreach ( $results as $result ) {
-                    $field_ids[] = $result['id'];
+                    $field_ids[] = (int) $result['id'];
                 }
                 $field_ids = implode( ',', $field_ids );
 
@@ -358,7 +392,7 @@ class cfs_api
                 DELETE v, m
                 FROM {$wpdb->prefix}cfs_values v
                 LEFT JOIN {$wpdb->postmeta} m ON m.meta_id = v.meta_id
-                WHERE v.post_id = '$post_id' AND v.field_id IN ($field_ids)";
+                WHERE v.post_id = $post_id AND v.field_id IN ($field_ids)";
 
                 if ( ! empty( $field_ids ) ) {
                     $wpdb->query( $sql );
@@ -382,6 +416,8 @@ class cfs_api
                     'field_id_lookup'       => $field_id_lookup,
                     'weight'                => 0,
                     'depth'                 => 0,
+                    // Values from forms are untrusted: filter HTML for users without unfiltered_html
+                    'kses'                  => ( 'input' == $options['format'] && ! current_user_can( 'unfiltered_html' ) ),
                 ]
             );
         }
@@ -411,8 +447,16 @@ class cfs_api
             // we need to lookup the ID from the "field_id_lookup" array
             if ( 'input' != $params['format'] ) {
                 $field_name = $field_id;
-                $field_id = (int) $params['field_id_lookup'][ $params['parent_id'] . ':' . $field_name ];
+                $lookup_key = $params['parent_id'] . ':' . $field_name;
+
+                if ( ! isset( $params['field_id_lookup'][ $lookup_key ] ) ) {
+                    return;
+                }
+
+                $field_id = (int) $params['field_id_lookup'][ $lookup_key ];
             }
+
+            $field_id = (int) $field_id;
 
             // Exit if the field is missing
             if ( ! isset( $params['all_fields'][ $field_id ] ) ) {
@@ -420,11 +464,26 @@ class cfs_api
             }
 
             $field_type = $params['all_fields'][ $field_id ]->type;
+
+            if ( ! isset( CFS()->fields[ $field_type ] ) ) {
+                return;
+            }
+        }
+        else {
+            // Odd depth = loop row index; always an integer
+            $field_id = (int) $field_id;
         }
 
         // We've found the values
         if ( isset( $field_array['value'] ) || 'loop' != $field_type ) {
             $values = isset( $field_array['value'] ) ? $field_array['value'] : $field_array;
+
+            // Filter untrusted HTML before the field type transforms (e.g. serializes) the value
+            if ( ! empty( $params['kses'] ) ) {
+                $values = map_deep( $values, function( $v ) {
+                    return is_string( $v ) ? wp_kses_post( $v ) : $v;
+                } );
+            }
 
             // Trigger the pre_save hook
             $values = CFS()->fields[ $field_type ]->pre_save( $values, $params['all_fields'][ $field_id ] );
@@ -432,6 +491,14 @@ class cfs_api
             $sub_weight = 0;
 
             foreach ( (array) $values as $value ) {
+
+                // Only scalar values can be stored
+                if ( ! is_scalar( $value ) && null !== $value ) {
+                    continue;
+                }
+
+                $value = (string) $value;
+
                 // Insert into postmeta
                 $data = [
                     'post_id'       => $params['post_id'],
@@ -467,6 +534,12 @@ class cfs_api
         // Keep recursing
         else {
             foreach ( $field_array as $sub_field_id => $sub_field_array ) {
+
+                // Hierarchy keys must be integers (field IDs or row indexes)
+                if ( 'input' == $params['format'] && ! is_int( $sub_field_id ) && ! ctype_digit( (string) $sub_field_id ) ) {
+                    continue;
+                }
+
                 $new_params = $params;
                 $new_params['field_array'] = $sub_field_array;
                 $new_params['field_id'] = $sub_field_id;
@@ -476,7 +549,11 @@ class cfs_api
                 // If not raw input, then sub_field_id is actually the field name
                 if ( 'input' != $params['format'] ) {
                     if ( 0 == $new_params['depth'] % 2 ) {
-                        $sub_field_id = $params['field_id_lookup'][ $new_params['parent_id'] . ':' . $sub_field_id ];
+                        $lookup_key = $new_params['parent_id'] . ':' . $sub_field_id;
+                        if ( ! isset( $params['field_id_lookup'][ $lookup_key ] ) ) {
+                            continue;
+                        }
+                        $sub_field_id = $params['field_id_lookup'][ $lookup_key ];
                     }
                     else {
                         $new_params['parent_id'] = $field_id;
@@ -487,7 +564,7 @@ class cfs_api
                     $new_params['hierarchy'][] = $field_id;
                 }
 
-                $new_params['hierarchy'][] = $sub_field_id;
+                $new_params['hierarchy'][] = (int) $sub_field_id;
                 $this->save_fields_recursive( $new_params );
             }
         }
@@ -570,7 +647,15 @@ class cfs_api
 
         $fields = $this->find_input_fields( $params );
 
-        $values = $this->get_fields( $post->ID, [ 'format' => 'input' ] );
+        // Values can come from an explicit post ID (front-end forms) or the global $post
+        if ( isset( $params['post_id_values'] ) ) {
+            $values_post_id = (int) $params['post_id_values'];
+        }
+        else {
+            $values_post_id = empty( $post->ID ) ? 0 : (int) $post->ID;
+        }
+
+        $values = ( 0 < $values_post_id ) ? $this->get_fields( $values_post_id, [ 'format' => 'input' ] ) : [];
 
         $output = [];
 
@@ -597,7 +682,10 @@ class cfs_api
     ================================================================
     */
     public function get_matching_groups( $params, $skip_roles = false ) {
-        global $wpdb, $current_user;
+        global $wpdb;
+
+        $post_id = 0;
+        $temp = [];
 
         // Set post ID
         if ( ! is_array( $params ) ) {
@@ -613,6 +701,11 @@ class cfs_api
         }
         else {
             $rule_types = $params;
+
+            if ( ! empty( $params['post_ids'] ) ) {
+                $first = (array) $params['post_ids'];
+                $post_id = (int) reset( $first );
+            }
         }
 
         // Detect post_types / page_templates if they weren't sent
@@ -664,7 +757,7 @@ class cfs_api
             [
                 'post_types'        => [],
                 'post_formats'      => [],
-                'user_roles'        => $current_user->roles,
+                'user_roles'        => (array) wp_get_current_user()->roles,
                 'term_ids'          => [],
                 'post_ids'          => [],
                 'page_templates'    => []
@@ -682,8 +775,8 @@ class cfs_api
         foreach ( $field_groups as $group_id => $result ) {
             $fail = false;
 
-            $rules = $result['rules'];
-            $extras = $result['extras'];
+            $rules = is_array( $result['rules'] ) ? $result['rules'] : [];
+            $extras = is_array( $result['extras'] ) ? $result['extras'] : [];
 
             foreach ( $rule_types as $rule_type => $value ) {
                 if ( ! empty( $rules[ $rule_type ] ) ) {
@@ -697,8 +790,9 @@ class cfs_api
                         $value = $wpdb->get_col( $wpdb->prepare( $sql, $post_id ) );
                     }
 
-                    $operator = (array) $rules[ $rule_type ]['operator'];
-                    $in_array = ( 0 < count( array_intersect( (array) $value, $rules[ $rule_type ]['values'] ) ) );
+                    $operator = isset( $rules[ $rule_type ]['operator'] ) ? (array) $rules[ $rule_type ]['operator'] : [ '==' ];
+                    $rule_values = isset( $rules[ $rule_type ]['values'] ) ? (array) $rules[ $rule_type ]['values'] : [];
+                    $in_array = ( 0 < count( array_intersect( (array) $value, $rule_values ) ) );
 
                     if ( ( $in_array && '!=' == $operator[0] ) || ( ! $in_array && '==' == $operator[0] ) ) {
                         $fail = true;
@@ -753,10 +847,12 @@ class cfs_api
 
             $value = CFS()->fields[ $field->type ]->prepare_value( $value, $field );
 
-            if ( 'api' == $options['format'] ) {
+            $format = is_array( $options ) && isset( $options['format'] ) ? $options['format'] : 'api';
+
+            if ( 'api' == $format ) {
                 $value = CFS()->fields[ $field->type ]->format_value_for_api( $value, $field );
             }
-            elseif ( 'input' == $options['format'] ) {
+            elseif ( 'input' == $format ) {
                 $value = CFS()->fields[ $field->type ]->format_value_for_input( $value, $field );
             }
         }
@@ -782,7 +878,7 @@ class cfs_api
             if ( is_string( $field ) ) {
                 $tmp = [];
                 foreach ( $data as $row ) {
-                    $tmp[] = $row[ $field ];
+                    $tmp[] = isset( $row[ $field ] ) ? $row[ $field ] : null;
                 }
                 $args[ $n ] = $tmp;
             }
