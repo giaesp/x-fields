@@ -17,49 +17,53 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: ..\n"
 
-#: includes/field.php:49
+#: includes/field.php:59
 #: includes/fields/text.php:10
 msgid "Text"
 msgstr "Текст"
 
-#: includes/field.php:75
+#: includes/field.php:85
+#: includes/fields/color/color.php:48
+#: includes/fields/date/date.php:58
 #: includes/fields/file.php:92
-#: includes/fields/select.php:150
+#: includes/fields/select.php:137
 #: includes/fields/text.php:32
 #: includes/fields/textarea.php:60
 #: includes/fields/true_false.php:49
-#: includes/fields/wysiwyg.php:56
+#: includes/fields/wysiwyg.php:55
 msgid "Validation"
 msgstr "Валидация"
 
-#: includes/field.php:84
+#: includes/field.php:94
+#: includes/fields/color/color.php:57
+#: includes/fields/date/date.php:67
 #: includes/fields/file.php:101
-#: includes/fields/select.php:159
+#: includes/fields/select.php:146
 #: includes/fields/text.php:41
 #: includes/fields/textarea.php:69
 #: includes/fields/true_false.php:58
-#: includes/fields/wysiwyg.php:65
+#: includes/fields/wysiwyg.php:64
 msgid "This is a required field"
 msgstr "Обязательное поле"
 
-#: includes/field_group.php:166
+#: includes/field_group.php:172
 msgid "Imported"
 msgstr "Импорт"
 
-#: includes/field_group.php:169
+#: includes/field_group.php:175
 msgid "Skipped"
 msgstr "Пропущено"
 
-#: includes/field_group.php:172
-#: includes/field_group.php:177
+#: includes/field_group.php:178
+#: includes/field_group.php:183
 msgid "Nothing to import"
 msgstr "Нет объектов для импорта"
 
-#: includes/fields/color/color.php:10
+#: includes/fields/color/color.php:16
 msgid "Color"
 msgstr "Цвет"
 
-#: includes/fields/date/date.php:10
+#: includes/fields/date/date.php:17
 msgid "Date"
 msgstr "Дата"
 
@@ -148,9 +152,9 @@ msgid "Add Row"
 msgstr "Добавить блок"
 
 #: includes/fields/loop.php:84
-#: includes/fields/relationship.php:113
-#: includes/fields/term.php:108
-#: includes/fields/user.php:84
+#: includes/fields/relationship.php:126
+#: includes/fields/term.php:109
+#: includes/fields/user.php:85
 msgid "Limits"
 msgstr "Ограничения"
 
@@ -158,37 +162,37 @@ msgstr "Ограничения"
 msgid "Relationship"
 msgstr "Связь"
 
-#: includes/fields/relationship.php:70
+#: includes/fields/relationship.php:83
 msgid "Search posts"
 msgstr "Поиск сообщений…"
 
-#: includes/fields/relationship.php:97
-#: includes/init.php:316
-#: templates/meta_box_rules.php:159
+#: includes/fields/relationship.php:110
+#: includes/init.php:361
+#: templates/meta_box_rules.php:126
 msgid "Post Types"
 msgstr "Типы записей"
 
-#: includes/fields/relationship.php:98
+#: includes/fields/relationship.php:111
 msgid "Limit posts to the following types"
 msgstr "Ограничить записи следующим типом"
 
-#: includes/fields/select.php:11
+#: includes/fields/select.php:9
 msgid "Select"
 msgstr "Выбрать"
 
-#: includes/fields/select.php:103
+#: includes/fields/select.php:90
 msgid "Choices"
 msgstr "Предпочтения"
 
-#: includes/fields/select.php:104
+#: includes/fields/select.php:91
 msgid "Enter one choice per line"
 msgstr "Одно предпочтение в строке"
 
-#: includes/fields/select.php:118
+#: includes/fields/select.php:105
 msgid "Multi-select?"
 msgstr "Множественный выбор?"
 
-#: includes/fields/select.php:127
+#: includes/fields/select.php:114
 msgid "This is a multi-select field"
 msgstr "Поле множественного выбора"
 
@@ -196,7 +200,7 @@ msgstr "Поле множественного выбора"
 msgid "Tab"
 msgstr "Вкладка"
 
-#: includes/fields/color/color.php:18
+#: includes/fields/color/color.php:33
 #: includes/fields/text.php:18
 #: includes/fields/textarea.php:25
 msgid "Default Value"
@@ -207,7 +211,7 @@ msgid "Textarea"
 msgstr "Текстовое поле"
 
 #: includes/fields/textarea.php:39
-#: includes/fields/wysiwyg.php:35
+#: includes/fields/wysiwyg.php:34
 msgid "Formatting"
 msgstr "Форматирование"
 
@@ -235,59 +239,59 @@ msgstr "Текст рядом с чекбоксом"
 msgid "User"
 msgstr "Пользователь"
 
-#: includes/fields/user.php:35
+#: includes/fields/user.php:36
 msgid "Search users"
 msgstr "Поиск пользователей…"
 
-#: includes/fields/wysiwyg.php:10
+#: includes/fields/wysiwyg.php:18
 msgid "Wysiwyg Editor"
 msgstr "Визуальный редактор"
 
-#: includes/fields/wysiwyg.php:44
+#: includes/fields/wysiwyg.php:43
 msgid "Default"
 msgstr "По-умолчанию"
 
-#: includes/fields/wysiwyg.php:45
+#: includes/fields/wysiwyg.php:44
 msgid "None (bypass filters)"
 msgstr "Нет (игнорировать фильтры)"
 
-#: includes/form.php:269
+#: includes/form.php:267
 msgid "Submit"
 msgstr "Отправить"
 
-#: includes/init.php:66
+#: includes/init.php:70
 msgid "Field Groups"
 msgstr "Группа полей"
 
-#: includes/init.php:67
+#: includes/init.php:71
 msgid "Field Group"
 msgstr "Группа полей"
 
-#: includes/init.php:69
+#: includes/init.php:73
 msgid "Add New Field Group"
 msgstr "Добавить группу полей"
 
-#: includes/init.php:70
+#: includes/init.php:74
 msgid "Edit Field Group"
 msgstr "Редактировать группу полей"
 
-#: includes/init.php:71
+#: includes/init.php:75
 msgid "New Field Group"
 msgstr "Новая"
 
-#: includes/init.php:72
+#: includes/init.php:76
 msgid "View Field Group"
 msgstr "Показать"
 
-#: includes/init.php:73
+#: includes/init.php:77
 msgid "Search Field Groups"
 msgstr "Поиск"
 
-#: includes/init.php:74
+#: includes/init.php:78
 msgid "No Field Groups found"
 msgstr "Ничего не найдено"
 
-#: includes/init.php:75
+#: includes/init.php:79
 msgid "No Field Groups found in Trash"
 msgstr "В корзине ничего не найдено"
 
@@ -295,51 +299,51 @@ msgstr "В корзине ничего не найдено"
 msgid "Tools"
 msgstr "Инструменты"
 
-#: includes/init.php:158
+#: includes/init.php:201
 msgid "Fields"
 msgstr "Поля"
 
-#: includes/init.php:159
+#: includes/init.php:202
 msgid "Placement Rules"
 msgstr "Правила размещения"
 
-#: includes/init.php:160
+#: includes/init.php:203
 msgid "Extras"
 msgstr "Дополнительно"
 
-#: includes/init.php:302
+#: includes/init.php:347
 msgid "Title"
 msgstr "Заголовок"
 
-#: includes/init.php:303
+#: includes/init.php:348
 msgid "Placement"
 msgstr "Расположение"
 
-#: includes/init.php:317
-#: templates/meta_box_rules.php:225
+#: includes/init.php:362
+#: templates/meta_box_rules.php:192
 msgid "User Roles"
 msgstr "Роли пользователей"
 
-#: includes/init.php:318
-#: templates/meta_box_rules.php:257
+#: includes/init.php:363
+#: templates/meta_box_rules.php:224
 msgid "Posts"
 msgstr "Записи"
 
-#: includes/init.php:319
+#: includes/init.php:364
 msgid "Term IDs"
 msgstr "Термин идентификаторы"
 
-#: includes/init.php:320
-#: templates/meta_box_rules.php:313
+#: includes/init.php:365
+#: templates/meta_box_rules.php:284
 msgid "Page Templates"
 msgstr "Шаблоны страниц"
 
-#: includes/init.php:321
-#: templates/meta_box_rules.php:192
+#: includes/init.php:366
+#: templates/meta_box_rules.php:159
 msgid "Post Formats"
 msgstr "Форматы записей"
 
-#: includes/revision.php:28
+#: includes/revision.php:32
 msgid "Post Meta"
 msgstr "Публикация мета"
 
@@ -356,24 +360,24 @@ msgstr "Название"
 msgid "The field label that editors will see."
 msgstr "Название поля, отображаемое редактору"
 
-#: templates/field_html.php:35
+#: templates/field_html.php:32
 #: templates/meta_box_fields.php:7
 msgid "Name"
 msgstr "Имя"
 
-#: templates/field_html.php:38
+#: templates/field_html.php:34
 msgid "The field name is passed into get() to retrieve values. Use only lowercase letters, numbers, and underscores."
 msgstr "Название поля передается в функцию get() для получения значения. Используйте только буквы, числа и нижнее подчеркивание."
 
-#: templates/field_html.php:45
+#: templates/field_html.php:37
 msgid "Field Type"
 msgstr "Тип поля"
 
-#: templates/field_html.php:62
+#: templates/field_html.php:54
 msgid "Notes"
 msgstr "Примечание"
 
-#: templates/field_html.php:64
+#: templates/field_html.php:55
 msgid "Notes for editors during data entry"
 msgstr "Примечание для редактора во время ввода данных"
 
@@ -381,27 +385,27 @@ msgstr "Примечание для редактора во время ввод�
 msgid "Order"
 msgstr "Порядок"
 
-#: templates/meta_box_extras.php:37
+#: templates/meta_box_extras.php:36
 msgid "The field group with the lowest order will appear first."
 msgstr "Группа полей с низшим порядковым номером отобразится первой."
 
-#: templates/meta_box_extras.php:47
+#: templates/meta_box_extras.php:44
 msgid "Position"
 msgstr "Расположение"
 
-#: templates/meta_box_extras.php:50
+#: templates/meta_box_extras.php:47
 msgid "Normal"
 msgstr "Обычно"
 
-#: templates/meta_box_extras.php:51
+#: templates/meta_box_extras.php:48
 msgid "Side"
 msgstr "Сбоку"
 
-#: templates/meta_box_extras.php:56
+#: templates/meta_box_extras.php:53
 msgid "Display Settings"
 msgstr "Настройки отображения"
 
-#: templates/meta_box_extras.php:66
+#: templates/meta_box_extras.php:63
 msgid "Hide the content editor"
 msgstr "Спрятать редактор"
 
@@ -413,11 +417,11 @@ msgstr "равно"
 msgid "is not"
 msgstr "не является"
 
-#: templates/meta_box_rules.php:117
+#: templates/meta_box_rules.php:116
 msgid "Leave blank to skip this rule"
 msgstr "Оставьте пустым, чтобы пропустить условие"
 
-#: templates/meta_box_rules.php:281
+#: templates/meta_box_rules.php:252
 msgid "Taxonomy Terms"
 msgstr "Правила таксономии"
 
@@ -448,7 +452,7 @@ msgstr "Удалить все"
 
 #. Plugin Name of the plugin
 #: x-fields.php
-#: includes/init.php:68
+#: includes/init.php:72
 #~ msgid "X-Fields"
 #~ msgstr "Кастомные поля"
 
@@ -496,27 +500,19 @@ msgstr ""
 msgid "Remove this row?"
 msgstr ""
 
-#: includes/fields/select.php:134
-msgid "Select2"
-msgstr ""
-
-#: includes/fields/select.php:143
-msgid "Render this field with Select2"
-msgstr ""
-
 #: includes/fields/term.php:10
 msgid "Term"
 msgstr ""
 
-#: includes/fields/term.php:65
+#: includes/fields/term.php:66
 msgid "Search terms"
 msgstr ""
 
-#: includes/fields/term.php:92
+#: includes/fields/term.php:93
 msgid "Taxonomies"
 msgstr ""
 
-#: includes/fields/term.php:93
+#: includes/fields/term.php:94
 msgid "Limit terms to the following taxonomies"
 msgstr ""
 
@@ -528,25 +524,25 @@ msgstr ""
 msgid "Sorry, you are not allowed to edit this item."
 msgstr ""
 
-#: includes/form.php:245
+#: includes/form.php:243
 msgid "One (or more) of your fields had validation errors. More information is available below."
 msgstr ""
 
-#: includes/form.php:449
+#: includes/form.php:447
 msgid "Toggle row visibility"
 msgstr ""
 
-#: includes/init.php:150
+#: includes/init.php:193
 msgid "X-Fields Tools"
 msgstr ""
 
 #. translators: 1: number of field groups, 2: number of value rows
-#: includes/migration.php:123
+#: includes/migration.php:204
 #, php-format
 msgid "X-Fields imported %1$d field groups and %2$d values from Custom Field Suite. The old CFS tables were kept as a backup."
 msgstr ""
 
-#: templates/admin_head.php:45
+#: templates/admin_head.php:42
 msgid "Delete this field and its saved values?"
 msgstr ""
 
@@ -562,7 +558,7 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: templates/field_html.php:77
+#: templates/field_html.php:66
 msgid "Done"
 msgstr ""
 
@@ -618,24 +614,24 @@ msgstr ""
 msgid "Paste the import code here"
 msgstr ""
 
-#: x-fields.php:37
+#: x-fields.php:36
 msgid "X-Fields is not active: please deactivate Custom Field Suite first. Your CFS data will be migrated automatically."
 msgstr ""
 
 #. translators: 1: loop label, 2: row number
-#: includes/api.php:626
+#: includes/api.php:621
 #, php-format
 msgid "%1$s, row %2$d"
 msgstr ""
 
 #. translators: %s: field label
-#: includes/api.php:647
+#: includes/api.php:642
 #, php-format
 msgid "%s is required."
 msgstr ""
 
 #. translators: 1: field label, 2: minimum number of items
-#: includes/api.php:659
+#: includes/api.php:654
 #, php-format
 msgid "%1$s needs at least %2$d item."
 msgid_plural "%1$s needs at least %2$d items."
@@ -643,7 +639,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: field label, 2: maximum number of items
-#: includes/api.php:663
+#: includes/api.php:658
 #, php-format
 msgid "%1$s allows at most %2$d item."
 msgid_plural "%1$s allows at most %2$d items."
@@ -651,7 +647,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: user ID
-#: includes/fields/user.php:73
+#: includes/fields/user.php:74
 #, php-format
 msgid "User #%d"
 msgstr ""
@@ -664,6 +660,34 @@ msgstr ""
 msgid "Form errors"
 msgstr ""
 
-#: includes/form.php:237
+#: includes/form.php:235
 msgid "Saved, but some fields need attention:"
+msgstr ""
+
+#: includes/fields/color/color.php:34
+msgid "Hex color, e.g. #2271b1"
+msgstr ""
+
+#: includes/fields/date/date.php:42
+msgid "Time"
+msgstr ""
+
+#: includes/fields/date/date.php:51
+msgid "Include the time (hours and minutes)"
+msgstr ""
+
+#: includes/fields/select.php:121
+msgid "Searchable"
+msgstr ""
+
+#: includes/fields/select.php:130
+msgid "Add a search box to this select"
+msgstr ""
+
+#: templates/meta_box_rules.php:117
+msgid "Type at least 2 characters…"
+msgstr ""
+
+#: templates/meta_box_rules.php:118
+msgid "No results"
 msgstr ""

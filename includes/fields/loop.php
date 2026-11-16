@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_loop extends xf_field
+class xfields_loop extends xfields_field
 {
     public $values;
 
@@ -21,7 +21,7 @@ class xf_loop extends xf_field
     function html( $field ) {
         global $post;
 
-        $this->values = empty( $post->ID ) ? [] : XF()->api->get_fields( $post->ID, [ 'format' => 'input' ] );
+        $this->values = empty( $post->ID ) ? [] : XFields()->api->get_fields( $post->ID, [ 'format' => 'input' ] );
         $this->recursive_clone( $field->group_id, $field->id );
         $this->recursive_html( $field->group_id, $field->id );
     }
@@ -40,9 +40,9 @@ class xf_loop extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'true_false',
-                        'input_name' => "xf[fields][$key][options][row_display]",
+                        'input_name' => "xfields[fields][$key][options][row_display]",
                         'input_class' => 'true_false',
                         'value' => $this->get_option( $field, 'row_display' ),
                         'options' => [ 'message' => __( 'Show the values by default', 'x-fields' ) ],
@@ -56,9 +56,9 @@ class xf_loop extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'text',
-                        'input_name' => "xf[fields][$key][options][row_label]",
+                        'input_name' => "xfields[fields][$key][options][row_label]",
                         'value' => $this->get_option( $field, 'row_label', __( 'Loop Row', 'x-fields' ) ),
                     ] );
                 ?>
@@ -70,9 +70,9 @@ class xf_loop extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'text',
-                        'input_name' => "xf[fields][$key][options][button_label]",
+                        'input_name' => "xfields[fields][$key][options][button_label]",
                         'value' => $this->get_option( $field, 'button_label', __( 'Add Row', 'x-fields' ) ),
                     ] );
                 ?>
@@ -84,8 +84,8 @@ class xf_loop extends xf_field
                 <label><?php esc_html_e( 'Limits', 'x-fields' ); ?></label>
             </td>
             <td>
-                <input type="text" name="xf[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />
-                <input type="text" name="xf[fields][<?php echo esc_attr( $key ); ?>][options][limit_max]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_max' ) ); ?>" placeholder="max" style="width:60px" />
+                <input type="text" name="xfields[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />
+                <input type="text" name="xfields[fields][<?php echo esc_attr( $key ); ?>][options][limit_max]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_max' ) ); ?>" placeholder="max" style="width:60px" />
             </td>
         </tr>
 
@@ -102,12 +102,12 @@ class xf_loop extends xf_field
         $loop_field_ids = [];
 
         // Get loop field
-        $loop_field = XF()->api->get_input_fields( [
+        $loop_field = XFields()->api->get_input_fields( [
             'field_id' => $field_id
         ] );
 
         // Get sub-fields
-        $results = XF()->api->get_input_fields( [
+        $results = XFields()->api->get_input_fields( [
             'group_id' => $group_id,
             'parent_id' => $field_id
         ] );
@@ -121,13 +121,13 @@ class xf_loop extends xf_field
         ob_start();
     ?>
         <div class="loop_wrapper">
-            <div class="xf_loop_head open">
-                <a class="xf_delete_field" href="javascript:;"></a>
-                <a class="xf_toggle_field" href="javascript:;"></a>
-                <a class="xf_insert_field" href="javascript:;"></a>
+            <div class="xfields_loop_head open">
+                <a class="xfields_delete_field" href="javascript:;"></a>
+                <a class="xfields_toggle_field" href="javascript:;"></a>
+                <a class="xfields_insert_field" href="javascript:;"></a>
                 <span class="label"><?php echo esc_html( $row_label ); ?></span>
             </div>
-            <div class="xf_loop_body open">
+            <div class="xfields_loop_body open">
             <?php foreach ( $results as $field ) : ?>
                 <label><?php echo esc_html( $field->label ); ?></label>
 
@@ -135,19 +135,19 @@ class xf_loop extends xf_field
                 <p class="notes"><?php echo esc_html( $field->notes ); ?></p>
                 <?php endif; ?>
 
-                <div class="field field-<?php echo esc_attr( $field->name ); ?> xf_<?php echo esc_attr( $field->type ); ?>">
+                <div class="field field-<?php echo esc_attr( $field->name ); ?> xfields_<?php echo esc_attr( $field->type ); ?>">
                 <?php
                 if ( 'loop' == $field->type ) :
                     $loop_field_ids[] = $field->id;
                 ?>
                     <div class="table_footer">
-                        <input type="button" class="button-primary xf_add_field" value="<?php echo esc_attr( $this->get_option( $field, 'button_label', __( 'Add Row', 'x-fields' ) ) ); ?>" data-loop-tag="[clone][<?php echo (int) $field->id; ?>]" data-rows="0" />
+                        <input type="button" class="button-primary xfields_add_field" value="<?php echo esc_attr( $this->get_option( $field, 'button_label', __( 'Add Row', 'x-fields' ) ) ); ?>" data-loop-tag="[clone][<?php echo (int) $field->id; ?>]" data-rows="0" />
                     </div>
                 <?php else : ?>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => $field->type,
-                        'input_name' => "xf[input][clone][$field->id][value][]",
+                        'input_name' => "xfields[input][clone][$field->id][value][]",
                         'input_class' => $field->type,
                         'options' => $field->options,
                         'value' => $this->get_option( $field, 'default_value' ),
@@ -163,7 +163,7 @@ class xf_loop extends xf_field
     ?>
 
         <script>
-        XF.loop_buffer[<?php echo (int) $field_id; ?>] = <?php echo wp_json_encode( $buffer ); ?>;
+        XFields.loop_buffer[<?php echo (int) $field_id; ?>] = <?php echo wp_json_encode( $buffer ); ?>;
         </script>
 
     <?php
@@ -181,12 +181,12 @@ class xf_loop extends xf_field
     function recursive_html( $group_id, $field_id, $parent_tag = '', $parent_weight = 0 ) {
 
         // Get loop field
-        $loop_field = XF()->api->get_input_fields( [
+        $loop_field = XFields()->api->get_input_fields( [
             'field_id' => $field_id
         ] );
 
         // Get sub-fields
-        $results = XF()->api->get_input_fields( [
+        $results = XFields()->api->get_input_fields( [
             'group_id' => $group_id,
             'parent_id' => $field_id
         ] );
@@ -219,13 +219,13 @@ class xf_loop extends xf_field
                 $row_offset = max( $i, $row_offset );
     ?>
         <div class="loop_wrapper">
-            <div class="xf_loop_head<?php echo esc_attr( $css_class ); ?>">
-                <a class="xf_delete_field" href="javascript:;"></a>
-                <a class="xf_toggle_field" href="javascript:;"></a>
-                <a class="xf_insert_field" href="javascript:;"></a>
+            <div class="xfields_loop_head<?php echo esc_attr( $css_class ); ?>">
+                <a class="xfields_delete_field" href="javascript:;"></a>
+                <a class="xfields_toggle_field" href="javascript:;"></a>
+                <a class="xfields_insert_field" href="javascript:;"></a>
                 <span class="label"><?php echo esc_html( $this->dynamic_label( $row_label, $results, $values[ $i ] ) ); ?>&nbsp;</span>
             </div>
-            <div class="xf_loop_body<?php echo esc_attr( $css_class ); ?>">
+            <div class="xfields_loop_body<?php echo esc_attr( $css_class ); ?>">
             <?php foreach ( $results as $field ) : ?>
                 <label><?php echo esc_html( $field->label ); ?></label>
 
@@ -233,14 +233,14 @@ class xf_loop extends xf_field
                 <p class="notes"><?php echo esc_html( $field->notes ); ?></p>
                 <?php endif; ?>
 
-                <div class="field field-<?php echo esc_attr( $field->name ); ?> xf_<?php echo esc_attr( $field->type ); ?>">
+                <div class="field field-<?php echo esc_attr( $field->name ); ?> xfields_<?php echo esc_attr( $field->type ); ?>">
                 <?php if ( 'loop' == $field->type ) : ?>
                     <?php $this->recursive_html( $group_id, $field->id, "{$parent_tag}[$i][$field->id]", $i ); ?>
                 <?php else : ?>
                 <?php
                     $args = [
                         'type' => $field->type,
-                        'input_name' => "xf[input]{$parent_tag}[$i][$field->id][value][]",
+                        'input_name' => "xfields[input]{$parent_tag}[$i][$field->id][value][]",
                         'input_class' => $field->type,
                         'options' => $field->options,
                     ];
@@ -252,7 +252,7 @@ class xf_loop extends xf_field
                         $args['value'] = $field->options['default_value'];
                     }
 
-                    XF()->create_field( $args );
+                    XFields()->create_field( $args );
                 ?>
                 <?php endif; ?>
                 </div>
@@ -263,7 +263,7 @@ class xf_loop extends xf_field
         <?php endforeach; endif; ?>
 
         <div class="table_footer">
-            <input type="button" class="button-primary xf_add_field" value="<?php echo esc_attr( $button_label ); ?>" data-loop-tag="<?php echo esc_attr( $parent_tag ); ?>" data-rows="<?php echo (int) ( $row_offset + 1 ); ?>" />
+            <input type="button" class="button-primary xfields_add_field" value="<?php echo esc_attr( $button_label ); ?>" data-loop-tag="<?php echo esc_attr( $parent_tag ); ?>" data-rows="<?php echo (int) ( $row_offset + 1 ); ?>" />
         </div>
     <?php
     }
@@ -278,56 +278,56 @@ class xf_loop extends xf_field
         <script>
         (function($) {
             $(function() {
-                $(document).on('click', '.xf_add_field', function() {
+                $(document).on('click', '.xfields_add_field', function() {
                     var num_rows = $(this).attr('data-rows');
                     var loop_tag = $(this).attr('data-loop-tag');
                     var loop_id = loop_tag.match(/.*\[(.*?)\]/)[1];
-                    var html = XF.loop_buffer[loop_id].replace(/\[clone\]/g, loop_tag + '[' + num_rows + ']');
+                    var html = XFields.loop_buffer[loop_id].replace(/\[clone\]/g, loop_tag + '[' + num_rows + ']');
                     $(this).attr('data-rows', parseInt(num_rows)+1);
                     $(html).insertBefore( $(this).closest('.table_footer') ).addClass('loop_wrapper_new');
-                    $(this).trigger('xf/ready');
+                    $(this).trigger('xfields/ready');
                 });
 
-                $(document).on('click', '.xf_insert_field', function(event) {
+                $(document).on('click', '.xfields_insert_field', function(event) {
                     event.stopPropagation();
                     // Use the "Add Row" button of THIS loop (previously the first one on the page)
-                    var $add_field = $(this).closest('.loop_wrapper').siblings('.table_footer').find('.xf_add_field').first();
+                    var $add_field = $(this).closest('.loop_wrapper').siblings('.table_footer').find('.xfields_add_field').first();
                     if (!$add_field.length) {
                         return;
                     }
                     var num_rows = $add_field.attr('data-rows');
                     var loop_tag = $add_field.attr('data-loop-tag');
                     var loop_id = loop_tag.match(/.*\[(.*?)\]/)[1];
-                    var html = XF.loop_buffer[loop_id].replace(/\[clone\]/g, loop_tag + '[' + num_rows + ']');
+                    var html = XFields.loop_buffer[loop_id].replace(/\[clone\]/g, loop_tag + '[' + num_rows + ']');
                     $add_field.attr('data-rows', parseInt(num_rows)+1);
                     $(html).insertAfter( $(this).closest('.loop_wrapper') ).addClass('loop_wrapper_new');
-                    $add_field.trigger('xf/ready');
+                    $add_field.trigger('xfields/ready');
                 });
 
-                $(document).on('click', '.xf_loop_head .xf_delete_field', function(event) {
+                $(document).on('click', '.xfields_loop_head .xfields_delete_field', function(event) {
                     if (confirm(<?php echo wp_json_encode( __( 'Remove this row?', 'x-fields' ) ); ?>)) {
                         $(this).closest('.loop_wrapper').remove();
                     }
                     event.stopPropagation();
                 });
 
-                $(document).on('click', '.xf_loop_head', function() {
+                $(document).on('click', '.xfields_loop_head', function() {
                     $(this).toggleClass('open');
-                    $(this).siblings('.xf_loop_body').toggleClass('open');
+                    $(this).siblings('.xfields_loop_body').toggleClass('open');
                 });
 
                 // Hide or show all rows
                 // The HTML is located in includes/form.php
-                $(document).on('click', '.xf_loop_toggle', function() {
-                    $(this).closest('.field').find('.xf_loop_head').toggleClass('open');
-                    $(this).closest('.field').find('.xf_loop_body').toggleClass('open');
+                $(document).on('click', '.xfields_loop_toggle', function() {
+                    $(this).closest('.field').find('.xfields_loop_head').toggleClass('open');
+                    $(this).closest('.field').find('.xfields_loop_body').toggleClass('open');
                 });
 
-                $('.xf_loop').sortable({
+                $('.xfields_loop').sortable({
                     axis: 'y',
                     containment: 'parent',
                     items: '.loop_wrapper',
-                    handle: '.xf_loop_head',
+                    handle: '.xfields_loop_head',
                     update: function(event, ui) {
 
                         // To re-order field names:
@@ -335,12 +335,12 @@ class xf_loop extends xf_field
                         // 2. Loop through each input field within the dragged element
                         // 3. Reset the array index within the name attribute
                         var $container = ui.item.closest('.field');
-                        var depth = $container.closest('.xf_loop').parents('.xf_loop').length;
+                        var depth = $container.closest('.xfields_loop').parents('.xfields_loop').length;
                         var array_element = 3 + (depth * 2);
 
                         var counter = -1;
                         var last_index = -1;
-                        $container.find('[name^="xf[input]"]').each(function() {
+                        $container.find('[name^="xfields[input]"]').each(function() {
                             var name_attr = $(this).attr('name').split('[');
                             var current_index = parseInt( name_attr[array_element] );
                             if (current_index != last_index) {

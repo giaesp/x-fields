@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_textarea extends xf_field
+class xfields_textarea extends xfields_field
 {
 
     function __construct() {
@@ -26,9 +26,9 @@ class xf_textarea extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'textarea',
-                        'input_name' => "xf[fields][$key][options][default_value]",
+                        'input_name' => "xfields[fields][$key][options][default_value]",
                         'value' => $this->get_option( $field, 'default_value' ),
                     ] );
                 ?>
@@ -40,9 +40,9 @@ class xf_textarea extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'select',
-                        'input_name' => "xf[fields][$key][options][formatting]",
+                        'input_name' => "xfields[fields][$key][options][formatting]",
                         'options' => [
                             'choices' => [
                                 'none' => __( 'None', 'x-fields' ),
@@ -61,9 +61,9 @@ class xf_textarea extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'true_false',
-                        'input_name' => "xf[fields][$key][options][required]",
+                        'input_name' => "xfields[fields][$key][options][required]",
                         'input_class' => 'true_false',
                         'value' => $this->get_option( $field, 'required' ),
                         'options' => [ 'message' => __( 'This is a required field', 'x-fields' ) ],

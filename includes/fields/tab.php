@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_tab extends xf_field
+class xfields_tab extends xfields_field
 {
 
     function __construct() {
@@ -28,18 +28,18 @@ class xf_tab extends xf_field
     ?>
         <script>
         (function($) {
-            $(document).on('click', '.xf-tab', function() {
+            $(document).on('click', '.xfields-tab', function() {
                 var tab = $(this).attr('rel'),
-                    $context = $(this).parents('.xf_input');
-                $context.find('.xf-tab').removeClass('active');
-                $context.find('.xf-tab-content').removeClass('active');
+                    $context = $(this).parents('.xfields_input');
+                $context.find('.xfields-tab').removeClass('active');
+                $context.find('.xfields-tab-content').removeClass('active');
                 $(this).addClass('active');
-                $context.find('.xf-tab-content-' + tab).addClass('active');
+                $context.find('.xfields-tab-content-' + tab).addClass('active');
             });
 
             $(function() {
-                $('.xf-tabs').each(function(){
-                    $(this).find('.xf-tab:first').click();
+                $('.xfields-tabs').each(function(){
+                    $(this).find('.xfields-tab:first').click();
                 });
             });
         })(jQuery);

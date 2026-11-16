@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_file extends xf_field
+class xfields_file extends xfields_field
 {
 
     function __construct() {
@@ -49,9 +49,9 @@ class xf_file extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'select',
-                        'input_name' => "xf[fields][$key][options][file_type]",
+                        'input_name' => "xfields[fields][$key][options][file_type]",
                         'options' => [
                             'choices' => [
                                 'file'  => __( 'Any', 'x-fields' ),
@@ -72,9 +72,9 @@ class xf_file extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'select',
-                        'input_name' => "xf[fields][$key][options][return_value]",
+                        'input_name' => "xfields[fields][$key][options][return_value]",
                         'options' => [
                             'choices' => [
                                 'url' => __( 'File URL', 'x-fields' ),
@@ -93,9 +93,9 @@ class xf_file extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'true_false',
-                        'input_name' => "xf[fields][$key][options][required]",
+                        'input_name' => "xfields[fields][$key][options][required]",
                         'input_class' => 'true_false',
                         'value' => $this->get_option( $field, 'required' ),
                         'options' => [ 'message' => __( 'This is a required field', 'x-fields' ) ],
@@ -111,14 +111,14 @@ class xf_file extends xf_field
         wp_enqueue_media();
     ?>
         <style>
-        .xf_frame .media-frame-menu {
+        .xfields_frame .media-frame-menu {
             display: none;
         }
 
-        .xf_frame .media-frame-title,
-        .xf_frame .media-frame-router,
-        .xf_frame .media-frame-content,
-        .xf_frame .media-frame-toolbar {
+        .xfields_frame .media-frame-title,
+        .xfields_frame .media-frame-router,
+        .xfields_frame .media-frame-content,
+        .xfields_frame .media-frame-toolbar {
             left: 0;
         }
         </style>
@@ -127,23 +127,23 @@ class xf_file extends xf_field
         (function($) {
             $(function() {
 
-                var xf_frames = {};
-                var $xf_button = null;
+                var xfields_frames = {};
+                var $xfields_button = null;
 
-                $(document).on('click', '.xf_input .media.button.add', function(e) {
-                    $xf_button = $(this);
+                $(document).on('click', '.xfields_input .media.button.add', function(e) {
+                    $xfields_button = $(this);
 
                     // One frame per file type (the "File Type" option was previously ignored)
-                    var file_type = $xf_button.attr('data-file-type') || 'file';
+                    var file_type = $xfields_button.attr('data-file-type') || 'file';
                     var library = ('file' === file_type) ? {} : { type: file_type };
 
-                    if (xf_frames[file_type]) {
-                        xf_frames[file_type].open();
+                    if (xfields_frames[file_type]) {
+                        xfields_frames[file_type].open();
                         return;
                     }
 
-                    var frame = xf_frames[file_type] = wp.media({
-                        className: 'media-frame xf_frame',
+                    var frame = xfields_frames[file_type] = wp.media({
+                        className: 'media-frame xfields_frame',
                         frame: 'post',
                         multiple: false,
                         library: library
@@ -162,17 +162,17 @@ class xf_file extends xf_field
                         else {
                             $preview = $('<a target="_blank" rel="noopener noreferrer"></a>').attr('href', attachment.url).text(attachment.filename);
                         }
-                        $xf_button.hide();
-                        $xf_button.siblings('.media.button.remove').show();
-                        $xf_button.siblings('.file_value').val(attachment.id);
-                        $xf_button.siblings('.file_url').empty().append($preview);
+                        $xfields_button.hide();
+                        $xfields_button.siblings('.media.button.remove').show();
+                        $xfields_button.siblings('.file_value').val(attachment.id);
+                        $xfields_button.siblings('.file_url').empty().append($preview);
                     });
 
                     frame.open();
                     frame.content.mode('upload');
                 });
 
-                $(document).on('click', '.xf_input .media.button.remove', function() {
+                $(document).on('click', '.xfields_input .media.button.remove', function() {
                     $(this).siblings('.file_url').html('');
                     $(this).siblings('.file_value').val('');
                     $(this).siblings('.media.button.add').show();

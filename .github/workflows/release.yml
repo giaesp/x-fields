@@ -16,7 +16,7 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME#v}"
           grep -q "Version:           $TAG" x-fields.php
-          grep -q "define( 'XF_VERSION', '$TAG' )" x-fields.php
+          grep -q "define( 'XFIELDS_VERSION', '$TAG' )" x-fields.php
           grep -q "Stable tag: $TAG" readme.txt
       - name: Build zip
         run: git archive --format=zip --prefix=x-fields/ -o x-fields-${GITHUB_REF_NAME}.zip HEAD

@@ -16,49 +16,53 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: ..\n"
 
-#: includes/field.php:49
+#: includes/field.php:59
 #: includes/fields/text.php:10
 msgid "Text"
 msgstr "Szöveg"
 
-#: includes/field.php:75
+#: includes/field.php:85
+#: includes/fields/color/color.php:48
+#: includes/fields/date/date.php:58
 #: includes/fields/file.php:92
-#: includes/fields/select.php:150
+#: includes/fields/select.php:137
 #: includes/fields/text.php:32
 #: includes/fields/textarea.php:60
 #: includes/fields/true_false.php:49
-#: includes/fields/wysiwyg.php:56
+#: includes/fields/wysiwyg.php:55
 msgid "Validation"
 msgstr "Ellenőrzés"
 
-#: includes/field.php:84
+#: includes/field.php:94
+#: includes/fields/color/color.php:57
+#: includes/fields/date/date.php:67
 #: includes/fields/file.php:101
-#: includes/fields/select.php:159
+#: includes/fields/select.php:146
 #: includes/fields/text.php:41
 #: includes/fields/textarea.php:69
 #: includes/fields/true_false.php:58
-#: includes/fields/wysiwyg.php:65
+#: includes/fields/wysiwyg.php:64
 msgid "This is a required field"
 msgstr "Mező kitöltése kötelező"
 
-#: includes/field_group.php:166
+#: includes/field_group.php:172
 msgid "Imported"
 msgstr "Importálás"
 
-#: includes/field_group.php:169
+#: includes/field_group.php:175
 msgid "Skipped"
 msgstr "Kihagyott"
 
-#: includes/field_group.php:172
-#: includes/field_group.php:177
+#: includes/field_group.php:178
+#: includes/field_group.php:183
 msgid "Nothing to import"
 msgstr "Nincs mit importálni"
 
-#: includes/fields/color/color.php:10
+#: includes/fields/color/color.php:16
 msgid "Color"
 msgstr "Szín"
 
-#: includes/fields/date/date.php:10
+#: includes/fields/date/date.php:17
 msgid "Date"
 msgstr "Dátum"
 
@@ -147,9 +151,9 @@ msgid "Add Row"
 msgstr "Sor hozzáadása"
 
 #: includes/fields/loop.php:84
-#: includes/fields/relationship.php:113
-#: includes/fields/term.php:108
-#: includes/fields/user.php:84
+#: includes/fields/relationship.php:126
+#: includes/fields/term.php:109
+#: includes/fields/user.php:85
 msgid "Limits"
 msgstr "Korlátok"
 
@@ -157,37 +161,37 @@ msgstr "Korlátok"
 msgid "Relationship"
 msgstr "Kapcsolat"
 
-#: includes/fields/relationship.php:70
+#: includes/fields/relationship.php:83
 msgid "Search posts"
 msgstr "Bejegyzések keresése"
 
-#: includes/fields/relationship.php:97
-#: includes/init.php:316
-#: templates/meta_box_rules.php:159
+#: includes/fields/relationship.php:110
+#: includes/init.php:361
+#: templates/meta_box_rules.php:126
 msgid "Post Types"
 msgstr "Bejegyzés típusok"
 
-#: includes/fields/relationship.php:98
+#: includes/fields/relationship.php:111
 msgid "Limit posts to the following types"
 msgstr "Bejegyzések korlátozása a következő típusokra"
 
-#: includes/fields/select.php:11
+#: includes/fields/select.php:9
 msgid "Select"
 msgstr "Kiválasztás"
 
-#: includes/fields/select.php:103
+#: includes/fields/select.php:90
 msgid "Choices"
 msgstr "Lehetőségek"
 
-#: includes/fields/select.php:104
+#: includes/fields/select.php:91
 msgid "Enter one choice per line"
 msgstr "Egy lehetőség soronként"
 
-#: includes/fields/select.php:118
+#: includes/fields/select.php:105
 msgid "Multi-select?"
 msgstr "Többszörös kiválasztás?"
 
-#: includes/fields/select.php:127
+#: includes/fields/select.php:114
 msgid "This is a multi-select field"
 msgstr "Több lehetőség is kiválasztható egyszerre"
 
@@ -195,7 +199,7 @@ msgstr "Több lehetőség is kiválasztható egyszerre"
 msgid "Tab"
 msgstr "Fül"
 
-#: includes/fields/color/color.php:18
+#: includes/fields/color/color.php:33
 #: includes/fields/text.php:18
 #: includes/fields/textarea.php:25
 msgid "Default Value"
@@ -206,7 +210,7 @@ msgid "Textarea"
 msgstr "Többsoros szöveg"
 
 #: includes/fields/textarea.php:39
-#: includes/fields/wysiwyg.php:35
+#: includes/fields/wysiwyg.php:34
 msgid "Formatting"
 msgstr "Formázás"
 
@@ -234,59 +238,59 @@ msgstr "A jelölőnégyzet melletti szöveg."
 msgid "User"
 msgstr "Felhasználó"
 
-#: includes/fields/user.php:35
+#: includes/fields/user.php:36
 msgid "Search users"
 msgstr "Felhasználók keresése"
 
-#: includes/fields/wysiwyg.php:10
+#: includes/fields/wysiwyg.php:18
 msgid "Wysiwyg Editor"
 msgstr "Formázott szöveg (WYSIWYG)"
 
-#: includes/fields/wysiwyg.php:44
+#: includes/fields/wysiwyg.php:43
 msgid "Default"
 msgstr "Alapértelmezett"
 
-#: includes/fields/wysiwyg.php:45
+#: includes/fields/wysiwyg.php:44
 msgid "None (bypass filters)"
 msgstr "Nincs (filterek megkerülése)"
 
-#: includes/form.php:269
+#: includes/form.php:267
 msgid "Submit"
 msgstr "Elküldés"
 
-#: includes/init.php:66
+#: includes/init.php:70
 msgid "Field Groups"
 msgstr "Mező csoportok"
 
-#: includes/init.php:67
+#: includes/init.php:71
 msgid "Field Group"
 msgstr "Mező csoport"
 
-#: includes/init.php:69
+#: includes/init.php:73
 msgid "Add New Field Group"
 msgstr "Új mező csoport hozzáadása"
 
-#: includes/init.php:70
+#: includes/init.php:74
 msgid "Edit Field Group"
 msgstr "Mező csoport szerkesztése"
 
-#: includes/init.php:71
+#: includes/init.php:75
 msgid "New Field Group"
 msgstr "Új mező csoport"
 
-#: includes/init.php:72
+#: includes/init.php:76
 msgid "View Field Group"
 msgstr "Mező csoport megtekintése"
 
-#: includes/init.php:73
+#: includes/init.php:77
 msgid "Search Field Groups"
 msgstr "Mező csoportok keresése"
 
-#: includes/init.php:74
+#: includes/init.php:78
 msgid "No Field Groups found"
 msgstr "Nem található mező csoport"
 
-#: includes/init.php:75
+#: includes/init.php:79
 msgid "No Field Groups found in Trash"
 msgstr "Nem található mező csoport a lomtárban"
 
@@ -294,51 +298,51 @@ msgstr "Nem található mező csoport a lomtárban"
 msgid "Tools"
 msgstr "Eszközök"
 
-#: includes/init.php:158
+#: includes/init.php:201
 msgid "Fields"
 msgstr "Mezők"
 
-#: includes/init.php:159
+#: includes/init.php:202
 msgid "Placement Rules"
 msgstr "Elhelyezési szabályok"
 
-#: includes/init.php:160
+#: includes/init.php:203
 msgid "Extras"
 msgstr "Extrák"
 
-#: includes/init.php:302
+#: includes/init.php:347
 msgid "Title"
 msgstr "Cím"
 
-#: includes/init.php:303
+#: includes/init.php:348
 msgid "Placement"
 msgstr "Elhelyezés"
 
-#: includes/init.php:317
-#: templates/meta_box_rules.php:225
+#: includes/init.php:362
+#: templates/meta_box_rules.php:192
 msgid "User Roles"
 msgstr "Felhasználói szerepek"
 
-#: includes/init.php:318
-#: templates/meta_box_rules.php:257
+#: includes/init.php:363
+#: templates/meta_box_rules.php:224
 msgid "Posts"
 msgstr "Bejegyzések"
 
-#: includes/init.php:319
+#: includes/init.php:364
 msgid "Term IDs"
 msgstr "Kifejezés ID-k"
 
-#: includes/init.php:320
-#: templates/meta_box_rules.php:313
+#: includes/init.php:365
+#: templates/meta_box_rules.php:284
 msgid "Page Templates"
 msgstr "Oldal sablonok"
 
-#: includes/init.php:321
-#: templates/meta_box_rules.php:192
+#: includes/init.php:366
+#: templates/meta_box_rules.php:159
 msgid "Post Formats"
 msgstr "Bejegyzés formátumok"
 
-#: includes/revision.php:28
+#: includes/revision.php:32
 msgid "Post Meta"
 msgstr "Bejegyzés meta"
 
@@ -355,24 +359,24 @@ msgstr "Felirat"
 msgid "The field label that editors will see."
 msgstr "A mező címkéje, a szerkesztő fogja látni."
 
-#: templates/field_html.php:35
+#: templates/field_html.php:32
 #: templates/meta_box_fields.php:7
 msgid "Name"
 msgstr "Név"
 
-#: templates/field_html.php:38
+#: templates/field_html.php:34
 msgid "The field name is passed into get() to retrieve values. Use only lowercase letters, numbers, and underscores."
 msgstr "A mező neve amit a get() függvénynek kell átadni az értékek eléréséhez. Csak kisbetűk, számok és aláhúzás használható."
 
-#: templates/field_html.php:45
+#: templates/field_html.php:37
 msgid "Field Type"
 msgstr "Mező típusa"
 
-#: templates/field_html.php:62
+#: templates/field_html.php:54
 msgid "Notes"
 msgstr "Jegyzet"
 
-#: templates/field_html.php:64
+#: templates/field_html.php:55
 msgid "Notes for editors during data entry"
 msgstr "Jegyzet a szerkesztőknek adatbevitel közben."
 
@@ -380,27 +384,27 @@ msgstr "Jegyzet a szerkesztőknek adatbevitel közben."
 msgid "Order"
 msgstr "Sorrend"
 
-#: templates/meta_box_extras.php:37
+#: templates/meta_box_extras.php:36
 msgid "The field group with the lowest order will appear first."
 msgstr "A legalacsonyabb sorrendű mező csoport jelenik meg először."
 
-#: templates/meta_box_extras.php:47
+#: templates/meta_box_extras.php:44
 msgid "Position"
 msgstr "Pozíció"
 
-#: templates/meta_box_extras.php:50
+#: templates/meta_box_extras.php:47
 msgid "Normal"
 msgstr "Normál"
 
-#: templates/meta_box_extras.php:51
+#: templates/meta_box_extras.php:48
 msgid "Side"
 msgstr "Oldalsáv"
 
-#: templates/meta_box_extras.php:56
+#: templates/meta_box_extras.php:53
 msgid "Display Settings"
 msgstr "Megjelenítési beállítás"
 
-#: templates/meta_box_extras.php:66
+#: templates/meta_box_extras.php:63
 msgid "Hide the content editor"
 msgstr "Tartalom szerkesztő elrejtése"
 
@@ -412,11 +416,11 @@ msgstr "egyenlő"
 msgid "is not"
 msgstr "nem egyenlő"
 
-#: templates/meta_box_rules.php:117
+#: templates/meta_box_rules.php:116
 msgid "Leave blank to skip this rule"
 msgstr "Hagyd üresen a szabály kihagyásához"
 
-#: templates/meta_box_rules.php:281
+#: templates/meta_box_rules.php:252
 msgid "Taxonomy Terms"
 msgstr "Rendszerezési kifejezések"
 
@@ -447,7 +451,7 @@ msgstr "Minden törlése"
 
 #. Plugin Name of the plugin
 #: x-fields.php
-#: includes/init.php:68
+#: includes/init.php:72
 msgid "X-Fields"
 msgstr ""
 
@@ -495,27 +499,19 @@ msgstr ""
 msgid "Remove this row?"
 msgstr ""
 
-#: includes/fields/select.php:134
-msgid "Select2"
-msgstr ""
-
-#: includes/fields/select.php:143
-msgid "Render this field with Select2"
-msgstr ""
-
 #: includes/fields/term.php:10
 msgid "Term"
 msgstr ""
 
-#: includes/fields/term.php:65
+#: includes/fields/term.php:66
 msgid "Search terms"
 msgstr ""
 
-#: includes/fields/term.php:92
+#: includes/fields/term.php:93
 msgid "Taxonomies"
 msgstr ""
 
-#: includes/fields/term.php:93
+#: includes/fields/term.php:94
 msgid "Limit terms to the following taxonomies"
 msgstr ""
 
@@ -527,25 +523,25 @@ msgstr ""
 msgid "Sorry, you are not allowed to edit this item."
 msgstr ""
 
-#: includes/form.php:245
+#: includes/form.php:243
 msgid "One (or more) of your fields had validation errors. More information is available below."
 msgstr ""
 
-#: includes/form.php:449
+#: includes/form.php:447
 msgid "Toggle row visibility"
 msgstr ""
 
-#: includes/init.php:150
+#: includes/init.php:193
 msgid "X-Fields Tools"
 msgstr ""
 
 #. translators: 1: number of field groups, 2: number of value rows
-#: includes/migration.php:123
+#: includes/migration.php:204
 #, php-format
 msgid "X-Fields imported %1$d field groups and %2$d values from Custom Field Suite. The old CFS tables were kept as a backup."
 msgstr ""
 
-#: templates/admin_head.php:45
+#: templates/admin_head.php:42
 msgid "Delete this field and its saved values?"
 msgstr ""
 
@@ -561,7 +557,7 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: templates/field_html.php:77
+#: templates/field_html.php:66
 msgid "Done"
 msgstr ""
 
@@ -617,24 +613,24 @@ msgstr ""
 msgid "Paste the import code here"
 msgstr ""
 
-#: x-fields.php:37
+#: x-fields.php:36
 msgid "X-Fields is not active: please deactivate Custom Field Suite first. Your CFS data will be migrated automatically."
 msgstr ""
 
 #. translators: 1: loop label, 2: row number
-#: includes/api.php:626
+#: includes/api.php:621
 #, php-format
 msgid "%1$s, row %2$d"
 msgstr ""
 
 #. translators: %s: field label
-#: includes/api.php:647
+#: includes/api.php:642
 #, php-format
 msgid "%s is required."
 msgstr ""
 
 #. translators: 1: field label, 2: minimum number of items
-#: includes/api.php:659
+#: includes/api.php:654
 #, php-format
 msgid "%1$s needs at least %2$d item."
 msgid_plural "%1$s needs at least %2$d items."
@@ -642,7 +638,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: field label, 2: maximum number of items
-#: includes/api.php:663
+#: includes/api.php:658
 #, php-format
 msgid "%1$s allows at most %2$d item."
 msgid_plural "%1$s allows at most %2$d items."
@@ -650,7 +646,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: user ID
-#: includes/fields/user.php:73
+#: includes/fields/user.php:74
 #, php-format
 msgid "User #%d"
 msgstr ""
@@ -663,6 +659,34 @@ msgstr ""
 msgid "Form errors"
 msgstr ""
 
-#: includes/form.php:237
+#: includes/form.php:235
 msgid "Saved, but some fields need attention:"
+msgstr ""
+
+#: includes/fields/color/color.php:34
+msgid "Hex color, e.g. #2271b1"
+msgstr ""
+
+#: includes/fields/date/date.php:42
+msgid "Time"
+msgstr ""
+
+#: includes/fields/date/date.php:51
+msgid "Include the time (hours and minutes)"
+msgstr ""
+
+#: includes/fields/select.php:121
+msgid "Searchable"
+msgstr ""
+
+#: includes/fields/select.php:130
+msgid "Add a search box to this select"
+msgstr ""
+
+#: templates/meta_box_rules.php:117
+msgid "Type at least 2 characters…"
+msgstr ""
+
+#: templates/meta_box_rules.php:118
+msgid "No results"
 msgstr ""

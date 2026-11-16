@@ -2,14 +2,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_select extends xf_field
+class xfields_select extends xfields_field
 {
-    public $select2_inserted;
-
     function __construct() {
         $this->name = 'select';
         $this->label = __( 'Select', 'x-fields' );
-        $this->select2_inserted = false;
     }
 
     function html( $field ) {
@@ -22,11 +19,9 @@ class xf_select extends xf_field
             $field->input_class .= ' multiple';
         }
 
-        // Select2
+        // Searchable select (Tom Select). The option key stays "select2" for backward compatibility.
         if ( isset( $field->options['select2'] ) && '1' == $field->options['select2'] ) {
-            $field->input_class .= ' select2';
-
-            add_action( 'admin_footer', [ $this, 'select2_code' ] );
+            $field->input_class .= ' xfields-enhanced';
         }
 
         // Select boxes should return arrays (unless "force_single" is true)
@@ -43,41 +38,33 @@ class xf_select extends xf_field
     <?php
     }
 
-    function select2_code() {
-
-        // Exit early if the select2 code has already been inserted
-        if ( $this->select2_inserted ) {
-            return;
-        }
-
-        echo '<script src="' . esc_url( XF_URL . '/assets/js/select2/select2.min.js' ) . '"></script>';
-        echo '<link rel="stylesheet" type="text/css" href="' . esc_url( XF_URL . '/assets/js/select2/select2.css' ) . '" />';
-
-        // Don't insert select2 code twice
-        $this->select2_inserted = true;
-    }
 
     function input_head( $field = null ) {
+        wp_enqueue_script( 'tom-select' );
+        wp_enqueue_style( 'tom-select' );
     ?>
         <script>
         (function($) {
-            $(function() {
-                $(document).on('xf/ready', '.xf_add_field', function() {
-                    $('.xf_select:not(.ready)').init_select();
-                });
-                $('.xf_select').init_select();
-            });
-
-            $.fn.init_select = function() {
-                this.each(function() {
-                    var $this = $(this);
-                    $this.addClass('ready');
-
-                    if ( $this.find( 'select' ).hasClass( 'select2' ) ) {
-                        $this.find( 'select' ).select2();
+            function init_select(context) {
+                $(context).find('.xfields_select select.xfields-enhanced').each(function() {
+                    // Skip loop templates and already enhanced selects
+                    if (!window.TomSelect || this.tomselect || /\[clone\]/.test(this.name)) {
+                        return;
                     }
+                    new TomSelect(this, {
+                        plugins: this.multiple ? ['remove_button'] : [],
+                        maxOptions: null,
+                        allowEmptyOption: true
+                    });
                 });
             }
+
+            $(function() {
+                init_select(document);
+                $(document).on('xfields/ready', '.xfields_add_field', function() {
+                    init_select(document);
+                });
+            });
         })(jQuery);
         </script>
     <?php
@@ -105,9 +92,9 @@ class xf_select extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'textarea',
-                        'input_name' => "xf[fields][$key][options][choices]",
+                        'input_name' => "xfields[fields][$key][options][choices]",
                         'value' => $this->get_option( $field, 'choices' ),
                     ] );
                 ?>
@@ -119,9 +106,9 @@ class xf_select extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'true_false',
-                        'input_name' => "xf[fields][$key][options][multiple]",
+                        'input_name' => "xfields[fields][$key][options][multiple]",
                         'input_class' => 'true_false',
                         'value' => $this->get_option( $field, 'multiple' ),
                         'options' => [ 'message' => __( 'This is a multi-select field', 'x-fields' ) ],
@@ -131,16 +118,16 @@ class xf_select extends xf_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php esc_html_e('Select2', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Searchable', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'true_false',
-                        'input_name' => "xf[fields][$key][options][select2]",
+                        'input_name' => "xfields[fields][$key][options][select2]",
                         'input_class' => 'true_false',
                         'value' => $this->get_option($field, 'select2'),
-                        'options' => [ 'message' => __('Render this field with Select2', 'x-fields' ) ],
+                        'options' => [ 'message' => __( 'Add a search box to this select', 'x-fields' ) ],
                     ] );
                 ?>
             </td>
@@ -151,9 +138,9 @@ class xf_select extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'true_false',
-                        'input_name' => "xf[fields][$key][options][required]",
+                        'input_name' => "xfields[fields][$key][options][required]",
                         'input_class' => 'true_false',
                         'value' => $this->get_option( $field, 'required' ),
                         'options' => [ 'message' => __( 'This is a required field', 'x-fields' ) ],

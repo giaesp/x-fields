@@ -44,7 +44,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { php: '7.4', wp: '6.0' }
+          - { php: '7.4', wp: '6.2' }
           - { php: '8.3', wp: 'latest' }
           - { php: '8.4', wp: 'latest' }
     services:
@@ -76,4 +76,8 @@ jobs:
         run: |
           wp eval-file wp/wp-content/plugins/x-fields/tests/smoke-test.php --path=wp | tee result.txt
           grep -q ', 0 failed' result.txt
-          grep -q 'PHP notices/warnings from XF: 0' result.txt
+          grep -q 'PHP notices/warnings from XFields: 0' result.txt
+      - name: Migration tests (1.x -> 2.x)
+        run: |
+          wp eval-file wp/wp-content/plugins/x-fields/tests/migration-test.php --path=wp | tee migration.txt
+          grep -q ', 0 failed' migration.txt

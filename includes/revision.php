@@ -2,11 +2,15 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( defined( 'XF_REVISIONS' ) && XF_REVISIONS ) {
-    new xf_revision();
+// This file reads/writes X-Fields' own tables ({prefix}xfields_values, {prefix}xfields_sessions) and the
+// group/value rows they reference; WordPress has no API for them. All queries are prepared or use integer/constant values.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery
+
+if ( defined( 'XFIELDS_REVISIONS' ) && XFIELDS_REVISIONS ) {
+    new xfields_revision();
 }
 
-class xf_revision
+class xfields_revision
 {
 
     function __construct() {
@@ -15,7 +19,7 @@ class xf_revision
         add_action( 'wp_delete_post_revision', [ $this, 'wp_delete_post_revision' ] );
 
         add_filter( '_wp_post_revision_fields', [ $this, '_wp_post_revision_fields' ] );
-        add_filter( '_wp_post_revision_field_xf_postmeta', [ $this, '_wp_post_revision_field_postmeta' ], 10, 3 );
+        add_filter( '_wp_post_revision_field_xfields_postmeta', [ $this, '_wp_post_revision_field_postmeta' ], 10, 3 );
         add_filter( 'wp_save_post_revision_check_for_changes', [ $this, 'check_for_changes' ], 10, 3 );
     }
 
@@ -25,19 +29,19 @@ class xf_revision
      * @see wp-includes/revision.php - wp_save_post_revision()
      */
     function _wp_post_revision_fields( $fields ) {
-        $fields[ 'xf_postmeta' ] = __( 'Post Meta', 'x-fields' );
+        $fields[ 'xfields_postmeta' ] = __( 'Post Meta', 'x-fields' );
         return $fields;
     }
 
 
     /**
-     * Generate the data for the "xf_postmeta" variable
+     * Generate the data for the "xfields_postmeta" variable
      * @see wp-admin/includes/ajax-actions - wp_ajax_revisions_data()
      */
     function _wp_post_revision_field_postmeta( $value, $column, $post ) {
         $output = '';
-        $fields = XF()->get( false, $post->ID );
-        $field_info = XF()->get_field_info( false, $post->ID );
+        $fields = XFields()->get( false, $post->ID );
+        $field_info = XFields()->get_field_info( false, $post->ID );
 
         foreach ( (array) $fields as $field_name => $field_data ) {
             $output .= '[' . $field_name . "]\n";
@@ -71,8 +75,8 @@ class xf_revision
      * @see wp-includes/revision.php -> wp_save_post_revision()
      */
     function check_for_changes( $default, $last_revision, $post ) {
-        $revision_data = XF()->get( false, $last_revision->ID );
-        $post_data = XF()->get( false, $post->ID );
+        $revision_data = XFields()->get( false, $last_revision->ID );
+        $post_data = XFields()->get( false, $post->ID );
 
         if ( serialize( $revision_data ) != serialize( $post_data ) ) {
             return false;
@@ -93,8 +97,8 @@ class xf_revision
         $original_post_id = wp_is_post_revision( $post_id );
 
         if ( $original_post_id ) {
-            $field_data = XF()->get( false, $original_post_id, [ 'format' => 'raw' ] );
-            XF()->save( $field_data, [ 'ID' => $post_id ] );
+            $field_data = XFields()->get( false, $original_post_id, [ 'format' => 'raw' ] );
+            XFields()->save( $field_data, [ 'ID' => $post_id ] );
         }
     }
 
@@ -104,8 +108,8 @@ class xf_revision
      * @see wp-includes/revision.php -> wp_restore_post_revision()
      */
     function wp_restore_post_revision( $post_id, $revision_id ) {
-        $field_data = XF()->get( false, $revision_id, [ 'format' => 'raw' ] );
-        XF()->save( $field_data, [ 'ID' => $post_id ] );
+        $field_data = XFields()->get( false, $revision_id, [ 'format' => 'raw' ] );
+        XFields()->save( $field_data, [ 'ID' => $post_id ] );
     }
 
 
@@ -116,6 +120,6 @@ class xf_revision
     function wp_delete_post_revision( $revision_id ) {
         global $wpdb;
 
-        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}xf_values WHERE post_id = %d", $revision_id ) );
+        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}xfields_values WHERE post_id = %d", $revision_id ) );
     }
 }

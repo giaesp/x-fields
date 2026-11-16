@@ -5,6 +5,39 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-16
+
+Prepared for the WordPress.org plugin directory.
+
+### Changed — breaking
+- **New prefixes** (WordPress.org requires ≥ 4 characters): `XF()` → `XFields()`, `xf_*` → `xfields_*` (hooks, options, tables, post type `xfields_group`, CSS/JS), `XF_*` → `XFIELDS_*`.
+- Requires **WordPress 6.2+** (tested up to 7.1).
+
+### Added
+- Automatic migration from X-Fields 1.x (tables, groups, meta, options, cron), tested in CI together with the Custom Field Suite migration.
+- Date field: optional **time** (native `datetime-local`), strict validation of impossible dates/times.
+- WordPress.org assets (banner, icon, screenshots) and deploy workflows (release → SVN, readme/assets updates).
+
+### Changed — libraries
+- **Tom Select 2.6.2** replaces Select2 3.x for placement rules, field options and the searchable Select field (with server-side post search).
+- **Native date / date-time inputs** replace bootstrap-datepicker.
+- **WordPress color picker** (`wp-color-picker`) replaces miniColors.
+- **Official `wp.editor` API** replaces the custom TinyMCE setup and bundled "code" plugin (Visual/Code tabs, Add Media, works in Loop rows and after drag & drop).
+- PowerTip tooltips replaced by always-visible descriptions under labels.
+- Assets are registered/enqueued with the WordPress script API (no hard-coded `<script>` tags).
+
+### Security / quality
+- All queries use `$wpdb->prepare()` (with `%i` identifiers) or WordPress APIs (`get_posts`, `get_terms`, `get_users`).
+- Official **Plugin Check: no errors, no warnings**; PHPCS (WordPress security + PHP compatibility): 0 warnings.
+
+### Fixed
+- Tools → Reset did not deactivate the plugin (wrong file path since 1.0.0).
+- Changing a field's type in the editor could lose its options (JS name mismatch introduced by the 1.0 rename).
+- The CFS migration was skipped if an empty "Add New" field group draft existed.
+- The migration notice could appear with "0 field groups".
+- Field editor layout: aligned Label/Name/Type inputs, descriptions under the inputs.
+- Relationship field no longer offers the post being edited.
+
 ## [1.1.0] - 2026-11-16
 
 ### Added
@@ -75,7 +108,8 @@ First release of X-Fields, forked from Custom Field Suite 2.6.7.
 - Double-encoded HTML entities in text/textarea values.
 - Tables are created with the site charset/collation (utf8mb4).
 
-[Unreleased]: https://github.com/giaesp/x-fields/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/giaesp/x-fields/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/giaesp/x-fields/compare/v1.1.0...v2.0.0
 [1.1.0]: https://github.com/giaesp/x-fields/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/giaesp/x-fields/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/giaesp/x-fields/releases/tag/v1.0.0

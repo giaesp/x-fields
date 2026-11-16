@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_upgrade
+class xfields_upgrade
 {
 
     public $version;
@@ -10,8 +10,8 @@ class xf_upgrade
 
 
     public function __construct() {
-        $this->version = XF_VERSION;
-        $this->last_version = (string) get_option( 'xf_version', '' );
+        $this->version = XFIELDS_VERSION;
+        $this->last_version = (string) get_option( 'xfields_version', '' );
 
         if ( version_compare( $this->last_version, $this->version, '<' ) ) {
             if ( version_compare( $this->last_version, '1.0.0', '<' ) ) {
@@ -22,7 +22,7 @@ class xf_upgrade
                 $this->run_upgrade();
             }
 
-            update_option( 'xf_version', $this->version );
+            update_option( 'xfields_version', $this->version );
         }
     }
 
@@ -32,7 +32,7 @@ class xf_upgrade
         $charset_collate = $wpdb->get_charset_collate();
 
         $sql = "
-        CREATE TABLE {$wpdb->prefix}xf_values (
+        CREATE TABLE {$wpdb->prefix}xfields_values (
             id INT unsigned not null auto_increment,
             field_id INT unsigned,
             meta_id INT unsigned,
@@ -49,7 +49,7 @@ class xf_upgrade
         dbDelta( $sql );
 
         $sql = "
-        CREATE TABLE {$wpdb->prefix}xf_sessions (
+        CREATE TABLE {$wpdb->prefix}xfields_sessions (
             id VARCHAR(32),
             data TEXT,
             expires VARCHAR(10),
@@ -58,14 +58,14 @@ class xf_upgrade
         dbDelta( $sql );
 
         // Set the field counter
-        update_option( 'xf_next_field_id', 1 );
+        update_option( 'xfields_next_field_id', 1 );
     }
 
     private function run_upgrade() {
     }
 }
 
-if ( ! did_action( 'xf_upgrade_done' ) ) {
-    new xf_upgrade();
-    do_action( 'xf_upgrade_done' );
+if ( ! did_action( 'xfields_upgrade_done' ) ) {
+    new xfields_upgrade();
+    do_action( 'xfields_upgrade_done' );
 }

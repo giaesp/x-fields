@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_true_false extends xf_field
+class xfields_true_false extends xfields_field
 {
 
     function __construct() {
@@ -36,9 +36,9 @@ class xf_true_false extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'text',
-                        'input_name' => "xf[fields][$key][options][message]",
+                        'input_name' => "xfields[fields][$key][options][message]",
                         'value' => $this->get_option( $field, 'message' ),
                     ] );
                 ?>
@@ -50,9 +50,9 @@ class xf_true_false extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'true_false',
-                        'input_name' => "xf[fields][$key][options][required]",
+                        'input_name' => "xfields[fields][$key][options][required]",
                         'input_class' => 'true_false',
                         'value' => $this->get_option( $field, 'required' ),
                         'options' => [ 'message' => __( 'This is a required field', 'x-fields' ) ],
@@ -71,10 +71,10 @@ class xf_true_false extends xf_field
         <script>
         (function($) {
             $(function() {
-                $(document).on('xf/ready', '.xf_add_field', function() {
-                    $('.xf_true_false:not(.ready)').init_true_false();
+                $(document).on('xfields/ready', '.xfields_add_field', function() {
+                    $('.xfields_true_false:not(.ready)').init_true_false();
                 });
-                $('.xf_true_false').init_true_false();
+                $('.xfields_true_false').init_true_false();
             });
 
             $.fn.init_true_false = function() {

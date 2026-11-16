@@ -5,25 +5,25 @@ defined( 'ABSPATH' ) || exit;
 global $wpdb;
 
 // Post types
-$post_types = [];
-$types = get_post_types( [ 'public' => true ] );
+$xfields_post_types = [];
+$xfields_types = get_post_types( [ 'public' => true ] );
 
-foreach ( $types as $post_type ) {
-    if ( ! in_array( $post_type, [ 'xf_group', 'attachment' ] ) ) {
-        $post_types[] = $post_type;
+foreach ( $xfields_types as $xfields_post_type ) {
+    if ( ! in_array( $xfields_post_type, [ 'xfields_group', 'attachment' ] ) ) {
+        $xfields_post_types[] = $xfields_post_type;
     }
 }
 
-$extras = (array) get_post_meta( $post->ID, 'xf_extras', true );
+$xfields_extras = (array) get_post_meta( $post->ID, 'xfields_extras', true );
 
-if ( ! isset( $extras['hide_editor'] ) ) {
-    $extras['hide_editor'] = '';
+if ( ! isset( $xfields_extras['hide_editor'] ) ) {
+    $xfields_extras['hide_editor'] = '';
 }
-if ( ! isset( $extras['order'] ) ) {
-    $extras['order'] = 0;
+if ( ! isset( $xfields_extras['order'] ) ) {
+    $xfields_extras['order'] = 0;
 }
-if ( ! isset( $extras['context'] ) ) {
-    $extras['context'] = 'normal';
+if ( ! isset( $xfields_extras['context'] ) ) {
+    $xfields_extras['context'] = 'normal';
 }
 
 ?>
@@ -32,14 +32,11 @@ if ( ! isset( $extras['context'] ) ) {
     <tr>
         <td class="label">
             <label>
-                <?php esc_html_e( 'Order', 'x-fields' ); ?>
-                <div class="xf_tooltip">?
-                    <div class="tooltip_inner"><?php esc_html_e( 'The field group with the lowest order will appear first.', 'x-fields' ); ?></div>
-                </div>
-            </label>
+                <?php esc_html_e( 'Order', 'x-fields' ); ?></label>
+                                    <p class="description"><?php esc_html_e( 'The field group with the lowest order will appear first.', 'x-fields' ); ?></p>
         </td>
         <td style="vertical-align:top">
-            <input type="text" name="xf[extras][order]" value="<?php echo (int) $extras['order']; ?>" style="width:80px" />
+            <input type="text" name="xfields[extras][order]" value="<?php echo (int) $xfields_extras['order']; ?>" style="width:80px" />
         </td>
     </tr>
     <tr>
@@ -47,8 +44,8 @@ if ( ! isset( $extras['context'] ) ) {
             <label><?php esc_html_e( 'Position', 'x-fields' ); ?></label>
         </td>
         <td style="vertical-align:top">
-            <input type="radio" name="xf[extras][context]" value="normal"<?php echo ( $extras['context'] == 'normal' ) ? ' checked' : ''; ?> /> <?php esc_html_e( 'Normal', 'x-fields' ); ?> &nbsp; &nbsp;
-            <input type="radio" name="xf[extras][context]" value="side"<?php echo ( $extras['context'] == 'side' ) ? ' checked' : ''; ?> /> <?php esc_html_e( 'Side', 'x-fields' ); ?>
+            <input type="radio" name="xfields[extras][context]" value="normal"<?php echo ( $xfields_extras['context'] == 'normal' ) ? ' checked' : ''; ?> /> <?php esc_html_e( 'Normal', 'x-fields' ); ?> &nbsp; &nbsp;
+            <input type="radio" name="xfields[extras][context]" value="side"<?php echo ( $xfields_extras['context'] == 'side' ) ? ' checked' : ''; ?> /> <?php esc_html_e( 'Side', 'x-fields' ); ?>
         </td>
     </tr>
     <tr>
@@ -58,11 +55,11 @@ if ( ! isset( $extras['context'] ) ) {
         <td style="vertical-align:top">
             <div>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type'          => 'true_false',
-                        'input_name'    => "xf[extras][hide_editor]",
+                        'input_name'    => "xfields[extras][hide_editor]",
                         'input_class'   => 'true_false',
-                        'value'         => $extras['hide_editor'],
+                        'value'         => $xfields_extras['hide_editor'],
                         'options'       => [ 'message' => __( 'Hide the content editor', 'x-fields' ) ],
                     ] );
                 ?>

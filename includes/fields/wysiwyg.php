@@ -2,28 +2,27 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_wysiwyg extends xf_field
+/**
+ * WYSIWYG field.
+ *
+ * Built on the official WordPress editor API (wp.editor.initialize, WP 4.8+):
+ * Visual + Text tabs, "Add Media" button and core TinyMCE plugins, with no bundled
+ * TinyMCE plugins of our own. Works in Loop rows (initialised when a row is added,
+ * re-initialised after drag & drop).
+ */
+class xfields_wysiwyg extends xfields_field
 {
 
     function __construct() {
         $this->name = 'wysiwyg';
         $this->label = __( 'Wysiwyg Editor', 'x-fields' );
-
-        // add the "code" button
-        add_filter( 'mce_external_plugins', [ $this, 'mce_external_plugins' ], 20 );
     }
 
 
     function html( $field ) {
+        $value = is_scalar( $field->value ) ? (string) $field->value : '';
     ?>
-        <div class="wp-editor-wrap">
-            <div class="wp-media-buttons">
-                <?php do_action( 'media_buttons' ); ?>
-            </div>
-            <div class="wp-editor-container">
-                <textarea name="<?php echo esc_attr( $field->input_name ); ?>" class="wp-editor-area <?php echo esc_attr( $field->input_class ); ?>" style="height:300px"><?php echo esc_textarea( is_scalar( $field->value ) ? (string) $field->value : '' ); ?></textarea>
-            </div>
-        </div>
+        <textarea name="<?php echo esc_attr( $field->input_name ); ?>" class="wp-editor-area xfields-wysiwyg-area <?php echo esc_attr( $field->input_class ); ?>" rows="12" data-media="<?php echo current_user_can( 'upload_files' ) ? '1' : '0'; ?>"><?php echo esc_textarea( $value ); ?></textarea>
     <?php
     }
 
@@ -36,9 +35,9 @@ class xf_wysiwyg extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'select',
-                        'input_name' => "xf[fields][$key][options][formatting]",
+                        'input_name' => "xfields[fields][$key][options][formatting]",
                         'options' => [
                             'choices' => [
                                 'default' => __( 'Default', 'x-fields' ),
@@ -57,9 +56,9 @@ class xf_wysiwyg extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'true_false',
-                        'input_name' => "xf[fields][$key][options][required]",
+                        'input_name' => "xfields[fields][$key][options][required]",
                         'input_class' => 'true_false',
                         'value' => $this->get_option( $field, 'required' ),
                         'options' => [ 'message' => __( 'This is a required field', 'x-fields' ) ],
@@ -72,120 +71,86 @@ class xf_wysiwyg extends xf_field
 
 
     function input_head( $field = null ) {
+        // Loads TinyMCE, Quicktags and the wp.editor API (admin and front-end)
+        wp_enqueue_editor();
 
-        // make sure the user has WYSIWYG enabled
-        if ( user_can_richedit() ) {
-            if ( ! is_admin() ) {
-    ?>
-        <div class="hidden"><?php wp_editor( '', 'xfwysi' ); ?></div>
-    <?php
-            }
+        if ( current_user_can( 'upload_files' ) ) {
+            wp_enqueue_media();
+        }
     ?>
         <script>
         (function($) {
-
-            var wpautop;
-            var resize;
-            var wysiwyg_count = 0;
-
-            $(function() {
-                $(document).on('xf/ready', '.xf_add_field', function() {
-                    $('.xf_wysiwyg:not(.ready)').init_wysiwyg();
-                });
-                $('.xf_wysiwyg').init_wysiwyg();
-
-                // set the active editor
-                $(document).on('click', 'a.add_media', function() {
-                    var editor_id = $(this).closest('.wp-editor-wrap').find('.wp-editor-area').attr('id');
-                    wpActiveEditor = editor_id;
-                });
-            });
-
-            $.fn.init_wysiwyg = function() {
-                this.each(function() {
-                    $(this).addClass('ready');
-
-                    // generate css id
-                    wysiwyg_count = wysiwyg_count + 1;
-                    var input_id = 'xf_wysiwyg_' + wysiwyg_count;
-
-                    // set the wysiwyg css id
-                    $(this).find('.wysiwyg').attr('id', input_id);
-                    $(this).find('a.add_media').attr('data-editor', input_id);
-
-                    // if all editors on page are in 'text' tab, tinyMCE.settings will not be set
-                    if ('undefined' === typeof tinyMCE.settings || Object.keys(tinyMCE.settings).length === 0) {
-
-                        // let's pull from tinyMCEPreInit for main content area (if it's set)
-                        if ('undefined' !== typeof tinyMCEPreInit && 'undefined' !== typeof tinyMCEPreInit.mceInit.content) {
-                            tinyMCE.settings = tinyMCEPreInit.mceInit.content;
-                        }
-                        // otherwise, setup basic settings object
-                        else {
-                            tinymce.settings = {
-                                wpautop : true,
-                                resize : 'vertical',
-                                toolbar2 : 'code'
-                            };
-                        }
-                    }
-
-                    // add the "code" button
-                    if ('undefined' !== typeof tinyMCE.settings.toolbar2) {
-                        if (tinyMCE.settings.toolbar2.indexOf('code') < 0) {
-                            tinyMCE.settings.toolbar2 += ',code';
-                        }
-                    }
-
-                    // create wysiwyg
-                    wpautop = tinyMCE.settings.wpautop;
-                    resize = tinyMCE.settings.resize;
-
-                    if (tinyMCE.settings.plugins){
-                        if ( tinyMCE.settings.plugins.indexOf('code,link') === -1 ){
-                            tinyMCE.settings.plugins = tinyMCE.settings.plugins + ',code,link';
-                        }
-                    } else {
-                        tinyMCE.settings.plugins = 'code,link';
-                    }
-
-                    tinyMCE.settings.wpautop = false;
-                    tinyMCE.settings.resize = 'vertical';
-                    tinyMCE.execCommand('mceAddEditor', false, input_id);
-                    tinyMCE.settings.wpautop = wpautop;
-                    tinyMCE.settings.resize = resize;
-                });
+            var counter = 0;
+            var settings = {
+                tinymce: {
+                    wpautop: true,
+                    plugins: 'charmap colorpicker hr lists paste tabfocus textcolor fullscreen wordpress wpautoresize wpeditimage wpemoji wpgallery wplink wptextpattern',
+                    toolbar1: 'formatselect bold italic bullist numlist blockquote alignleft aligncenter alignright link wp_more fullscreen wp_adv',
+                    toolbar2: 'strikethrough hr forecolor pastetext removeformat charmap outdent indent undo redo wp_help',
+                    wp_autoresize_on: true
+                },
+                quicktags: true
             };
 
-            $('.meta-box-sortables, .xf_loop').on('sortstart', function(event, ui) {
-                tinyMCE.settings.wpautop = false;
-                tinyMCE.settings.resize = 'vertical';
-                $(this).find('.wysiwyg').each(function() {
-                    tinyMCE.execCommand('mceRemoveEditor', false, $(this).attr('id'));
-                });
-            });
+            function editor_ready() {
+                return window.wp && wp.editor && typeof wp.editor.initialize === 'function';
+            }
 
-            $('.meta-box-sortables, .xf_loop').on('sortstop', function(event, ui) {
-                $(this).find('.wysiwyg').each(function() {
-                    tinyMCE.execCommand('mceAddEditor', false, $(this).attr('id'));
+            function init_editors(context) {
+                if (!editor_ready()) {
+                    return;
+                }
+                $(context).find('.xfields_wysiwyg textarea.xfields-wysiwyg-area').each(function() {
+                    // Skip loop templates and already initialised editors
+                    if ($(this).hasClass('xfields-ready') || /\[clone\]/.test(this.name)) {
+                        return;
+                    }
+                    if (!this.id) {
+                        counter++;
+                        this.id = 'xfields_wysiwyg_' + counter + '_' + Math.random().toString(36).slice(2, 8);
+                    }
+                    $(this).addClass('xfields-ready');
+                    wp.editor.initialize(this.id, $.extend(true, {}, settings, {
+                        mediaButtons: $(this).data('media') === 1
+                    }));
                 });
-                tinyMCE.settings.wpautop = wpautop;
-                tinyMCE.settings.resize = resize;
+            }
+
+            function save_all() {
+                if (window.tinymce) {
+                    window.tinymce.triggerSave();
+                }
+            }
+
+            $(function() {
+                init_editors(document);
+
+                $(document).on('xfields/ready', '.xfields_add_field', function() {
+                    init_editors(document);
+                });
+
+                // TinyMCE iframes can't be moved in the DOM: remove before sorting, restore after
+                $(document).on('sortstart', '.meta-box-sortables, .xfields_loop', function(e, ui) {
+                    save_all();
+                    $(ui.item).find('textarea.xfields-wysiwyg-area.xfields-ready').each(function() {
+                        wp.editor.remove(this.id);
+                        $(this).removeClass('xfields-ready');
+                    });
+                });
+                $(document).on('sortstop', '.meta-box-sortables, .xfields_loop', function(e, ui) {
+                    init_editors(ui.item);
+                });
+
+                // Always submit the latest editor content
+                $(document).on('submit', 'form', save_all);
             });
         })(jQuery);
         </script>
     <?php
-        }
     }
 
 
-    function mce_external_plugins( $plugins ) {
-        $plugins['code'] = XF_URL . '/assets/js/tinymce/code.min.js';
-        return $plugins;
-    }
-
-
-    // Raw value; html() escapes it with format_for_editor() (also covers default values)
+    // Raw value; html() escapes it
     function format_value_for_input( $value, $field = null ) {
         return is_scalar( $value ) ? (string) $value : '';
     }
@@ -193,6 +158,7 @@ class xf_wysiwyg extends xf_field
 
     function format_value_for_api( $value, $field = null ) {
         $formatting = $this->get_option( $field, 'formatting', 'default' );
-        return ( 'none' == $formatting ) ? $value : apply_filters( 'the_content', $value );
+        // Core filter, intentionally applied (same output as post content)
+        return ( 'none' == $formatting ) ? $value : apply_filters( 'the_content', $value ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
     }
 }

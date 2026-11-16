@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_term extends xf_field
+class xfields_term extends xfields_field
 {
 
     function __construct() {
@@ -35,7 +35,7 @@ class xf_term extends xf_field
             'order'      => 'ASC'
         ];
 
-        $args = apply_filters( 'xf_field_term_query_args', $args, [ 'field' => $field ] );
+        $args = apply_filters( 'xfields_field_term_query_args', $args, [ 'field' => $field ] );
 
         $query = get_terms( $args );
         $query = is_wp_error( $query ) ? [] : (array) $query;
@@ -52,28 +52,29 @@ class xf_term extends xf_field
             ];
         }
 
-        $field->value = implode( ',', xf_sanitize_id_list( $field->value ) );
+        $ids = xfields_sanitize_id_list( $field->value );
+        $field->value = implode( ',', $ids );
 
-        if ( ! empty( $field->value ) ) {
-            $results = $wpdb->get_results( "SELECT term_id, name FROM $wpdb->terms WHERE term_id IN ($field->value) ORDER BY FIELD(term_id,$field->value)" ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
-            foreach ( $results as $result ) {
+        if ( ! empty( $ids ) ) {
+            $results = get_terms( [ 'include' => $ids, 'orderby' => 'include', 'hide_empty' => false ] );
+            foreach ( is_wp_error( $results ) ? [] : $results as $result ) {
                 $selected_posts[ $result->term_id ] = $result;
             }
         }
     ?>
         <div class="filter_posts">
-            <input type="text" class="xf_filter_input" autocomplete="off" placeholder="<?php esc_attr_e( 'Search terms', 'x-fields' ); ?>" />
+            <input type="text" class="xfields_filter_input" autocomplete="off" placeholder="<?php esc_attr_e( 'Search terms', 'x-fields' ); ?>" />
         </div>
 
         <div class="available_posts post_list">
         <?php foreach ( $available_posts as $term ) : ?>
-            <div rel="<?php echo (int) $term->term_id; ?>"<?php echo isset( $selected_posts[ $term->term_id ] ) ? ' class="used"' : ''; ?> title="<?php echo esc_attr( $term->name ); ?>"><?php echo wp_kses_post( apply_filters( 'xf_term_display', esc_html( $term->name ), $term->term_id, $field ) ); ?></div>
+            <div rel="<?php echo (int) $term->term_id; ?>"<?php echo isset( $selected_posts[ $term->term_id ] ) ? ' class="used"' : ''; ?> title="<?php echo esc_attr( $term->name ); ?>"><?php echo wp_kses_post( apply_filters( 'xfields_term_display', esc_html( $term->name ), $term->term_id, $field ) ); ?></div>
         <?php endforeach; ?>
         </div>
 
         <div class="selected_posts post_list">
         <?php foreach ( $selected_posts as $term ) : ?>
-            <div rel="<?php echo (int) $term->term_id; ?>"><span class="remove"></span><?php echo wp_kses_post( apply_filters( 'xf_term_display', esc_html( $term->name ), $term->term_id, $field ) ); ?></div>
+            <div rel="<?php echo (int) $term->term_id; ?>"><span class="remove"></span><?php echo wp_kses_post( apply_filters( 'xfields_term_display', esc_html( $term->name ), $term->term_id, $field ) ); ?></div>
         <?php endforeach; ?>
         </div>
         <div class="clear"></div>
@@ -84,7 +85,7 @@ class xf_term extends xf_field
 
     function options_html( $key, $field ) {
         $args = [ 'public' => true ];
-        $choices = apply_filters( 'xf_field_term_taxonomies', get_taxonomies( $args ) );
+        $choices = apply_filters( 'xfields_field_term_taxonomies', get_taxonomies( $args ) );
 
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
@@ -94,9 +95,9 @@ class xf_term extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type'          => 'select',
-                        'input_name'    => "xf[fields][$key][options][taxonomies]",
+                        'input_name'    => "xfields[fields][$key][options][taxonomies]",
                         'options'       => [ 'multiple' => '1', 'choices' => $choices ],
                         'value'         => $this->get_option( $field, 'taxonomies' ),
                     ] );
@@ -108,8 +109,8 @@ class xf_term extends xf_field
                 <label><?php esc_html_e( 'Limits', 'x-fields' ); ?></label>
             </td>
             <td>
-                <input type="text" name="xf[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />
-                <input type="text" name="xf[fields][<?php echo esc_attr( $key ); ?>][options][limit_max]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_max' ) ); ?>" placeholder="max" style="width:60px" />
+                <input type="text" name="xfields[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />
+                <input type="text" name="xfields[fields][<?php echo esc_attr( $key ); ?>][options][limit_max]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_max' ) ); ?>" placeholder="max" style="width:60px" />
             </td>
         </tr>
     <?php
@@ -129,13 +130,13 @@ class xf_term extends xf_field
             }
 
             $(function() {
-                $(document).on('xf/ready', '.xf_add_field', function() {
-                    $('.xf_term:not(.ready)').init_term();
+                $(document).on('xfields/ready', '.xfields_add_field', function() {
+                    $('.xfields_term:not(.ready)').init_term();
                 });
-                $('.xf_term').init_term();
+                $('.xfields_term').init_term();
 
                 // add selected post
-                $(document).on('click', '.xf_term .available_posts div', function() {
+                $(document).on('click', '.xfields_term .available_posts div', function() {
                     var parent = $(this).closest('.field');
                     var term_id = $(this).attr('rel');
                     var html = $(this).html();
@@ -145,7 +146,7 @@ class xf_term extends xf_field
                 });
 
                 // remove selected post
-                $(document).on('click', '.xf_term .selected_posts .remove', function() {
+                $(document).on('click', '.xfields_term .selected_posts .remove', function() {
                     var div = $(this).parent();
                     var parent = div.closest('.field');
                     var term_id = div.attr('rel');
@@ -155,7 +156,7 @@ class xf_term extends xf_field
                 });
 
                 // filter posts
-                $(document).on('keyup', '.xf_term .xf_filter_input', function() {
+                $(document).on('keyup', '.xfields_term .xfields_filter_input', function() {
                     var input = $(this).val();
                     var parent = $(this).closest('.field');
                     var regex = new RegExp(input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
@@ -197,12 +198,12 @@ class xf_term extends xf_field
 
 
     function format_value_for_input( $value, $field = null ) {
-        return implode( ',', xf_sanitize_id_list( $value ) );
+        return implode( ',', xfields_sanitize_id_list( $value ) );
     }
 
 
     function pre_save( $value, $field = null ) {
         // Only positive integer IDs are allowed (prevents SQL injection in html())
-        return xf_sanitize_id_list( $value );
+        return xfields_sanitize_id_list( $value );
     }
 }

@@ -2,7 +2,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_ajax
+// This file reads/writes X-Fields' own tables ({prefix}xfields_values, {prefix}xfields_sessions) and the
+// group/value rows they reference; WordPress has no API for them. All queries are prepared or use integer/constant values.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery
+
+class xfields_ajax
 {
     /**
      * Search posts (in the Placement Rules area)
@@ -19,13 +23,15 @@ class xf_ajax
         FROM $wpdb->posts
         WHERE
             post_status IN ('publish', 'private') AND
-            post_type NOT IN ('xf_group', 'attachment', 'revision', 'nav_menu_item') AND
+            post_type NOT IN ('xfields_group', 'attachment', 'revision', 'nav_menu_item') AND
             post_title LIKE %s
         ORDER BY post_type, post_title
         LIMIT 10",
         '%' . $wpdb->esc_like( $q ) . '%' );
 
-        $results = $wpdb->get_results( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
+        // phpcs:disable WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
+        $results = $wpdb->get_results( $sql );
+        // phpcs:enable WordPress.DB.PreparedSQL
 
         $output = [];
         foreach ( $results as $result ) {
@@ -49,7 +55,7 @@ class xf_ajax
 
 
     /**
-     * Remove all traces of XF
+     * Remove all traces of XFields
      */
     public function reset() {
         global $wpdb;
@@ -58,19 +64,23 @@ class xf_ajax
         $sql = "
         DELETE p, m FROM {$wpdb->posts} p
         LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID
-        WHERE p.post_type = 'xf_group'";
-        $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
+        WHERE p.post_type = 'xfields_group'";
+        // phpcs:disable WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
+        $wpdb->query( $sql );
+        // phpcs:enable WordPress.DB.PreparedSQL
 
         // Drop custom field values
         $sql = "
-        DELETE v, m FROM {$wpdb->prefix}xf_values v
+        DELETE v, m FROM {$wpdb->prefix}xfields_values v
         LEFT JOIN {$wpdb->postmeta} m ON m.meta_id = v.meta_id";
-        $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
+        // phpcs:disable WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
+        $wpdb->query( $sql );
+        // phpcs:enable WordPress.DB.PreparedSQL
 
         // Drop tables
-        $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}xf_values" );
-        $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}xf_sessions" );
-        delete_option( 'xf_version' );
-        delete_option( 'xf_next_field_id' );
+        $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}xfields_values" );
+        $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}xfields_sessions" );
+        delete_option( 'xfields_version' );
+        delete_option( 'xfields_next_field_id' );
     }
 }

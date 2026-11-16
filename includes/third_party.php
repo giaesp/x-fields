@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_third_party
+class xfields_third_party
 {
 
     public function __construct() {
@@ -27,7 +27,7 @@ class xf_third_party
     /**
      * WPML support
      *
-     * Properly copy XF fields on WPML post duplication (requires WPML 2.6+)
+     * Properly copy XFields fields on WPML post duplication (requires WPML 2.6+)
      *
      * @param int $master_id
      * @param string $lang
@@ -36,10 +36,10 @@ class xf_third_party
      * @since 1.6.8
      */
     function wpml_handler( $master_id, $lang, $post_data, $duplicate_id ) {
-        $field_data = XF()->get( false, $master_id, [ 'format' => 'raw' ] );
+        $field_data = XFields()->get( false, $master_id, [ 'format' => 'raw' ] );
 
         if ( ! empty( $field_data ) ) {
-            XF()->save( $field_data, [ 'ID' => $duplicate_id ] );
+            XFields()->save( $field_data, [ 'ID' => $duplicate_id ] );
         }
     }
 
@@ -52,14 +52,14 @@ class xf_third_party
      * @since 1.0.0
      */
     function pll_get_post_types( $post_types, $is_settings ) {
-        unset( $post_types['xf_group'] );
+        unset( $post_types['xfields_group'] );
         return $post_types;
     }
 
 
     /**
      * Polylang: don't let Polylang copy/sync X-Fields values as plain postmeta.
-     * Without the matching rows in xf_values they would be orphaned (and invisible).
+     * Without the matching rows in xfields_values they would be orphaned (and invisible).
      * X-Fields copies them itself when a translation is created (see below).
      * @param array $keys
      * @param bool $sync
@@ -68,7 +68,7 @@ class xf_third_party
      * @since 1.0.0
      */
     function pll_copy_post_metas( $keys, $sync = false, $from = 0 ) {
-        $names = wp_list_pluck( XF()->api->find_input_fields(), 'name' );
+        $names = wp_list_pluck( XFields()->api->find_input_fields(), 'name' );
         return array_values( array_diff( (array) $keys, $names ) );
     }
 
@@ -99,14 +99,14 @@ class xf_third_party
         }
 
         // Only once, and never over existing data
-        if ( ! empty( XF()->get( false, $post->ID, [ 'format' => 'raw' ] ) ) ) {
+        if ( ! empty( XFields()->get( false, $post->ID, [ 'format' => 'raw' ] ) ) ) {
             return;
         }
 
-        $field_data = XF()->get( false, $from, [ 'format' => 'raw' ] );
+        $field_data = XFields()->get( false, $from, [ 'format' => 'raw' ] );
 
         if ( ! empty( $field_data ) ) {
-            XF()->save( $field_data, [ 'ID' => $post->ID ] );
+            XFields()->save( $field_data, [ 'ID' => $post->ID ] );
         }
     }
 
@@ -122,7 +122,7 @@ class xf_third_party
             $screen = get_current_screen();
 
             // Was $current_screen (undefined), so this never matched
-            if ( isset( $screen->id ) && 'xf_group' == $screen->id ) {
+            if ( isset( $screen->id ) && 'xfields_group' == $screen->id ) {
                 $args = [ 'public' => false, 'show_ui' => true ];
             }
         }
@@ -138,7 +138,7 @@ class xf_third_party
      * @since 2.0.0
      */
     function duplicate_post($new_post_id, $post) {
-        $field_data = XF()->get( false, $post->ID, [ 'format' => 'raw' ] );
+        $field_data = XFields()->get( false, $post->ID, [ 'format' => 'raw' ] );
 
         if ( is_array( $field_data ) ) {
             foreach ( $field_data as $key => $value ) {
@@ -149,8 +149,8 @@ class xf_third_party
         }
 
         $post_data = [ 'ID' => $new_post_id ];
-        XF()->save( $field_data, $post_data );
+        XFields()->save( $field_data, $post_data );
     }
 }
 
-new xf_third_party();
+new xfields_third_party();

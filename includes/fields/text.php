@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_text extends xf_field
+class xfields_text extends xfields_field
 {
 
     function __construct() {
@@ -19,9 +19,9 @@ class xf_text extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'text',
-                        'input_name' => "xf[fields][$key][options][default_value]",
+                        'input_name' => "xfields[fields][$key][options][default_value]",
                         'value' => $this->get_option( $field, 'default_value' ),
                     ] );
                 ?>
@@ -33,9 +33,9 @@ class xf_text extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'true_false',
-                        'input_name' => "xf[fields][$key][options][required]",
+                        'input_name' => "xfields[fields][$key][options][required]",
                         'input_class' => 'true_false',
                         'value' => $this->get_option( $field, 'required' ),
                         'options' => [ 'message' => __( 'This is a required field', 'x-fields' ) ],

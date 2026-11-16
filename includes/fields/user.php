@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_user extends xf_field
+class xfields_user extends xfields_field
 {
 
     function __construct() {
@@ -17,33 +17,34 @@ class xf_user extends xf_field
         $selected_users = [];
         $available_users = [];
 
-        $results = $wpdb->get_results( "SELECT ID, display_name FROM $wpdb->users ORDER BY display_name" );
+        $results = get_users( [ 'fields' => [ 'ID', 'display_name' ], 'orderby' => 'display_name' ] );
         foreach ( $results as $result ) {
             $available_users[] = $result;
         }
 
-        $field->value = implode( ',', xf_sanitize_id_list( $field->value ) );
+        $ids = xfields_sanitize_id_list( $field->value );
+        $field->value = implode( ',', $ids );
 
-        if ( ! empty( $field->value ) ) {
-            $results = $wpdb->get_results( "SELECT ID, display_name FROM $wpdb->users WHERE ID IN ($field->value) ORDER BY FIELD(ID,$field->value)" ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
+        if ( ! empty( $ids ) ) {
+            $results = get_users( [ 'include' => $ids, 'orderby' => 'include', 'fields' => [ 'ID', 'display_name' ] ] );
             foreach ( $results as $result ) {
                 $selected_users[ $result->ID ] = $result;
             }
         }
     ?>
         <div class="filter_posts">
-            <input type="text" class="xf_filter_input" autocomplete="off" placeholder="<?php esc_attr_e( 'Search users', 'x-fields' ); ?>" />
+            <input type="text" class="xfields_filter_input" autocomplete="off" placeholder="<?php esc_attr_e( 'Search users', 'x-fields' ); ?>" />
         </div>
 
         <div class="available_posts post_list">
         <?php foreach ( $available_users as $user ) : ?>
-            <div rel="<?php echo (int) $user->ID; ?>"<?php echo isset( $selected_users[ $user->ID ] ) ? ' class="used"' : ''; ?>><?php echo wp_kses_post( apply_filters( 'xf_user_display', esc_html( $this->user_label( $user->ID ) ), $user->ID, $field ) ); ?></div>
+            <div rel="<?php echo (int) $user->ID; ?>"<?php echo isset( $selected_users[ $user->ID ] ) ? ' class="used"' : ''; ?>><?php echo wp_kses_post( apply_filters( 'xfields_user_display', esc_html( $this->user_label( $user->ID ) ), $user->ID, $field ) ); ?></div>
         <?php endforeach; ?>
         </div>
 
         <div class="selected_posts post_list">
         <?php foreach ( $selected_users as $user ) : ?>
-            <div rel="<?php echo (int) $user->ID; ?>"><span class="remove"></span><?php echo wp_kses_post( apply_filters( 'xf_user_display', esc_html( $this->user_label( $user->ID ) ), $user->ID, $field ) ); ?></div>
+            <div rel="<?php echo (int) $user->ID; ?>"><span class="remove"></span><?php echo wp_kses_post( apply_filters( 'xfields_user_display', esc_html( $this->user_label( $user->ID ) ), $user->ID, $field ) ); ?></div>
         <?php endforeach; ?>
         </div>
         <div class="clear"></div>
@@ -84,8 +85,8 @@ class xf_user extends xf_field
                 <label><?php esc_html_e( 'Limits', 'x-fields' ); ?></label>
             </td>
             <td>
-                <input type="text" name="xf[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />
-                <input type="text" name="xf[fields][<?php echo esc_attr( $key ); ?>][options][limit_max]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_max' ) ); ?>" placeholder="max" style="width:60px" />
+                <input type="text" name="xfields[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />
+                <input type="text" name="xfields[fields][<?php echo esc_attr( $key ); ?>][options][limit_max]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_max' ) ); ?>" placeholder="max" style="width:60px" />
             </td>
         </tr>
     <?php
@@ -105,13 +106,13 @@ class xf_user extends xf_field
             }
 
             $(function() {
-                $(document).on('xf/ready', '.xf_add_field', function() {
-                    $('.xf_user:not(.ready)').init_user();
+                $(document).on('xfields/ready', '.xfields_add_field', function() {
+                    $('.xfields_user:not(.ready)').init_user();
                 });
-                $('.xf_user').init_user();
+                $('.xfields_user').init_user();
 
                 // add selected post
-                $(document).on('click', '.xf_user .available_posts div', function() {
+                $(document).on('click', '.xfields_user .available_posts div', function() {
                     var parent = $(this).closest('.field');
                     var post_id = $(this).attr('rel');
                     var html = $(this).html();
@@ -121,7 +122,7 @@ class xf_user extends xf_field
                 });
 
                 // remove selected post
-                $(document).on('click', '.xf_user .selected_posts .remove', function() {
+                $(document).on('click', '.xfields_user .selected_posts .remove', function() {
                     var div = $(this).parent();
                     var parent = div.closest('.field');
                     var post_id = div.attr('rel');
@@ -131,7 +132,7 @@ class xf_user extends xf_field
                 });
 
                 // filter posts
-                $(document).on('keyup', '.xf_user .xf_filter_input', function() {
+                $(document).on('keyup', '.xfields_user .xfields_filter_input', function() {
                     var input = $(this).val();
                     var parent = $(this).closest('.field');
                     var regex = new RegExp(input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
@@ -173,12 +174,12 @@ class xf_user extends xf_field
 
 
     function format_value_for_input( $value, $field = null ) {
-        return implode( ',', xf_sanitize_id_list( $value ) );
+        return implode( ',', xfields_sanitize_id_list( $value ) );
     }
 
 
     function pre_save( $value, $field = null ) {
         // Only positive integer IDs are allowed (prevents SQL injection in html())
-        return xf_sanitize_id_list( $value );
+        return xfields_sanitize_id_list( $value );
     }
 }

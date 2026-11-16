@@ -3,62 +3,32 @@
  * Follows WordPress admin conventions; the accent follows the user's admin color scheme.
  */
 
-#xf_fields,
-#xf_rules,
-#xf_extras {
-    --xf-accent: var(--wp-admin-theme-color, #2271b1);
-    --xf-accent-soft: rgba(34, 113, 177, 0.08);
-    --xf-border: #dcdcde;
-    --xf-border-soft: #f0f0f1;
-    --xf-muted: #646970;
-    --xf-text: #1d2327;
-    --xf-bg-soft: #f6f7f7;
-    --xf-danger: #d63638;
-    --xf-radius: 4px;
-}
-
-/*--------------------------------------------------------------
-    Tooltips
---------------------------------------------------------------*/
-
-.xf_tooltip {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    margin-left: 4px;
-    border-radius: 50%;
-    background: #f0f0f1;
-    color: #646970;
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1;
-    vertical-align: middle;
-    cursor: help;
-}
-
-.xf_tooltip:hover {
-    background: var(--xf-accent, #2271b1);
-    color: #fff;
-}
-
-.tooltip_inner {
-    display: none;
+#xfields_fields,
+#xfields_rules,
+#xfields_extras {
+    --xfields-accent: var(--wp-admin-theme-color, #2271b1);
+    --xfields-accent-soft: rgba(34, 113, 177, 0.08);
+    --xfields-border: #dcdcde;
+    --xfields-border-soft: #f0f0f1;
+    --xfields-muted: #646970;
+    --xfields-text: #1d2327;
+    --xfields-bg-soft: #f6f7f7;
+    --xfields-danger: #d63638;
+    --xfields-radius: 4px;
 }
 
 /*--------------------------------------------------------------
     Fields box
 --------------------------------------------------------------*/
 
-#xf_fields .inside {
+#xfields_fields .inside {
     margin: 0;
     padding: 0;
 }
 
 /* Column header */
-#xf_fields .xf-fields-header,
-#xf_fields .field_meta {
+#xfields_fields .xfields-fields-header,
+#xfields_fields .field_meta {
     display: grid;
     grid-template-columns: 36px minmax(0, 1.4fr) minmax(0, 1fr) 140px 76px;
     align-items: center;
@@ -66,11 +36,11 @@
     padding: 0 12px 0 4px;
 }
 
-#xf_fields .xf-fields-header {
+#xfields_fields .xfields-fields-header {
     min-height: 36px;
-    border-bottom: 1px solid var(--xf-border);
-    background: var(--xf-bg-soft);
-    color: var(--xf-muted);
+    border-bottom: 1px solid var(--xfields-border);
+    background: var(--xfields-bg-soft);
+    color: var(--xfields-muted);
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
@@ -78,78 +48,78 @@
 }
 
 /* Empty state */
-#xf_fields .xf-empty-state {
+#xfields_fields .xfields-empty-state {
     padding: 40px 24px;
     text-align: center;
-    color: var(--xf-muted);
+    color: var(--xfields-muted);
 }
 
-#xf_fields .xf-empty-state[hidden] {
+#xfields_fields .xfields-empty-state[hidden] {
     display: none;
 }
 
-#xf_fields .xf-empty-state .dashicons {
+#xfields_fields .xfields-empty-state .dashicons {
     width: 40px;
     height: 40px;
     font-size: 40px;
     color: #c3c4c7;
 }
 
-#xf_fields .xf-empty-state p {
+#xfields_fields .xfields-empty-state p {
     margin: 6px 0 0;
 }
 
-#xf_fields .xf-empty-state strong {
-    color: var(--xf-text);
+#xfields_fields .xfields-empty-state strong {
+    color: var(--xfields-text);
     font-size: 14px;
 }
 
 /* List */
-#xf_fields .fields {
+#xfields_fields .fields {
     margin: 0;
     padding: 0;
     background: #fff;
 }
 
-#xf_fields .fields li {
+#xfields_fields .fields li {
     margin: 0;
     list-style: none;
 }
 
 /* Nested (loop children) */
-#xf_fields .fields li ul {
+#xfields_fields .fields li ul {
     margin: 0;
     padding: 0 0 0 28px;
-    border-left: 3px solid var(--xf-accent-soft);
+    border-left: 3px solid var(--xfields-accent-soft);
     background: #fcfcfc;
 }
 
-#xf_fields .fields li.loop > ul {
+#xfields_fields .fields li.loop > ul {
     min-height: 12px;
 }
 
-#xf_fields .fields li.loop > ul:empty::before {
+#xfields_fields .fields li.loop > ul:empty::before {
     content: attr(data-empty);
     display: block;
     padding: 8px 12px;
 }
 
 /* Row */
-#xf_fields .field {
-    border-bottom: 1px solid var(--xf-border-soft);
+#xfields_fields .field {
+    border-bottom: 1px solid var(--xfields-border-soft);
 }
 
-#xf_fields .field_meta {
+#xfields_fields .field_meta {
     min-height: 48px;
     background: #fff;
     transition: background-color 0.12s ease;
 }
 
-#xf_fields .field_meta:hover {
-    background: var(--xf-bg-soft);
+#xfields_fields .field_meta:hover {
+    background: var(--xfields-bg-soft);
 }
 
-#xf_fields .field_order {
+#xfields_fields .field_order {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -158,19 +128,19 @@
     color: #a7aaad;
 }
 
-#xf_fields .field_meta .field_order::before {
+#xfields_fields .field_meta .field_order::before {
     content: "\f545"; /* dashicons-move */
     font: normal 18px/1 dashicons;
 }
 
-#xf_fields .field_meta:hover .field_order {
-    color: var(--xf-muted);
+#xfields_fields .field_meta:hover .field_order {
+    color: var(--xfields-muted);
 }
 
-#xf_fields .field_label .row-title {
+#xfields_fields .field_label .row-title {
     display: block;
     overflow: hidden;
-    color: var(--xf-text);
+    color: var(--xfields-text);
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
@@ -179,52 +149,52 @@
     cursor: pointer;
 }
 
-#xf_fields .field_label .row-title:hover,
-#xf_fields .field_label .row-title:focus {
-    color: var(--xf-accent);
+#xfields_fields .field_label .row-title:hover,
+#xfields_fields .field_label .row-title:focus {
+    color: var(--xfields-accent);
 }
 
-#xf_fields code.field_name {
+#xfields_fields code.field_name {
     justify-self: start;
     max-width: 100%;
     overflow: hidden;
     padding: 2px 6px;
     border-radius: 3px;
-    background: var(--xf-bg-soft);
+    background: var(--xfields-bg-soft);
     color: #50575e;
     font-size: 12px;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
 
-#xf_fields .field_meta .field_type {
+#xfields_fields .field_meta .field_type {
     justify-self: start;
     padding: 2px 8px;
     border-radius: 999px;
-    background: var(--xf-accent-soft);
-    color: var(--xf-accent);
+    background: var(--xfields-accent-soft);
+    color: var(--xfields-accent);
     font-size: 12px;
     font-weight: 500;
     white-space: nowrap;
 }
 
-#xf_fields .field_meta .field_type.xf-type-loop {
+#xfields_fields .field_meta .field_type.xfields-type-loop {
     background: #fcf0e3;
     color: #8a4d00;
 }
 
-#xf_fields .field_meta .field_type.xf-type-tab {
+#xfields_fields .field_meta .field_type.xfields-type-tab {
     background: #f0f0f1;
     color: #50575e;
 }
 
-#xf_fields .field_tools {
+#xfields_fields .field_tools {
     display: flex;
     justify-content: flex-end;
     gap: 2px;
 }
 
-.xf-icon-button {
+.xfields-icon-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -232,69 +202,69 @@
     height: 30px;
     padding: 0;
     border: 0;
-    border-radius: var(--xf-radius, 4px);
+    border-radius: var(--xfields-radius, 4px);
     background: transparent;
     color: #646970;
     cursor: pointer;
 }
 
-.xf-icon-button:hover,
-.xf-icon-button:focus {
+.xfields-icon-button:hover,
+.xfields-icon-button:focus {
     background: #f0f0f1;
-    color: var(--xf-accent, #2271b1);
+    color: var(--xfields-accent, #2271b1);
 }
 
-.xf-icon-button.xf_delete_field:hover,
-.xf-icon-button.xf_delete_field:focus {
+.xfields-icon-button.xfields_delete_field:hover,
+.xfields-icon-button.xfields_delete_field:focus {
     background: #fcf0f1;
-    color: var(--xf-danger, #d63638);
+    color: var(--xfields-danger, #d63638);
 }
 
-.xf-icon-button:focus {
+.xfields-icon-button:focus {
     outline: 2px solid transparent;
-    box-shadow: 0 0 0 2px var(--xf-accent, #2271b1);
+    box-shadow: 0 0 0 2px var(--xfields-accent, #2271b1);
 }
 
 /* Open state */
-#xf_fields .field.form_open {
+#xfields_fields .field.form_open {
     position: relative;
     z-index: 1;
     margin: 8px;
-    border: 1px solid var(--xf-accent);
-    border-radius: var(--xf-radius);
+    border: 1px solid var(--xfields-accent);
+    border-radius: var(--xfields-radius);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-#xf_fields .field.form_open > .field_meta {
-    border-radius: var(--xf-radius) var(--xf-radius) 0 0;
-    background: var(--xf-accent-soft);
+#xfields_fields .field.form_open > .field_meta {
+    border-radius: var(--xfields-radius) var(--xfields-radius) 0 0;
+    background: var(--xfields-accent-soft);
 }
 
 /* Footer */
-#xf_fields .table_footer {
+#xfields_fields .table_footer {
     display: flex;
     justify-content: flex-end;
     padding: 12px;
-    border-top: 1px solid var(--xf-border);
-    background: var(--xf-bg-soft);
+    border-top: 1px solid var(--xfields-border);
+    background: var(--xfields-bg-soft);
 }
 
-#xf_fields .table_footer .button .dashicons {
+#xfields_fields .table_footer .button .dashicons {
     margin: 4px 2px 0 -2px;
     font-size: 16px;
 }
 
 /* Drag placeholder */
-#xf_fields .ui-sortable-placeholder {
+#xfields_fields .ui-sortable-placeholder {
     height: 48px;
     margin: 4px 8px;
-    border: 2px dashed var(--xf-accent);
-    border-radius: var(--xf-radius);
-    background: var(--xf-accent-soft);
+    border: 2px dashed var(--xfields-accent);
+    border-radius: var(--xfields-radius);
+    background: var(--xfields-accent-soft);
     visibility: visible !important;
 }
 
-#xf_fields .ui-sortable-helper {
+#xfields_fields .ui-sortable-helper {
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
 }
 
@@ -304,7 +274,7 @@
 
 .field_form {
     display: none;
-    border-top: 1px solid var(--xf-border, #dcdcde);
+    border-top: 1px solid var(--xfields-border, #dcdcde);
     background: #fff;
 }
 
@@ -318,7 +288,7 @@
 
 .field_form > table > tbody > tr > td {
     padding: 14px 16px;
-    border-top: 1px solid var(--xf-border-soft, #f0f0f1);
+    border-top: 1px solid var(--xfields-border-soft, #f0f0f1);
 }
 
 .field_form > table > tbody > tr:first-child > td {
@@ -331,35 +301,52 @@
 }
 
 .field_form td.label label {
-    color: var(--xf-text, #1d2327);
+    color: var(--xfields-text, #1d2327);
     font-weight: 600;
 }
 
 .field_form td.label p.description {
     margin: 4px 0 0 !important;
-    color: var(--xf-muted, #646970);
+    color: var(--xfields-muted, #646970);
     font-style: normal;
 }
 
 /* Label / Name / Type row */
 .field_form tr.field_basics > td {
-    background: var(--xf-bg-soft, #f6f7f7);
+    background: var(--xfields-bg-soft, #f6f7f7);
 }
 
 .field_form tr.field_basics table {
     border-spacing: 0;
 }
 
-.field_form tr.field_basics td {
+.field_form tr.field_basics > td {
+    padding: 16px;
+}
+
+.field_form tr.field_basics table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.field_form tr.field_basics table td {
     width: 33.33%;
     padding: 0 16px 0 0;
     border: 0;
     vertical-align: top;
 }
 
-.field_form tr.field_basics td:last-child {
+.field_form tr.field_basics table td:last-child {
     padding-right: 0;
 }
+
+.field_form tr.field_basics table td select,
+.field_form tr.field_basics table td input[type="text"] {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+}
+
 
 .field_form tr.field_basics label {
     font-weight: 600;
@@ -381,7 +368,7 @@
     height: 110px;
 }
 
-.field_form td .xf_true_false label,
+.field_form td .xfields_true_false label,
 .field_form td label:has(> input[type="checkbox"]) {
     display: inline-flex;
     align-items: center;
@@ -392,7 +379,7 @@
 .field_form tr.field_actions td {
     padding-top: 12px;
     padding-bottom: 12px;
-    background: var(--xf-bg-soft, #f6f7f7);
+    background: var(--xfields-bg-soft, #f6f7f7);
     text-align: right;
 }
 
@@ -400,92 +387,83 @@
     Placement rules & extras
 --------------------------------------------------------------*/
 
-#xf_rules .inside,
-#xf_extras .inside {
+#xfields_rules .inside,
+#xfields_extras .inside {
     margin: 0;
     padding: 0;
 }
 
-#xf_rules table,
-#xf_extras table {
+#xfields_rules table,
+#xfields_extras table {
     width: 100%;
     border-spacing: 0;
 }
 
-#xf_rules table td,
-#xf_extras table td {
+#xfields_rules table td,
+#xfields_extras table td {
     padding: 12px 16px;
-    border-bottom: 1px solid var(--xf-border-soft);
+    border-bottom: 1px solid var(--xfields-border-soft);
     vertical-align: middle;
 }
 
-#xf_rules table tr:last-child td,
-#xf_extras table tr:last-child td {
+#xfields_rules table tr:last-child td,
+#xfields_extras table tr:last-child td {
     border-bottom: 0;
 }
 
-#xf_rules table td.label,
-#xf_extras table td.label {
+#xfields_rules table td.label,
+#xfields_extras table td.label {
     width: 170px;
-    color: var(--xf-text);
+    color: var(--xfields-text);
     font-weight: 600;
 }
 
-#xf_rules table td.label label,
-#xf_extras table td.label label {
-    color: var(--xf-text);
+#xfields_rules table td.label label,
+#xfields_extras table td.label label {
+    color: var(--xfields-text);
     font-weight: 600;
 }
 
-#xf_rules table select,
-#xf_extras table select,
-#xf_rules table textarea,
-#xf_extras table textarea,
-#xf_rules table input[type="text"],
-#xf_extras table input[type="text"] {
+#xfields_rules table select,
+#xfields_extras table select,
+#xfields_rules table textarea,
+#xfields_extras table textarea,
+#xfields_rules table input[type="text"],
+#xfields_extras table input[type="text"] {
     width: 100%;
     max-width: 100%;
 }
 
-#xf_rules .select2,
-#xf_rules .select2-container {
-    width: 100% !important;
-}
 
-#xf_rules .select2-container-multi .select2-choices {
-    min-height: 32px;
-    border-color: #8c8f94;
-    border-radius: var(--xf-radius);
-    background-image: none;
-}
-
-#xf_rules .select2-container-multi .select2-choices .select2-search-choice {
-    border: 0;
-    border-radius: 3px;
-    background: var(--xf-accent-soft);
-    box-shadow: none;
-    color: var(--xf-accent);
-}
-
-#xf_extras input[name="xf[extras][order]"] {
+#xfields_extras input[name="xfields[extras][order]"] {
     width: 80px !important;
 }
 
-#xf_extras label + input[type="radio"],
-#xf_extras input[type="radio"] {
+#xfields_extras label + input[type="radio"],
+#xfields_extras input[type="radio"] {
     margin-right: 4px;
+}
+
+/* Descriptions under labels (replace the old "?" tooltips) */
+.field_form td.label p.description,
+.field_form tr.field_basics p.description {
+    margin: 2px 0 0 !important;
+    color: var(--xf-muted, #646970);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
 }
 
 /*--------------------------------------------------------------
     Field group: hide irrelevant publish actions
 --------------------------------------------------------------*/
 
-.post-type-xf_group #submitdiv #minor-publishing-actions,
-.post-type-xf_group #submitdiv #misc-publishing-actions {
+.post-type-xfields_group #submitdiv #minor-publishing-actions,
+.post-type-xfields_group #submitdiv #misc-publishing-actions {
     display: none;
 }
 
-.post-type-xf_group #submitdiv #major-publishing-actions {
+.post-type-xfields_group #submitdiv #major-publishing-actions {
     border-top: 0;
 }
 
@@ -494,11 +472,11 @@
 --------------------------------------------------------------*/
 
 @media (max-width: 782px) {
-    #xf_fields .xf-fields-header {
+    #xfields_fields .xfields-fields-header {
         display: none;
     }
 
-    #xf_fields .field_meta {
+    #xfields_fields .field_meta {
         grid-template-columns: 32px minmax(0, 1fr) auto;
         grid-template-areas:
             "order label tools"
@@ -508,15 +486,15 @@
         padding-bottom: 8px;
     }
 
-    #xf_fields .field_meta .field_order { grid-area: order; }
-    #xf_fields .field_meta .field_label { grid-area: label; }
-    #xf_fields .field_meta .field_tools { grid-area: tools; }
-    #xf_fields .field_meta code.field_name { grid-area: meta; }
-    #xf_fields .field_meta .field_type { grid-area: meta; justify-self: end; }
+    #xfields_fields .field_meta .field_order { grid-area: order; }
+    #xfields_fields .field_meta .field_label { grid-area: label; }
+    #xfields_fields .field_meta .field_tools { grid-area: tools; }
+    #xfields_fields .field_meta code.field_name { grid-area: meta; }
+    #xfields_fields .field_meta .field_type { grid-area: meta; justify-self: end; }
 
     .field_form td.label,
-    #xf_rules table td.label,
-    #xf_extras table td.label {
+    #xfields_rules table td.label,
+    #xfields_extras table td.label {
         display: block;
         width: auto;
         padding-bottom: 0;
@@ -524,8 +502,8 @@
     }
 
     .field_form tr.field_basics td,
-    #xf_rules table td,
-    #xf_extras table td {
+    #xfields_rules table td,
+    #xfields_extras table td {
         display: block;
         width: auto !important;
         padding-right: 0;
@@ -534,4 +512,80 @@
     .field_form tr.field_basics td + td {
         padding-top: 12px;
     }
+}
+
+/*--------------------------------------------------------------
+    Tom Select — WordPress admin look
+--------------------------------------------------------------*/
+
+.ts-wrapper {
+    --xf-ts-accent: var(--wp-admin-theme-color, #2271b1);
+    width: 100%;
+    max-width: 100%;
+}
+
+.ts-wrapper .ts-control {
+    min-height: 32px;
+    padding: 3px 8px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    box-shadow: none;
+    font-size: 14px;
+    background: #fff;
+}
+
+.ts-wrapper.focus .ts-control {
+    border-color: var(--xf-ts-accent);
+    box-shadow: 0 0 0 1px var(--xf-ts-accent);
+}
+
+.ts-wrapper.multi .ts-control > .item {
+    margin: 2px 4px 2px 0;
+    padding: 1px 2px 1px 8px;
+    border: 0;
+    border-radius: 3px;
+    background: rgba(34, 113, 177, 0.1);
+    color: var(--xf-ts-accent);
+    font-weight: 500;
+}
+
+.ts-wrapper.multi .ts-control > .item .remove {
+    border-left: 0;
+    color: inherit;
+    opacity: 0.7;
+}
+
+.ts-wrapper.multi .ts-control > .item .remove:hover {
+    background: transparent;
+    opacity: 1;
+}
+
+.ts-dropdown {
+    z-index: 100000;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    font-size: 14px;
+}
+
+.ts-dropdown .active {
+    background: rgba(34, 113, 177, 0.1);
+    color: #1d2327;
+}
+
+.ts-dropdown .no-results {
+    padding: 8px 10px;
+    color: #646970;
+}
+
+/* Native inputs inside Tom Select must not inherit admin widths */
+.ts-wrapper .ts-control input,
+.field_form .ts-wrapper .ts-control input,
+.xfields_input .field .ts-wrapper .ts-control input[type="text"] {
+    width: auto !important;
+    min-width: 7rem;
+    margin: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
 }

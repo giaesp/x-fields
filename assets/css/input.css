@@ -3,98 +3,98 @@
  * Follows WordPress admin conventions; the accent follows the user's admin color scheme.
  */
 
-.xf_input {
-    --xf-accent: var(--wp-admin-theme-color, #2271b1);
-    --xf-accent-soft: rgba(34, 113, 177, 0.08);
-    --xf-border: #dcdcde;
-    --xf-border-strong: #8c8f94;
-    --xf-border-soft: #f0f0f1;
-    --xf-muted: #646970;
-    --xf-text: #1d2327;
-    --xf-bg-soft: #f6f7f7;
-    --xf-danger: #d63638;
-    --xf-radius: 4px;
+.xfields_input {
+    --xfields-accent: var(--wp-admin-theme-color, #2271b1);
+    --xfields-accent-soft: rgba(34, 113, 177, 0.08);
+    --xfields-border: #dcdcde;
+    --xfields-border-strong: #8c8f94;
+    --xfields-border-soft: #f0f0f1;
+    --xfields-muted: #646970;
+    --xfields-text: #1d2327;
+    --xfields-bg-soft: #f6f7f7;
+    --xfields-danger: #d63638;
+    --xfields-radius: 4px;
 }
 
 /*--------------------------------------------------------------
     Container & fields
 --------------------------------------------------------------*/
 
-#poststuff .xf_input .inside {
+#poststuff .xfields_input .inside {
     margin: 0;
     padding: 0;
 }
 
-.xf_input .field {
+.xfields_input .field {
     padding: 16px;
-    border-bottom: 1px solid var(--xf-border-soft);
+    border-bottom: 1px solid var(--xfields-border-soft);
 }
 
-.xf_input .field:last-child {
+.xfields_input .field:last-child {
     border-bottom: 0;
 }
 
-.xf_input .field > label,
-.xf_input .xf_loop_body > label {
+.xfields_input .field > label,
+.xfields_input .xfields_loop_body > label {
     display: block;
     margin: 0 0 6px;
-    color: var(--xf-text);
+    color: var(--xfields-text);
     font-size: 13px;
     font-weight: 600;
     cursor: default;
 }
 
-.xf_input .field p.notes,
-.xf_input .xf_loop_body p.notes {
+.xfields_input .field p.notes,
+.xfields_input .xfields_loop_body p.notes {
     margin: -2px 0 8px;
-    color: var(--xf-muted);
+    color: var(--xfields-muted);
     font-size: 12px;
     font-style: normal;
 }
 
-.xf_input .field input[type="text"],
-.xf_input .field textarea,
-.xf_input .field select {
+.xfields_input .field input[type="text"],
+.xfields_input .field textarea,
+.xfields_input .field select {
     width: 100%;
     max-width: 100%;
 }
 
-.xf_input .field textarea {
+.xfields_input .field textarea {
     min-height: 90px;
 }
 
 /* Front-end forms */
-.xf_input.no_box {
+.xfields_input.no_box {
     border: 0;
     background: none;
 }
 
-.xf_input.no_box .hndle,
-.xf_input.no_box .handlediv {
+.xfields_input.no_box .hndle,
+.xfields_input.no_box .handlediv {
     display: none;
 }
 
-.xf_input.no_box .field {
+.xfields_input.no_box .field {
     padding: 12px 0;
     border: 0;
 }
 
 /* Validation */
-.xf_input .error {
+.xfields_input .error {
     margin: 8px 0 0;
     padding: 8px 12px;
     border: 0;
-    border-left: 4px solid var(--xf-danger);
-    border-radius: 0 var(--xf-radius) var(--xf-radius) 0;
+    border-left: 4px solid var(--xfields-danger);
+    border-radius: 0 var(--xfields-radius) var(--xfields-radius) 0;
     background: #fcf0f1;
     color: #8a2424;
     font-weight: 500;
 }
 
-.xf_input .field:has(.error[style*="block"]) input,
-.xf_input .field:has(.error[style*="block"]) textarea,
-.xf_input .field:has(.error[style*="block"]) select {
-    border-color: var(--xf-danger);
+.xfields_input .field:has(.error[style*="block"]) input,
+.xfields_input .field:has(.error[style*="block"]) textarea,
+.xfields_input .field:has(.error[style*="block"]) select {
+    border-color: var(--xfields-danger);
 }
 
 .hidden {
@@ -105,25 +105,21 @@
     Select
 --------------------------------------------------------------*/
 
-.xf_select select {
+.xfields_select select {
     height: auto;
     line-height: 2;
 }
 
-.xf_select select.multiple {
+.xfields_select select.multiple {
     height: 120px !important;
 }
 
-.xf_select .select2,
-.xf_select .select2-container {
-    width: 100% !important;
-}
 
 /*--------------------------------------------------------------
     True / false
 --------------------------------------------------------------*/
 
-.xf_input .field .xf_true_false label {
+.xfields_input .field .xfields_true_false label {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -131,7 +127,7 @@
     cursor: pointer;
 }
 
-.xf_input .field .xf_true_false input[type="checkbox"] {
+.xfields_input .field .xfields_true_false input[type="checkbox"] {
     margin: 0;
 }
 
@@ -139,61 +135,54 @@
     Date & color
 --------------------------------------------------------------*/
 
-.xf_input .xf_date input.date {
-    width: 180px;
-    padding-right: 30px;
-    background: #fff url(../images/icon-calendar.png) right 8px center no-repeat;
+.xfields_input .xfields_date input[type="date"],
+.xfields_input .xfields_date input[type="datetime-local"] {
+    width: auto;
+    min-width: 180px;
 }
 
-.xf_input .xf_color input.color {
-    width: 140px;
+.xfields_input .xfields_color .wp-picker-container input[type="text"].wp-color-picker {
+    width: 90px;
 }
 
 /*--------------------------------------------------------------
     Wysiwyg
 --------------------------------------------------------------*/
 
-.xf_wysiwyg .wp-editor-container {
-    border: 1px solid var(--xf-border);
-    border-radius: var(--xf-radius);
-    overflow: hidden;
+.xfields_wysiwyg .wp-editor-wrap {
+    margin-top: 2px;
 }
 
-.xf_wysiwyg textarea {
-    height: 220px;
-    border: 0;
-}
-
-.xf_wysiwyg .wp-media-buttons {
-    padding: 0 0 6px;
+.xfields_wysiwyg textarea.wp-editor-area {
+    min-height: 180px;
 }
 
 /*--------------------------------------------------------------
     File
 --------------------------------------------------------------*/
 
-.xf_file {
+.xfields_file {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 8px 12px;
 }
 
-.xf_file .file_url:empty {
+.xfields_file .file_url:empty {
     display: none;
 }
 
-.xf_file .file_url {
+.xfields_file .file_url {
     display: inline-flex;
     align-items: center;
     max-width: 100%;
     padding: 6px;
-    border: 1px solid var(--xf-border);
-    border-radius: var(--xf-radius);
+    border: 1px solid var(--xfields-border);
+    border-radius: var(--xfields-radius);
     background: #fff url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAIUlEQVQYV2NkYGCQBGJ08BxdgHGIKMTiF0wPgjwz2BUCADTeBYguWvyCAAAAAElFTkSuQmCC);
 }
 
-.xf_file .file_url img {
+.xfields_file .file_url img {
     display: block;
     max-width: 160px;
     max-height: 120px;
@@ -201,24 +190,24 @@
     border-radius: 2px;
 }
 
-.xf_file .file_url a {
+.xfields_file .file_url a {
     padding: 2px 6px;
     background: #fff;
     word-break: break-all;
 }
 
-.xf_file .media.button.hidden {
+.xfields_file .media.button.hidden {
     display: none;
 }
 
-.xf_file .media.button.remove {
+.xfields_file .media.button.remove {
     border-color: transparent;
     background: transparent;
-    color: var(--xf-danger);
+    color: var(--xfields-danger);
     box-shadow: none;
 }
 
-.xf_file .media.button.remove:hover {
+.xfields_file .media.button.remove:hover {
     background: #fcf0f1;
 }
 
@@ -226,24 +215,24 @@
     Relationship, Term, User (two-column picker)
 --------------------------------------------------------------*/
 
-.xf_relationship,
-.xf_term,
-.xf_user {
+.xfields_relationship,
+.xfields_term,
+.xfields_user {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px 12px;
 }
 
-.xf_relationship .filter_posts,
-.xf_term .filter_posts,
-.xf_user .filter_posts {
+.xfields_relationship .filter_posts,
+.xfields_term .filter_posts,
+.xfields_user .filter_posts {
     grid-column: 1 / -1;
     margin: 0;
 }
 
-.xf_input .field .xf_relationship .xf_filter_input,
-.xf_input .field .xf_term .xf_filter_input,
-.xf_input .field .xf_user .xf_filter_input {
+.xfields_input .field .xfields_relationship .xfields_filter_input,
+.xfields_input .field .xfields_term .xfields_filter_input,
+.xfields_input .field .xfields_user .xfields_filter_input {
     width: 100%;
     max-width: 320px;
     margin: 0;
@@ -251,31 +240,31 @@
     background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23646970'%3E%3Cpath d='M12.14 4.18a5.4 5.4 0 0 1 .7 6.8l3.64 3.65-1.62 1.62-3.65-3.64a5.4 5.4 0 1 1 .93-8.43zm-1.41 6.24a3.4 3.4 0 1 0-4.81-4.81 3.4 3.4 0 0 0 4.81 4.81z'/%3E%3C/svg%3E") 8px center / 16px no-repeat;
 }
 
-.xf_relationship .post_list,
-.xf_term .post_list,
-.xf_user .post_list {
+.xfields_relationship .post_list,
+.xfields_term .post_list,
+.xfields_user .post_list {
     height: 220px;
     overflow-y: auto;
-    border: 1px solid var(--xf-border);
-    border-radius: var(--xf-radius);
+    border: 1px solid var(--xfields-border);
+    border-radius: var(--xfields-radius);
     background: #fff;
 }
 
-.xf_relationship .clear,
-.xf_term .clear,
-.xf_user .clear {
+.xfields_relationship .clear,
+.xfields_term .clear,
+.xfields_user .clear {
     display: none;
 }
 
-.xf_relationship .post_list.selected_posts,
-.xf_term .post_list.selected_posts,
-.xf_user .post_list.selected_posts {
-    background: var(--xf-bg-soft);
+.xfields_relationship .post_list.selected_posts,
+.xfields_term .post_list.selected_posts,
+.xfields_user .post_list.selected_posts {
+    background: var(--xfields-bg-soft);
 }
 
-.xf_relationship .post_list.selected_posts:empty::before,
-.xf_term .post_list.selected_posts:empty::before,
-.xf_user .post_list.selected_posts:empty::before {
+.xfields_relationship .post_list.selected_posts:empty::before,
+.xfields_term .post_list.selected_posts:empty::before,
+.xfields_user .post_list.selected_posts:empty::before {
     content: "—";
     display: flex;
     align-items: center;
@@ -284,45 +273,45 @@
     color: #a7aaad;
 }
 
-.xf_relationship .post_list div,
-.xf_term .post_list div,
-.xf_user .post_list div {
+.xfields_relationship .post_list div,
+.xfields_term .post_list div,
+.xfields_user .post_list div {
     position: relative;
     padding: 7px 36px 7px 10px;
-    border-bottom: 1px solid var(--xf-border-soft);
+    border-bottom: 1px solid var(--xfields-border-soft);
     cursor: pointer;
 }
 
-.xf_relationship .post_list div:last-child,
-.xf_term .post_list div:last-child,
-.xf_user .post_list div:last-child {
+.xfields_relationship .post_list div:last-child,
+.xfields_term .post_list div:last-child,
+.xfields_user .post_list div:last-child {
     border-bottom: 0;
 }
 
-.xf_relationship .available_posts div:hover,
-.xf_term .available_posts div:hover,
-.xf_user .available_posts div:hover {
-    background: var(--xf-accent-soft);
-    color: var(--xf-accent);
+.xfields_relationship .available_posts div:hover,
+.xfields_term .available_posts div:hover,
+.xfields_user .available_posts div:hover {
+    background: var(--xfields-accent-soft);
+    color: var(--xfields-accent);
 }
 
-.xf_relationship .available_posts div.used,
-.xf_term .available_posts div.used,
-.xf_user .available_posts div.used {
+.xfields_relationship .available_posts div.used,
+.xfields_term .available_posts div.used,
+.xfields_user .available_posts div.used {
     display: none;
 }
 
-.xf_relationship .selected_posts div,
-.xf_term .selected_posts div,
-.xf_user .selected_posts div {
+.xfields_relationship .selected_posts div,
+.xfields_term .selected_posts div,
+.xfields_user .selected_posts div {
     padding-left: 30px;
     background: #fff;
     cursor: grab;
 }
 
-.xf_relationship .selected_posts div::before,
-.xf_term .selected_posts div::before,
-.xf_user .selected_posts div::before {
+.xfields_relationship .selected_posts div::before,
+.xfields_term .selected_posts div::before,
+.xfields_user .selected_posts div::before {
     content: "\f545";
     position: absolute;
     top: 50%;
@@ -333,9 +322,9 @@
 }
 
 /* "+" on available items */
-.xf_relationship .post_list.available_posts > div::after,
-.xf_term .post_list.available_posts > div::after,
-.xf_user .post_list.available_posts > div::after {
+.xfields_relationship .post_list.available_posts > div::after,
+.xfields_term .post_list.available_posts > div::after,
+.xfields_user .post_list.available_posts > div::after {
     content: "\f543";
     position: absolute;
     top: 50%;
@@ -345,16 +334,16 @@
     font: normal 18px/1 dashicons;
 }
 
-.xf_relationship .post_list.available_posts > div:hover::after,
-.xf_term .post_list.available_posts > div:hover::after,
-.xf_user .post_list.available_posts > div:hover::after {
-    color: var(--xf-accent);
+.xfields_relationship .post_list.available_posts > div:hover::after,
+.xfields_term .post_list.available_posts > div:hover::after,
+.xfields_user .post_list.available_posts > div:hover::after {
+    color: var(--xfields-accent);
 }
 
 /* "×" on selected items */
-.xf_relationship .selected_posts div span.remove,
-.xf_term .selected_posts div span.remove,
-.xf_user .selected_posts div span.remove {
+.xfields_relationship .selected_posts div span.remove,
+.xfields_term .selected_posts div span.remove,
+.xfields_user .selected_posts div span.remove {
     position: absolute;
     top: 50%;
     right: 6px;
@@ -365,9 +354,9 @@
     cursor: pointer;
 }
 
-.xf_relationship .selected_posts div span.remove::before,
-.xf_term .selected_posts div span.remove::before,
-.xf_user .selected_posts div span.remove::before {
+.xfields_relationship .selected_posts div span.remove::before,
+.xfields_term .selected_posts div span.remove::before,
+.xfields_user .selected_posts div span.remove::before {
     content: "\f335";
     display: block;
     color: #a7aaad;
@@ -375,27 +364,27 @@
     text-align: center;
 }
 
-.xf_relationship .selected_posts div span.remove:hover,
-.xf_term .selected_posts div span.remove:hover,
-.xf_user .selected_posts div span.remove:hover {
+.xfields_relationship .selected_posts div span.remove:hover,
+.xfields_term .selected_posts div span.remove:hover,
+.xfields_user .selected_posts div span.remove:hover {
     background: #fcf0f1;
 }
 
-.xf_relationship .selected_posts div span.remove:hover::before,
-.xf_term .selected_posts div span.remove:hover::before,
-.xf_user .selected_posts div span.remove:hover::before {
-    color: var(--xf-danger);
+.xfields_relationship .selected_posts div span.remove:hover::before,
+.xfields_term .selected_posts div span.remove:hover::before,
+.xfields_user .selected_posts div span.remove:hover::before {
+    color: var(--xfields-danger);
 }
 
 /*--------------------------------------------------------------
     Loop (repeater)
 --------------------------------------------------------------*/
 
-.xf_input .field[data-type="loop"] {
+.xfields_input .field[data-type="loop"] {
     position: relative;
 }
 
-.xf_input .xf_loop_toggle {
+.xfields_input .xfields_loop_toggle {
     position: absolute;
     top: 14px;
     right: 16px;
@@ -404,39 +393,39 @@
     justify-content: center;
     width: 28px;
     height: 28px;
-    border-radius: var(--xf-radius);
-    color: var(--xf-muted);
+    border-radius: var(--xfields-radius);
+    color: var(--xfields-muted);
     text-decoration: none;
 }
 
-.xf_input .xf_loop_toggle::before {
+.xfields_input .xfields_loop_toggle::before {
     content: "\f177"; /* visibility */
     font: normal 18px/1 dashicons;
 }
 
-.xf_input .xf_loop_toggle:hover {
-    background: var(--xf-bg-soft);
-    color: var(--xf-accent);
+.xfields_input .xfields_loop_toggle:hover {
+    background: var(--xfields-bg-soft);
+    color: var(--xfields-accent);
 }
 
-.xf_loop .loop_wrapper {
+.xfields_loop .loop_wrapper {
     margin: 0 0 8px;
-    border: 1px solid var(--xf-border);
-    border-radius: var(--xf-radius);
+    border: 1px solid var(--xfields-border);
+    border-radius: var(--xfields-radius);
     background: #fff;
     overflow: hidden;
 }
 
-@keyframes xf-highlight {
-    0%   { box-shadow: 0 0 0 3px var(--xf-accent-soft), 0 0 0 1px var(--xf-accent); }
+@keyframes xfields-highlight {
+    0%   { box-shadow: 0 0 0 3px var(--xfields-accent-soft), 0 0 0 1px var(--xfields-accent); }
     100% { box-shadow: 0 0 0 0 transparent; }
 }
 
-.xf_loop .loop_wrapper_new {
-    animation: xf-highlight 1.2s ease-out;
+.xfields_loop .loop_wrapper_new {
+    animation: xfields-highlight 1.2s ease-out;
 }
 
-.xf_loop .xf_loop_head {
+.xfields_loop .xfields_loop_head {
     position: relative;
     display: flex;
     flex-direction: row-reverse;
@@ -444,21 +433,21 @@
     gap: 2px;
     min-height: 40px;
     padding: 4px 6px 4px 34px;
-    background: var(--xf-bg-soft);
+    background: var(--xfields-bg-soft);
     cursor: pointer;
     user-select: none;
 }
 
-.xf_loop .xf_loop_head .label {
+.xfields_loop .xfields_loop_head .label {
     flex: 1;
     overflow: hidden;
-    color: var(--xf-text);
+    color: var(--xfields-text);
     font-weight: 600;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
 
-.xf_loop .xf_loop_head::before {
+.xfields_loop .xfields_loop_head::before {
     content: "\f545"; /* move */
     position: absolute;
     top: 50%;
@@ -469,88 +458,88 @@
     cursor: grab;
 }
 
-.xf_loop .xf_loop_head:hover {
+.xfields_loop .xfields_loop_head:hover {
     background: #f0f0f1;
 }
 
-.xf_loop .xf_loop_head.open {
-    border-bottom: 1px solid var(--xf-border);
+.xfields_loop .xfields_loop_head.open {
+    border-bottom: 1px solid var(--xfields-border);
 }
 
-.xf_input .xf_toggle_field,
-.xf_input .xf_delete_field,
-.xf_input .xf_insert_field {
+.xfields_input .xfields_toggle_field,
+.xfields_input .xfields_delete_field,
+.xfields_input .xfields_insert_field {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 28px;
     height: 28px;
-    border-radius: var(--xf-radius);
-    color: var(--xf-muted);
+    border-radius: var(--xfields-radius);
+    color: var(--xfields-muted);
     text-decoration: none;
 }
 
-.xf_input .xf_toggle_field::before,
-.xf_input .xf_delete_field::before,
-.xf_input .xf_insert_field::before {
+.xfields_input .xfields_toggle_field::before,
+.xfields_input .xfields_delete_field::before,
+.xfields_input .xfields_insert_field::before {
     font: normal 18px/1 dashicons;
 }
 
-.xf_input .xf_toggle_field::before { content: "\f140"; }
-.xf_input .open .xf_toggle_field::before,
-.xf_input .open > .xf_toggle_field::before { content: "\f142"; }
-.xf_input .xf_insert_field::before { content: "\f132"; }
-.xf_input .xf_delete_field::before { content: "\f182"; } /* trash */
+.xfields_input .xfields_toggle_field::before { content: "\f140"; }
+.xfields_input .open .xfields_toggle_field::before,
+.xfields_input .open > .xfields_toggle_field::before { content: "\f142"; }
+.xfields_input .xfields_insert_field::before { content: "\f132"; }
+.xfields_input .xfields_delete_field::before { content: "\f182"; } /* trash */
 
-.xf_input .xf_toggle_field:hover,
-.xf_input .xf_insert_field:hover {
+.xfields_input .xfields_toggle_field:hover,
+.xfields_input .xfields_insert_field:hover {
     background: #fff;
-    color: var(--xf-accent);
+    color: var(--xfields-accent);
 }
 
-.xf_input .xf_delete_field:hover {
+.xfields_input .xfields_delete_field:hover {
     background: #fcf0f1;
-    color: var(--xf-danger);
+    color: var(--xfields-danger);
 }
 
 /* Show row actions on hover / keyboard focus only */
-.xf_loop .xf_loop_head .xf_insert_field,
-.xf_loop .xf_loop_head .xf_delete_field {
+.xfields_loop .xfields_loop_head .xfields_insert_field,
+.xfields_loop .xfields_loop_head .xfields_delete_field {
     opacity: 0;
     transition: opacity 0.12s ease;
 }
 
-.xf_loop .xf_loop_head:hover .xf_insert_field,
-.xf_loop .xf_loop_head:hover .xf_delete_field,
-.xf_loop .xf_loop_head:focus-within .xf_insert_field,
-.xf_loop .xf_loop_head:focus-within .xf_delete_field {
+.xfields_loop .xfields_loop_head:hover .xfields_insert_field,
+.xfields_loop .xfields_loop_head:hover .xfields_delete_field,
+.xfields_loop .xfields_loop_head:focus-within .xfields_insert_field,
+.xfields_loop .xfields_loop_head:focus-within .xfields_delete_field {
     opacity: 1;
 }
 
-.xf_loop .xf_loop_body {
+.xfields_loop .xfields_loop_body {
     display: none;
     padding: 16px;
     background: #fff;
 }
 
-.xf_loop .xf_loop_body.open {
+.xfields_loop .xfields_loop_body.open {
     display: block;
 }
 
-.xf_input .xf_loop .field {
+.xfields_input .xfields_loop .field {
     padding: 0 0 14px;
     border: 0;
 }
 
-.xf_input .xf_loop .xf_loop_body > .field:last-child {
+.xfields_input .xfields_loop .xfields_loop_body > .field:last-child {
     padding-bottom: 0;
 }
 
-.xf_loop .table_footer {
+.xfields_loop .table_footer {
     padding-top: 4px;
 }
 
-.xf_loop .table_footer .xf_add_field {
+.xfields_loop .table_footer .xfields_add_field {
     border-style: dashed;
 }
 
@@ -558,47 +547,47 @@
     Tabs
 --------------------------------------------------------------*/
 
-.xf-tabs {
+.xfields-tabs {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
     margin: 0;
     padding: 0 12px;
-    border-bottom: 1px solid var(--xf-border);
-    background: var(--xf-bg-soft);
+    border-bottom: 1px solid var(--xfields-border);
+    background: var(--xfields-bg-soft);
 }
 
-.xf-tab {
+.xfields-tab {
     position: relative;
     margin-bottom: -1px;
     padding: 12px 14px;
     border-bottom: 3px solid transparent;
-    color: var(--xf-muted);
+    color: var(--xfields-muted);
     font-weight: 500;
     cursor: pointer;
 }
 
-.xf-tab:hover {
-    color: var(--xf-text);
+.xfields-tab:hover {
+    color: var(--xfields-text);
 }
 
-.xf-tab.active {
-    border-bottom-color: var(--xf-accent);
-    color: var(--xf-text);
+.xfields-tab.active {
+    border-bottom-color: var(--xfields-accent);
+    color: var(--xfields-text);
     font-weight: 600;
 }
 
-.xf-tab-content {
+.xfields-tab-content {
     display: none;
 }
 
-.xf-tab-content.active {
+.xfields-tab-content.active {
     display: block;
 }
 
-.xf-tab-notes {
+.xfields-tab-notes {
     padding: 12px 16px 0;
-    color: var(--xf-muted);
+    color: var(--xfields-muted);
 }
 
 /*--------------------------------------------------------------
@@ -606,14 +595,90 @@
 --------------------------------------------------------------*/
 
 @media (max-width: 782px) {
-    .xf_relationship,
-    .xf_term,
-    .xf_user {
+    .xfields_relationship,
+    .xfields_term,
+    .xfields_user {
         grid-template-columns: 1fr;
     }
 
-    .xf_loop .xf_loop_head .xf_insert_field,
-    .xf_loop .xf_loop_head .xf_delete_field {
+    .xfields_loop .xfields_loop_head .xfields_insert_field,
+    .xfields_loop .xfields_loop_head .xfields_delete_field {
         opacity: 1;
     }
+}
+
+/*--------------------------------------------------------------
+    Tom Select — WordPress admin look
+--------------------------------------------------------------*/
+
+.ts-wrapper {
+    --xf-ts-accent: var(--wp-admin-theme-color, #2271b1);
+    width: 100%;
+    max-width: 100%;
+}
+
+.ts-wrapper .ts-control {
+    min-height: 32px;
+    padding: 3px 8px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    box-shadow: none;
+    font-size: 14px;
+    background: #fff;
+}
+
+.ts-wrapper.focus .ts-control {
+    border-color: var(--xf-ts-accent);
+    box-shadow: 0 0 0 1px var(--xf-ts-accent);
+}
+
+.ts-wrapper.multi .ts-control > .item {
+    margin: 2px 4px 2px 0;
+    padding: 1px 2px 1px 8px;
+    border: 0;
+    border-radius: 3px;
+    background: rgba(34, 113, 177, 0.1);
+    color: var(--xf-ts-accent);
+    font-weight: 500;
+}
+
+.ts-wrapper.multi .ts-control > .item .remove {
+    border-left: 0;
+    color: inherit;
+    opacity: 0.7;
+}
+
+.ts-wrapper.multi .ts-control > .item .remove:hover {
+    background: transparent;
+    opacity: 1;
+}
+
+.ts-dropdown {
+    z-index: 100000;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    font-size: 14px;
+}
+
+.ts-dropdown .active {
+    background: rgba(34, 113, 177, 0.1);
+    color: #1d2327;
+}
+
+.ts-dropdown .no-results {
+    padding: 8px 10px;
+    color: #646970;
+}
+
+/* Native inputs inside Tom Select must not inherit admin widths */
+.ts-wrapper .ts-control input,
+.field_form .ts-wrapper .ts-control input,
+.xfields_input .field .ts-wrapper .ts-control input[type="text"] {
+    width: auto !important;
+    min-width: 7rem;
+    margin: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
 }

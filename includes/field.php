@@ -9,12 +9,12 @@ defined( 'ABSPATH' ) || exit;
  * @return array
  * @since 2.7.0
  */
-function xf_sanitize_id_list( $value ) {
+function xfields_sanitize_id_list( $value ) {
     $ids = [];
 
     foreach ( (array) $value as $item ) {
         if ( is_array( $item ) ) {
-            $ids = array_merge( $ids, xf_sanitize_id_list( $item ) );
+            $ids = array_merge( $ids, xfields_sanitize_id_list( $item ) );
             continue;
         }
 
@@ -33,7 +33,17 @@ function xf_sanitize_id_list( $value ) {
     return array_values( array_unique( $ids ) );
 }
 
-class xf_field
+/**
+ * Build a "%d,%d,..." placeholder list for $wpdb->prepare() IN() clauses.
+ * @param array $ids
+ * @return string
+ * @since 2.0.0
+ */
+function xfields_id_placeholders( $ids ) {
+    return implode( ',', array_fill( 0, max( 1, count( (array) $ids ) ), '%d' ) );
+}
+
+class xfields_field
 {
     public $name;
     public $label;
@@ -76,9 +86,9 @@ class xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type'          => 'true_false',
-                        'input_name'    => "xf[fields][$key][options][required]",
+                        'input_name'    => "xfields[fields][$key][options][required]",
                         'input_class'   => 'true_false',
                         'value'         => $this->get_option( $field, 'required' ),
                         'options'       => [ 'message' => __( 'This is a required field', 'x-fields' ) ],
@@ -118,7 +128,7 @@ class xf_field
 
 
     /**
-     * Format the value for use with $xf->get
+     * Format the value for use with $xfields->get
      * @param mixed $value
      * @param mixed $field The field object (optional)
      * @return mixed

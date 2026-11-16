@@ -2,7 +2,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_api
+// This file reads/writes X-Fields' own tables ({prefix}xfields_values, {prefix}xfields_sessions) and the
+// group/value rows they reference; WordPress has no API for them. All queries are prepared or use integer/constant values.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery
+
+class xfields_api
 {
     public $cache;
     public $saved_fields;
@@ -89,17 +93,20 @@ class xf_api
 
             if ( ! empty( $fields ) ) {
                 // Make sure we're using active field groups
-                $field_ids = implode( ',', array_map( 'intval', array_keys( $fields ) ) );
+                $ids = array_map( 'intval', array_keys( $fields ) );
+                $ph  = xfields_id_placeholders( $ids );
 
                 // Get all the field data
-                $sql = "
-                SELECT m.meta_value, v.field_id, v.hierarchy, v.weight
-                FROM {$wpdb->prefix}xf_values v
-                INNER JOIN {$wpdb->postmeta} m ON m.meta_id = v.meta_id
-                WHERE v.field_id IN ($field_ids) AND v.post_id = $post_id
-                ORDER BY v.depth, FIELD(v.field_id, $field_ids), v.weight, v.sub_weight";
-
-                $results = $wpdb->get_results( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
+                // phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $ph is a list of %d placeholders
+                $results = $wpdb->get_results( $wpdb->prepare(
+                    "SELECT m.meta_value, v.field_id, v.hierarchy, v.weight
+                    FROM %i v
+                    INNER JOIN %i m ON m.meta_id = v.meta_id
+                    WHERE v.field_id IN ($ph) AND v.post_id = %d
+                    ORDER BY v.depth, FIELD(v.field_id, $ph), v.weight, v.sub_weight",
+                    array_merge( [ $wpdb->prefix . 'xfields_values', $wpdb->postmeta ], $ids, [ $post_id ], $ids )
+                ) );
+                // phpcs:enable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
                 $num_rows = $wpdb->num_rows;
 
                 $prev_hierarchy = '';
@@ -248,17 +255,15 @@ class xf_api
             foreach ( $results as $result ) {
                 $field_ids[] = (int) $result['id'];
             }
-            $where .= " AND v.field_id IN (" . implode( ',', $field_ids ) . ")";
+            // phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- list of %d placeholders
+            $where .= $wpdb->prepare( ' AND v.field_id IN (' . xfields_id_placeholders( $field_ids ) . ')', $field_ids );
+            // phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
         }
 
-        $sql = "
-        SELECT DISTINCT p.ID
-        FROM {$wpdb->prefix}xf_values v
-        INNER JOIN $wpdb->posts p ON p.ID = v.post_id
-        INNER JOIN $wpdb->postmeta m ON m.meta_id = v.meta_id
-        WHERE $where";
-
-        $results = $wpdb->get_results( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
+        // $where is built only from $wpdb->prepare() fragments and esc_sql()-escaped IN lists above
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $results = $wpdb->get_results( "SELECT DISTINCT p.ID FROM {$wpdb->prefix}xfields_values v INNER JOIN {$wpdb->posts} p ON p.ID = v.post_id INNER JOIN {$wpdb->postmeta} m ON m.meta_id = v.meta_id WHERE $where" );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $output = [];
 
         foreach ( $results as $result ) {
@@ -294,7 +299,7 @@ class xf_api
         // create post if the ID is missing
         if ( empty( $post_data['ID'] ) ) {
             $post_defaults = [
-                'post_title'                => 'My XF post',
+                'post_title'                => 'My XFields post',
                 'post_content'              => '',
                 'post_content_filtered'     => '',
                 'post_excerpt'              => '',
@@ -365,16 +370,11 @@ class xf_api
                 }
             }
 
-            $field_ids = implode( ',', $field_ids );
-
-            $sql = "
-            DELETE v, m
-            FROM {$wpdb->prefix}xf_values v
-            LEFT JOIN {$wpdb->postmeta} m ON m.meta_id = v.meta_id
-            WHERE v.post_id = $post_id AND (v.field_id IN ($field_ids) OR v.base_field_id IN ($field_ids))";
-
             if ( ! empty( $field_ids ) ) {
-                $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
+                $ph = xfields_id_placeholders( $field_ids );
+                // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $ph is a list of %d placeholders
+                $wpdb->query( $wpdb->prepare( "DELETE v, m FROM %i v LEFT JOIN %i m ON m.meta_id = v.meta_id WHERE v.post_id = %d AND (v.field_id IN ($ph) OR v.base_field_id IN ($ph))", array_merge( [ $wpdb->prefix . 'xfields_values', $wpdb->postmeta, $post_id ], $field_ids, $field_ids ) ) );
+                // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
             }
         }
         elseif ( 'input' == $options['format'] ) {
@@ -386,17 +386,10 @@ class xf_api
                 foreach ( $results as $result ) {
                     $field_ids[] = (int) $result['id'];
                 }
-                $field_ids = implode( ',', $field_ids );
-
-                $sql = "
-                DELETE v, m
-                FROM {$wpdb->prefix}xf_values v
-                LEFT JOIN {$wpdb->postmeta} m ON m.meta_id = v.meta_id
-                WHERE v.post_id = $post_id AND v.field_id IN ($field_ids)";
-
-                if ( ! empty( $field_ids ) ) {
-                    $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
-                }
+                $ph = xfields_id_placeholders( $field_ids );
+                // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $ph is a list of %d placeholders
+                $wpdb->query( $wpdb->prepare( "DELETE v, m FROM %i v LEFT JOIN %i m ON m.meta_id = v.meta_id WHERE v.post_id = %d AND v.field_id IN ($ph)", array_merge( [ $wpdb->prefix . 'xfields_values', $wpdb->postmeta, $post_id ], $field_ids ) ) );
+                // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
             }
         }
 
@@ -466,7 +459,7 @@ class xf_api
 
             $field_type = $params['all_fields'][ $field_id ]->type;
 
-            if ( ! isset( XF()->fields[ $field_type ] ) ) {
+            if ( ! isset( XFields()->fields[ $field_type ] ) ) {
                 return;
             }
         }
@@ -493,7 +486,7 @@ class xf_api
             }
 
             // Trigger the pre_save hook
-            $values = XF()->fields[ $field_type ]->pre_save( $values, $params['all_fields'][ $field_id ] );
+            $values = XFields()->fields[ $field_type ]->pre_save( $values, $params['all_fields'][ $field_id ] );
 
             $sub_weight = 0;
 
@@ -506,12 +499,14 @@ class xf_api
 
                 $value = (string) $value;
 
-                // Insert into postmeta
+                // Insert into postmeta (row data for $wpdb->insert(), not a meta query)
+                // phpcs:disable WordPress.DB.SlowDBQuery
                 $data = [
                     'post_id'       => $params['post_id'],
                     'meta_key'      => $params['all_fields'][ $field_id ]->name,
                     'meta_value'    => $value,
                 ];
+                // phpcs:enable WordPress.DB.SlowDBQuery
 
                 $wpdb->insert( $wpdb->postmeta, $data );
                 $meta_id = $wpdb->insert_id;
@@ -519,7 +514,7 @@ class xf_api
                 // Get the top-level field ID from the hierarchy array
                 $base_field_id = empty( $params['hierarchy'] ) ? 0 : $params['hierarchy'][0];
 
-                // Insert into xf_values
+                // Insert into xfields_values
                 $data = [
                     'field_id'          => $field_id,
                     'meta_id'           => $meta_id,
@@ -531,7 +526,7 @@ class xf_api
                     'sub_weight'        => $sub_weight,
                 ];
 
-                $wpdb->insert( $wpdb->prefix . 'xf_values', $data );
+                $wpdb->insert( $wpdb->prefix . 'xfields_values', $data );
                 $sub_weight++;
 
                 // Update log
@@ -596,7 +591,7 @@ class xf_api
         $errors = [];
         $this->validate_level( (array) $field_data, 0, $fields, $errors, '' );
 
-        return apply_filters( 'xf_validate_input', array_values( array_unique( $errors ) ), $field_data, $group_ids );
+        return apply_filters( 'xfields_validate_input', array_values( array_unique( $errors ) ), $field_data, $group_ids );
     }
 
 
@@ -631,7 +626,7 @@ class xf_api
             $value = ( isset( $data[ $id ] ) && is_array( $data[ $id ] ) && array_key_exists( 'value', $data[ $id ] ) ) ? $data[ $id ]['value'] : null;
 
             if ( in_array( $field->type, [ 'relationship', 'term', 'user' ], true ) ) {
-                $count = count( xf_sanitize_id_list( $value ) );
+                $count = count( xfields_sanitize_id_list( $value ) );
                 $this->check_count( $count, $min, $max, $label, $errors );
                 $empty = ( 0 === $count );
             }
@@ -684,7 +679,7 @@ class xf_api
 
         $params = array_merge( $defaults, $params );
 
-        $field_groups = XF()->field_group->load_field_groups();
+        $field_groups = XFields()->field_group->load_field_groups();
 
         $output = [];
 
@@ -766,7 +761,7 @@ class xf_api
             $output[ $field->id ] = $field;
         }
 
-        return apply_filters( 'xf_get_input_fields', $output, $params );
+        return apply_filters( 'xfields_get_input_fields', $output, $params );
     }
 
 
@@ -859,7 +854,7 @@ class xf_api
         );
 
         // Get all field groups
-        $field_groups = XF()->field_group->load_field_groups();
+        $field_groups = XFields()->field_group->load_field_groups();
 
         // Ignore user_roles if used within get_fields
         if ( false !== $skip_roles ) {
@@ -881,7 +876,9 @@ class xf_api
                         SELECT tt.term_id
                         FROM $wpdb->term_taxonomy tt
                         INNER JOIN $wpdb->term_relationships tr ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tr.object_id = %d";
-                        $value = $wpdb->get_col( $wpdb->prepare( $sql, $post_id ) ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
+                        // phpcs:disable WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
+                        $value = $wpdb->get_col( $wpdb->prepare( $sql, $post_id ) );
+                        // phpcs:enable WordPress.DB.PreparedSQL
                     }
 
                     $operator = isset( $rules[ $rule_type ]['operator'] ) ? (array) $rules[ $rule_type ]['operator'] : [ '==' ];
@@ -914,7 +911,7 @@ class xf_api
         }
 
         // Allow for overrides
-        return apply_filters( 'xf_matching_groups', $matches, $params, $rule_types );
+        return apply_filters( 'xfields_matching_groups', $matches, $params, $rule_types );
     }
 
 
@@ -935,19 +932,19 @@ class xf_api
             $value[] = $field_value;
         }
         else {
-            if ( ! isset( XF()->fields[ $field->type ] ) ) {
+            if ( ! isset( XFields()->fields[ $field->type ] ) ) {
                 return;
             }
 
-            $value = XF()->fields[ $field->type ]->prepare_value( $value, $field );
+            $value = XFields()->fields[ $field->type ]->prepare_value( $value, $field );
 
             $format = is_array( $options ) && isset( $options['format'] ) ? $options['format'] : 'api';
 
             if ( 'api' == $format ) {
-                $value = XF()->fields[ $field->type ]->format_value_for_api( $value, $field );
+                $value = XFields()->fields[ $field->type ]->format_value_for_api( $value, $field );
             }
             elseif ( 'input' == $format ) {
-                $value = XF()->fields[ $field->type ]->format_value_for_input( $value, $field );
+                $value = XFields()->fields[ $field->type ]->format_value_for_input( $value, $field );
             }
         }
     }
@@ -985,4 +982,4 @@ class xf_api
     }
 }
 
-XF()->api = new xf_api();
+XFields()->api = new xfields_api();

@@ -6,25 +6,70 @@
         function zebra_stripes() {
             $('.fields .field_meta').removeClass('even');
             $('.fields .field_meta:even').addClass('even');
-            $('#xf_fields .xf-empty-state').prop('hidden', $('#xf_fields .fields .field').length > 0);
+            $('#xfields_fields .xfields-empty-state').prop('hidden', $('#xfields_fields .fields .field').length > 0);
         }
 
-        function init_tooltip() {
-            $(document).on('mouseover', '.xf_tooltip', function() {
-                if ('undefined' == typeof $(this).data('powertip')) {
-                    var content = $(this).find('.tooltip_inner').html();
-                    $(this).data('powertip', content);
-                    $(this).powerTip({
-                        placement: 'e',
-                        mouseOnToPopup: true
-                    });
-                    $.powerTip.show(this);
-                }
+
+        /**
+         * Tom Select: searchable multi-selects (placement rules + field options)
+         */
+        var rules = (XFields && XFields.rules) || {};
+
+        function enhance(el) {
+            if (!window.TomSelect || el.tomselect) {
+                return;
+            }
+            new TomSelect(el, {
+                plugins: ['remove_button'],
+                placeholder: rules.placeholder || '',
+                hidePlaceholder: true,
+                maxOptions: null
             });
         }
 
+        function enhance_all(context) {
+            $(context).find('select.xfields-enhanced, .field_form select.multiple').each(function() {
+                enhance(this);
+            });
+        }
+
+        // Posts rule: search on the server
+        $('#xfields_rules select.xfields-post-search').each(function() {
+            if (!window.TomSelect || this.tomselect) {
+                return;
+            }
+            new TomSelect(this, {
+                plugins: ['remove_button'],
+                valueField: 'id',
+                labelField: 'text',
+                searchField: 'text',
+                placeholder: rules.placeholder || '',
+                hidePlaceholder: true,
+                shouldLoad: function(query) {
+                    return query.length >= 2;
+                },
+                load: function(query, callback) {
+                    var body = new URLSearchParams({
+                        action: 'xfields_ajax_handler',
+                        action_type: 'search_posts',
+                        nonce: rules.nonce || '',
+                        q: query
+                    });
+                    fetch(window.ajaxurl, { method: 'POST', credentials: 'same-origin', body: body })
+                        .then(function(r) { return r.ok ? r.json() : []; })
+                        .then(function(data) { callback(Array.isArray(data) ? data : []); })
+                        .catch(function() { callback(); });
+                },
+                render: {
+                    no_results: function(data, escape) {
+                        return '<div class="no-results">' + escape(rules.no_results || '') + '</div>';
+                    }
+                }
+            });
+        });
+
+        enhance_all(document);
         zebra_stripes();
-        init_tooltip();
 
         // Setup checkboxes
         $(document).on('change click', 'input[type="checkbox"]', function() {
@@ -57,7 +102,7 @@
 
                 /*
                 var $container = ui.item.closest('.fields');
-                $container.find('[name^="xf[fields]"]').each(function() {
+                $container.find('[name^="xfields[fields]"]').each(function() {
                     console.log($(this).attr('name') + ' = ' + $(this).val());
                 });
                 */
@@ -65,23 +110,22 @@
         });
 
         // Add a new field
-        $(document).on('click', '.xf_add_field', function() {
-            var html = XF.field_clone.replace(/\[clone\]/g, '['+XF.field_index+']');
+        $(document).on('click', '.xfields_add_field', function() {
+            var html = XFields.field_clone.replace(/\[clone\]/g, '['+XFields.field_index+']');
             $('.fields').append('<li>' + html + '</li>');
             $('.fields > li:last .field_meta .field_label a').trigger('click');
             $('.fields > li:last .field_type select').trigger('change');
             $('.fields > li:last .field_label input').trigger('focus');
-            XF.field_index = XF.field_index + 1;
+            XFields.field_index = XFields.field_index + 1;
             zebra_stripes();
-            init_tooltip();
-        });
+            });
 
         // Delete a field
-        $(document).on('click', '#xf_fields .xf_delete_field', function(e) {
+        $(document).on('click', '#xfields_fields .xfields_delete_field', function(e) {
             e.preventDefault();
             e.stopPropagation();
             var label = $.trim($(this).closest('.field').find('.field_meta .field_label a').text());
-            var msg = (XF.i18n && XF.i18n.confirm_delete) ? XF.i18n.confirm_delete : 'Delete this field and its saved values?';
+            var msg = (XFields.i18n && XFields.i18n.confirm_delete) ? XFields.i18n.confirm_delete : 'Delete this field and its saved values?';
             if (window.confirm(label ? msg + '\n\n' + label : msg)) {
                 $(this).closest('li').remove();
                 zebra_stripes();
@@ -89,7 +133,7 @@
         });
 
         // Pop open the edit fields
-        $(document).on('click', '#xf_fields .xf_edit_field', function(e) {
+        $(document).on('click', '#xfields_fields .xfields_edit_field', function(e) {
             e.preventDefault();
             var field = $(this).closest('.field');
             field.toggleClass('form_open');
@@ -100,14 +144,14 @@
         $(document).on('change', '.field_form .field_type select', function() {
             var type = $(this).val();
             var input_name = $(this).attr('name').replace('[type]', '');
-            var html = XF.options_html[type].replace(/xf\[fields\]\[clone\]/g, input_name);
+            var html = XFields.options_html[type].replace(/xfields\[fields\]\[clone\]/g, input_name);
             $(this).closest('.field').find('.field_meta .field_type')
                 .text($(this).find('option:selected').text())
-                .attr('class', 'field_type xf-type-' + type);
+                .attr('class', 'field_type xfields-type-' + type);
             $(this).closest('.field').find('.field_option').remove();
             $(this).closest('.field_basics').after(html);
-            init_tooltip();
-        });
+            enhance_all($(this).closest('.field'));
+            });
 
         // Auto-populate the field name
         $(document).on('blur', '.field_form .field_label input', function() {

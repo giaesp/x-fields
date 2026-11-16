@@ -3,8 +3,8 @@
  * Plugin Name:       X-Fields
  * Plugin URI:        https://github.com/giaesp/x-fields
  * Description:       Simple, secure custom fields for WordPress: field groups, placement rules, loops (repeaters), relationships and front-end forms.
- * Version:           1.1.0
- * Requires at least: 6.0
+ * Version:           2.0.0
+ * Requires at least: 6.2
  * Requires PHP:      7.4
  * Author:            Gianluca Esposito
  * Author URI:        https://github.com/giaesp
@@ -12,7 +12,6 @@
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       x-fields
  * Domain Path:       /languages
- * Update URI:        https://github.com/giaesp/x-fields
  *
  * X-Fields is a fork of Custom Field Suite.
  * Copyright (C) 2026 Gianluca Esposito
@@ -26,10 +25,10 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'XF_VERSION', '1.1.0' );
-define( 'XF_FILE', __FILE__ );
-define( 'XF_DIR', __DIR__ );
-define( 'XF_URL', plugins_url( '', __FILE__ ) );
+define( 'XFIELDS_VERSION', '2.0.0' );
+define( 'XFIELDS_FILE', __FILE__ );
+define( 'XFIELDS_DIR', __DIR__ );
+define( 'XFIELDS_URL', plugins_url( '', __FILE__ ) );
 
 // Refuse to load alongside Custom Field Suite: both register the same UI and would fight over saves
 if ( class_exists( 'Custom_Field_Suite' ) ) {
@@ -39,10 +38,10 @@ if ( class_exists( 'Custom_Field_Suite' ) ) {
     return;
 }
 
-require_once XF_DIR . '/includes/migration.php';
-register_activation_hook( __FILE__, [ 'xf_migration', 'activate' ] );
+require_once XFIELDS_DIR . '/includes/migration.php';
+register_activation_hook( __FILE__, [ 'xfields_migration', 'activate' ] );
 register_deactivation_hook( __FILE__, function() {
-    wp_clear_scheduled_hook( 'xf_cleanup_sessions' );
+    wp_clear_scheduled_hook( 'xfields_cleanup_sessions' );
 } );
 
 class X_Fields
@@ -60,7 +59,7 @@ class X_Fields
     function __construct() {
 
         // get the gears turning
-        include( XF_DIR . '/includes/init.php' );
+        include( XFIELDS_DIR . '/includes/init.php' );
     }
 
 
@@ -79,33 +78,33 @@ class X_Fields
      * Public API methods
      */
     function get( $field_name = false, $post_id = false, $options = [] ) {
-        return XF()->api->get( $field_name, $post_id, $options );
+        return XFields()->api->get( $field_name, $post_id, $options );
     }
 
 
     function get_field_info( $field_name = false, $post_id = false ) {
-        return XF()->api->get_field_info( $field_name, $post_id );
+        return XFields()->api->get_field_info( $field_name, $post_id );
     }
 
 
     function get_reverse_related( $post_id, $options = [] ) {
-        return XF()->api->get_reverse_related( $post_id, $options );
+        return XFields()->api->get_reverse_related( $post_id, $options );
     }
 
 
     function save( $field_data = [], $post_data = [], $options = [] ) {
-        return XF()->api->save_fields( $field_data, $post_data, $options );
+        return XFields()->api->save_fields( $field_data, $post_data, $options );
     }
 
 
     function find_fields( $params = [] ) {
-        return XF()->api->find_input_fields( $params );
+        return XFields()->api->find_input_fields( $params );
     }
 
 
     function form( $params = [] ) {
         ob_start();
-        XF()->form->render( $params );
+        XFields()->form->render( $params );
         return ob_get_clean();
     }
 
@@ -114,7 +113,7 @@ class X_Fields
      * Render a field's admin settings HTML
      */
     function field_html( $field ) {
-        include( XF_DIR . '/templates/field_html.php' );
+        include( XFIELDS_DIR . '/templates/field_html.php' );
     }
 
 
@@ -133,11 +132,11 @@ class X_Fields
         $field = (object) array_merge( $defaults, (array) $field );
 
         // Skip unknown field types (avoids a fatal error on PHP 8)
-        if ( ! isset( XF()->fields[ $field->type ] ) ) {
+        if ( ! isset( XFields()->fields[ $field->type ] ) ) {
             return;
         }
 
-        XF()->fields[ $field->type ]->html( $field );
+        XFields()->fields[ $field->type ]->html( $field );
     }
 }
 
@@ -146,8 +145,8 @@ class X_Fields
  * Capability required to manage field groups and X-Fields tools.
  * @return string
  */
-function xf_manage_capability() {
-    return (string) apply_filters( 'xf_manage_capability', 'manage_options' );
+function xfields_manage_capability() {
+    return (string) apply_filters( 'xfields_manage_capability', 'manage_options' );
 }
 
 
@@ -155,8 +154,8 @@ function xf_manage_capability() {
  * Map every field group capability to the manage capability.
  * @return array
  */
-function xf_group_capabilities() {
-    $cap = xf_manage_capability();
+function xfields_group_capabilities() {
+    $cap = xfields_manage_capability();
     $keys = [ 'edit_post', 'read_post', 'delete_post', 'edit_posts', 'edit_others_posts', 'publish_posts',
         'read_private_posts', 'delete_posts', 'delete_private_posts', 'delete_published_posts',
         'delete_others_posts', 'edit_private_posts', 'edit_published_posts', 'create_posts' ];
@@ -164,9 +163,9 @@ function xf_group_capabilities() {
 }
 
 
-function XF() {
+function XFields() {
     return X_Fields::instance();
 }
 
 
-XF();
+XFields();

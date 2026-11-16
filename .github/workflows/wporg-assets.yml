@@ -1,0 +1,32 @@
+name: Update WordPress.org readme & assets
+
+# Pushes readme.txt and .wordpress-org/ changes without a new release.
+on:
+  push:
+    branches: [main]
+    paths:
+      - readme.txt
+      - .wordpress-org/**
+
+permissions:
+  contents: read
+
+jobs:
+  assets:
+    runs-on: ubuntu-latest
+    env:
+      HAS_SVN: ${{ secrets.SVN_USERNAME != '' && secrets.SVN_PASSWORD != '' }}
+    steps:
+      - name: Skip (WordPress.org credentials not configured)
+        if: env.HAS_SVN != 'true'
+        run: echo "SVN credentials not set; skipping."
+      - uses: actions/checkout@v4
+        if: env.HAS_SVN == 'true'
+      - uses: 10up/action-wordpress-plugin-asset-update@stable
+        if: env.HAS_SVN == 'true'
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: x-fields
+          ASSETS_DIR: .wordpress-org
+          IGNORE_OTHER_FILES: true

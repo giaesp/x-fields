@@ -2,7 +2,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_session
+// This file reads/writes X-Fields' own tables ({prefix}xfields_values, {prefix}xfields_sessions) and the
+// group/value rows they reference; WordPress has no API for them. All queries are prepared or use integer/constant values.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery
+
+class xfields_session
 {
     public $session_id;
     public $session_data;
@@ -13,8 +17,10 @@ class xf_session
      * Constructor
      */
     public function __construct() {
-        // The nonce is verified by the caller (xf_form::init); the ID is validated as 32 hex chars
-        $posted = isset( $_POST['xf']['session_id'] ) && is_string( $_POST['xf']['session_id'] ) ? sanitize_text_field( wp_unslash( $_POST['xf']['session_id'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        // The nonce is verified by the caller (xfields_form::init); the ID is validated as 32 hex chars
+        // phpcs:disable WordPress.Security.NonceVerification.Missing
+        $posted = isset( $_POST['xfields']['session_id'] ) && is_string( $_POST['xfields']['session_id'] ) ? sanitize_text_field( wp_unslash( $_POST['xfields']['session_id'] ) ) : '';
+        // phpcs:enable WordPress.Security.NonceVerification.Missing
 
         if ( $this->is_valid( $posted ) ) {
             $this->session_id = $posted;
@@ -35,7 +41,7 @@ class xf_session
 
         $output = [];
         $session_data = $wpdb->get_var( $wpdb->prepare(
-            "SELECT data FROM {$wpdb->prefix}xf_sessions WHERE id = %s AND expires > %d",
+            "SELECT data FROM {$wpdb->prefix}xfields_sessions WHERE id = %s AND expires > %d",
             $this->session_id, time()
         ) );
 
@@ -63,7 +69,7 @@ class xf_session
         $session_data = (array) $session_data;
         $session_data['user_id'] = get_current_user_id();
 
-        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}xf_sessions WHERE id = %s LIMIT 1", $this->session_id ) );
+        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}xfields_sessions WHERE id = %s LIMIT 1", $this->session_id ) );
 
         // Every rendered form creates a row: purge expired ones regularly (1% of writes + daily cron)
         if ( 1 === wp_rand( 1, 100 ) ) {
@@ -72,7 +78,7 @@ class xf_session
 
         $wpdb->query(
             $wpdb->prepare(
-                "INSERT INTO {$wpdb->prefix}xf_sessions VALUES (%s, %s, %s)",
+                "INSERT INTO {$wpdb->prefix}xfields_sessions VALUES (%s, %s, %s)",
                 $this->session_id, serialize( $session_data ), time() + $this->expires
             )
         );
@@ -85,7 +91,7 @@ class xf_session
     public function cleanup() {
         global $wpdb;
 
-        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}xf_sessions WHERE CAST(expires AS UNSIGNED) <= %d", time() ) );
+        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}xfields_sessions WHERE CAST(expires AS UNSIGNED) <= %d", time() ) );
     }
 
 

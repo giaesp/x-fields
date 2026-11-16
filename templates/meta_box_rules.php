@@ -2,17 +2,17 @@
 
 defined( 'ABSPATH' ) || exit;
 
-global $post, $wpdb, $wp_roles;
+global $post;
 
-$user_roles = [];
-$term_ids = [];
+$xfields_user_roles = [];
+$xfields_term_ids = [];
 
-$equals_text = __( 'equals', 'x-fields' );
-$not_equals_text = __( 'is not', 'x-fields' );
-$rules = (array) get_post_meta( $post->ID, 'xf_rules', true );
+$xfields_equals_text = __( 'equals', 'x-fields' );
+$xfields_not_equals_text = __( 'is not', 'x-fields' );
+$xfields_rules = (array) get_post_meta( $post->ID, 'xfields_rules', true );
 
 // Populate rules if empty
-$rule_types = [
+$xfields_rule_types = [
     'post_types',
     'post_formats',
     'user_roles',
@@ -21,137 +21,104 @@ $rule_types = [
     'page_templates'
 ];
 
-foreach ( $rule_types as $type ) {
-    if ( ! isset( $rules[ $type ] ) || ! is_array( $rules[ $type ] ) ) {
-        $rules[ $type ] = [ 'operator' => [ '==' ], 'values' => [] ];
+foreach ( $xfields_rule_types as $xfields_type ) {
+    if ( ! isset( $xfields_rules[ $xfields_type ] ) || ! is_array( $xfields_rules[ $xfields_type ] ) ) {
+        $xfields_rules[ $xfields_type ] = [ 'operator' => [ '==' ], 'values' => [] ];
     }
-    $rules[ $type ]['values'] = isset( $rules[ $type ]['values'] ) ? (array) $rules[ $type ]['values'] : [];
-    $rules[ $type ]['operator'] = isset( $rules[ $type ]['operator'] ) ? $rules[ $type ]['operator'] : '==';
+    $xfields_rules[ $xfields_type ]['values'] = isset( $xfields_rules[ $xfields_type ]['values'] ) ? (array) $xfields_rules[ $xfields_type ]['values'] : [];
+    $xfields_rules[ $xfields_type ]['operator'] = isset( $xfields_rules[ $xfields_type ]['operator'] ) ? $xfields_rules[ $xfields_type ]['operator'] : '==';
 }
 
 // Post types
-$post_types = [];
-$types = get_post_types();
-foreach ( $types as $post_type ) {
-    if ( ! in_array( $post_type, [ 'xf_group', 'attachment', 'revision', 'nav_menu_item' ] ) ) {
-        $post_types[ $post_type ] = $post_type;
+$xfields_post_types = [];
+$xfields_types = get_post_types();
+foreach ( $xfields_types as $xfields_post_type ) {
+    if ( ! in_array( $xfields_post_type, [ 'xfields_group', 'attachment', 'revision', 'nav_menu_item' ] ) ) {
+        $xfields_post_types[ $xfields_post_type ] = $xfields_post_type;
     }
 }
 
 // Post formats
-$post_formats = [];
+$xfields_post_formats = [];
 if ( current_theme_supports( 'post-formats' ) ) {
-    $post_formats = [ 'standard' => 'Standard' ];
-    $post_formats_slugs = get_theme_support( 'post-formats' );
+    $xfields_post_formats = [ 'standard' => 'Standard' ];
+    $xfields_post_formats_slugs = get_theme_support( 'post-formats' );
 
-    if ( isset( $post_formats_slugs[0] ) && is_array( $post_formats_slugs[0] ) ) {
-        foreach ( $post_formats_slugs[0] as $post_format ) {
-            $post_formats[ $post_format ] = get_post_format_string( $post_format );
+    if ( isset( $xfields_post_formats_slugs[0] ) && is_array( $xfields_post_formats_slugs[0] ) ) {
+        foreach ( $xfields_post_formats_slugs[0] as $xfields_post_format ) {
+            $xfields_post_formats[ $xfields_post_format ] = get_post_format_string( $xfields_post_format );
         }
     }
 }
 
 // User roles
-foreach ( wp_roles()->roles as $key => $role ) {
-    $user_roles[ $key ] = $key;
+foreach ( wp_roles()->roles as $xfields_key => $xfields_role ) {
+    $xfields_user_roles[ $xfields_key ] = $xfields_key;
 }
 
 // Post IDs
-$post_ids = [];
-$json_posts = [];
+$xfields_post_ids = [];
+$xfields_json_posts = [];
 
-$post_in = array_filter( array_map( 'absint', $rules['post_ids']['values'] ) );
+$xfields_post_in = array_filter( array_map( 'absint', $xfields_rules['post_ids']['values'] ) );
 
-if ( ! empty( $post_in ) ) {
-    $post_in = implode( ',', $post_in );
+if ( ! empty( $xfields_post_in ) ) {
+    $xfields_results = get_posts( [
+        'post__in'       => $xfields_post_in,
+        'post_type'      => 'any',
+        'post_status'    => 'any',
+        'orderby'        => [ 'type' => 'ASC', 'title' => 'ASC' ],
+        'posts_per_page' => count( $xfields_post_in ),
+        'no_found_rows'  => true,
+    ] );
 
-    $sql = "
-    SELECT ID, post_type, post_title, post_parent
-    FROM $wpdb->posts
-    WHERE ID IN ($post_in)
-    ORDER BY post_type, post_title";
-    $results = $wpdb->get_results( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
-
-    foreach ( $results as $result ) {
-        $parent = '';
+    foreach ( $xfields_results as $xfields_result ) {
+        $xfields_parent = '';
 
         if (
-            isset( $result->post_parent ) &&
-            absint( $result->post_parent ) > 0 &&
-            $parent = get_post( $result->post_parent )
+            isset( $xfields_result->post_parent ) &&
+            absint( $xfields_result->post_parent ) > 0 &&
+            $xfields_parent = get_post( $xfields_result->post_parent )
         ) {
-            $parent = "$parent->post_title >";
+            $xfields_parent = "$xfields_parent->post_title >";
         }
 
-        $json_posts[] = [ 'id' => $result->ID, 'text' => "($result->post_type) $parent $result->post_title (#$result->ID)" ];
-        $post_ids[] = (int) $result->ID;
+        $xfields_json_posts[] = [ 'id' => $xfields_result->ID, 'text' => "($xfields_result->post_type) $xfields_parent $xfields_result->post_title (#$xfields_result->ID)" ];
+        $xfields_post_ids[] = (int) $xfields_result->ID;
     }
 }
 
-// Term IDs
-$sql = "
-SELECT t.term_id, t.name, tt.taxonomy
-FROM $wpdb->terms t
-INNER JOIN $wpdb->term_taxonomy tt ON tt.term_id = t.term_id AND tt.taxonomy != 'post_tag'
-ORDER BY tt.parent, tt.taxonomy, t.name";
-$results = $wpdb->get_results( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
+// Term IDs (all taxonomies except tags)
+$xfields_results = get_terms( [
+    'taxonomy'   => array_values( array_diff( get_taxonomies(), [ 'post_tag' ] ) ),
+    'hide_empty' => false,
+    'orderby'    => 'name',
+] );
+$xfields_results = is_wp_error( $xfields_results ) ? [] : $xfields_results;
 
-foreach ( $results as $result ) {
-    $term_ids[ $result->term_id ] = "($result->taxonomy) $result->name";
+foreach ( $xfields_results as $xfields_result ) {
+    $xfields_term_ids[ $xfields_result->term_id ] = "($xfields_result->taxonomy) $xfields_result->name";
 }
 
 // Page templates
-$page_templates = [];
-$templates = get_page_templates();
+$xfields_page_templates = [];
+$xfields_templates = get_page_templates();
 
-foreach ( $templates as $template_name => $filename ) {
-    $page_templates[ $filename ] = $template_name;
+foreach ( $xfields_templates as $xfields_template_name => $xfields_filename ) {
+    $xfields_page_templates[ $xfields_filename ] = $xfields_template_name;
 }
 
+
+// Rules UI is initialised by assets/js/fields.js (Tom Select)
+wp_add_inline_script( 'xfields-fields', 'window.XFields = Object.assign( window.XFields || {}, ' . wp_json_encode( [
+    'rules' => [
+        'nonce'       => wp_create_nonce( 'xfields_admin_nonce' ),
+        'placeholder' => __( 'Leave blank to skip this rule', 'x-fields' ),
+        'search'      => __( 'Type at least 2 characters…', 'x-fields' ),
+        'no_results'  => __( 'No results', 'x-fields' ),
+    ],
+] ) . ' );', 'before' );
 ?>
-
-<script>
-(function($) {
-    $(function() {
-        var xf_nonce = <?php echo wp_json_encode( wp_create_nonce( 'xf_admin_nonce' ) ); ?>;
-        var xf_placeholder = <?php echo wp_json_encode( __( 'Leave blank to skip this rule', 'x-fields' ) ); ?>;
-
-        $('.select2').select2({
-            placeholder: xf_placeholder
-        });
-
-        $('.select2-ajax').select2({
-            multiple: true,
-            placeholder: xf_placeholder,
-            minimumInputLength: 2,
-            ajax: {
-                url: ajaxurl,
-                type: 'POST',
-                dataType: 'json',
-                data: function(term, page) {
-                    return {
-                        q: term,
-                        action: 'xf_ajax_handler',
-                        action_type: 'search_posts',
-                        nonce: xf_nonce
-                    }
-                },
-                results: function(data, page) {
-                    return { results: data };
-                }
-            },
-            initSelection: function(element, callback) {
-                var data = [];
-                var post_ids = <?php echo wp_json_encode( $json_posts, JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
-                $(post_ids).each(function(idx, val) {
-                    data.push({ id: val.id, text: val.text });
-                });
-                callback(data);
-            }
-        });
-    });
-})(jQuery);
-</script>
 
 <table>
     <tr>
@@ -160,61 +127,61 @@ foreach ( $templates as $template_name => $filename ) {
         </td>
         <td style="width:80px; vertical-align:top">
             <?php
-                XF()->create_field( [
+                XFields()->create_field( [
                     'type' => 'select',
-                    'input_name' => "xf[rules][operator][post_types]",
+                    'input_name' => "xfields[rules][operator][post_types]",
                     'options' => [
                         'choices' => [
-                            '==' => $equals_text,
-                            '!=' => $not_equals_text,
+                            '==' => $xfields_equals_text,
+                            '!=' => $xfields_not_equals_text,
                         ],
                         'force_single' => true,
                     ],
-                    'value' => $rules['post_types']['operator'],
+                    'value' => $xfields_rules['post_types']['operator'],
                 ] );
             ?>
         </td>
         <td>
             <?php
-                XF()->create_field( [
+                XFields()->create_field( [
                     'type' => 'select',
-                    'input_class' => 'select2',
-                    'input_name' => "xf[rules][post_types]",
-                    'options' => [ 'multiple' => '1', 'choices' => $post_types ],
-                    'value' => $rules['post_types']['values'],
+                    'input_class' => 'xfields-enhanced',
+                    'input_name' => "xfields[rules][post_types]",
+                    'options' => [ 'multiple' => '1', 'choices' => $xfields_post_types ],
+                    'value' => $xfields_rules['post_types']['values'],
                 ] );
             ?>
         </td>
     </tr>
-    <?php if ( current_theme_supports( 'post-formats' ) && count( $post_formats ) ) : ?>
+    <?php if ( current_theme_supports( 'post-formats' ) && count( $xfields_post_formats ) ) : ?>
         <tr>
             <td class="label">
                 <label><?php esc_html_e( 'Post Formats', 'x-fields' ); ?></label>
             </td>
             <td style="width:80px; vertical-align:top">
                 <?php
-                XF()->create_field( [
+                XFields()->create_field( [
                     'type' => 'select',
-                    'input_name' => "xf[rules][operator][post_formats]",
+                    'input_name' => "xfields[rules][operator][post_formats]",
                     'options' => [
                         'choices' => [
-                            '==' => $equals_text,
-                            '!=' => $not_equals_text,
+                            '==' => $xfields_equals_text,
+                            '!=' => $xfields_not_equals_text,
                         ],
                         'force_single' => true,
                     ],
-                    'value' => $rules['post_formats']['operator'],
+                    'value' => $xfields_rules['post_formats']['operator'],
                 ] );
                 ?>
             </td>
             <td>
                 <?php
-                XF()->create_field( [
+                XFields()->create_field( [
                     'type' => 'select',
-                    'input_class' => 'select2',
-                    'input_name' => "xf[rules][post_formats]",
-                    'options' => [ 'multiple' => '1', 'choices' => $post_formats ],
-                    'value' => $rules['post_formats']['values'],
+                    'input_class' => 'xfields-enhanced',
+                    'input_name' => "xfields[rules][post_formats]",
+                    'options' => [ 'multiple' => '1', 'choices' => $xfields_post_formats ],
+                    'value' => $xfields_rules['post_formats']['values'],
                 ] );
                 ?>
             </td>
@@ -226,28 +193,28 @@ foreach ( $templates as $template_name => $filename ) {
         </td>
         <td style="width:80px; vertical-align:top">
             <?php
-                XF()->create_field( [
+                XFields()->create_field( [
                     'type' => 'select',
-                    'input_name' => "xf[rules][operator][user_roles]",
+                    'input_name' => "xfields[rules][operator][user_roles]",
                     'options' => [
                         'choices' => [
-                            '==' => $equals_text,
-                            '!=' => $not_equals_text,
+                            '==' => $xfields_equals_text,
+                            '!=' => $xfields_not_equals_text,
                         ],
                         'force_single' => true,
                     ],
-                    'value' => $rules['user_roles']['operator'],
+                    'value' => $xfields_rules['user_roles']['operator'],
                 ] );
             ?>
         </td>
         <td>
             <?php
-                XF()->create_field( [
+                XFields()->create_field( [
                     'type' => 'select',
-                    'input_class' => 'select2',
-                    'input_name' => "xf[rules][user_roles]",
-                    'options' => [ 'multiple' => '1', 'choices' => $user_roles ],
-                    'value' => $rules['user_roles']['values'],
+                    'input_class' => 'xfields-enhanced',
+                    'input_name' => "xfields[rules][user_roles]",
+                    'options' => [ 'multiple' => '1', 'choices' => $xfields_user_roles ],
+                    'value' => $xfields_rules['user_roles']['values'],
                 ] );
             ?>
         </td>
@@ -258,22 +225,26 @@ foreach ( $templates as $template_name => $filename ) {
         </td>
         <td style="width:80px; vertical-align:top">
             <?php
-                XF()->create_field( [
+                XFields()->create_field( [
                     'type' => 'select',
-                    'input_name' => "xf[rules][operator][post_ids]",
+                    'input_name' => "xfields[rules][operator][post_ids]",
                     'options' => [
                         'choices' => [
-                            '==' => $equals_text,
-                            '!=' => $not_equals_text,
+                            '==' => $xfields_equals_text,
+                            '!=' => $xfields_not_equals_text,
                         ],
                         'force_single' => true,
                     ],
-                    'value' => $rules['post_ids']['operator'],
+                    'value' => $xfields_rules['post_ids']['operator'],
                 ] );
             ?>
         </td>
         <td>
-            <input type="hidden" name="xf[rules][post_ids]" class="select2-ajax" value="<?php echo esc_attr( implode( ',', $post_ids ) ); ?>" style="width:99.95%" />
+            <select name="xfields[rules][post_ids][]" class="xfields-post-search" multiple>
+                <?php foreach ( $xfields_json_posts as $xfields_item ) : ?>
+                <option value="<?php echo (int) $xfields_item['id']; ?>" selected><?php echo esc_html( $xfields_item['text'] ); ?></option>
+                <?php endforeach; ?>
+            </select>
         </td>
     </tr>
     <tr>
@@ -282,28 +253,28 @@ foreach ( $templates as $template_name => $filename ) {
         </td>
         <td style="width:80px; vertical-align:top">
             <?php
-                XF()->create_field( [
+                XFields()->create_field( [
                     'type' => 'select',
-                    'input_name' => "xf[rules][operator][term_ids]",
+                    'input_name' => "xfields[rules][operator][term_ids]",
                     'options' => [
                         'choices' => [
-                            '==' => $equals_text,
-                            '!=' => $not_equals_text,
+                            '==' => $xfields_equals_text,
+                            '!=' => $xfields_not_equals_text,
                         ],
                         'force_single' => true,
                     ],
-                    'value' => $rules['term_ids']['operator'],
+                    'value' => $xfields_rules['term_ids']['operator'],
                 ] );
             ?>
         </td>
         <td>
             <?php
-                XF()->create_field( [
+                XFields()->create_field( [
                     'type' => 'select',
-                    'input_class' => 'select2',
-                    'input_name' => "xf[rules][term_ids]",
-                    'options' => [ 'multiple' => '1', 'choices' => $term_ids ],
-                    'value' => $rules['term_ids']['values'],
+                    'input_class' => 'xfields-enhanced',
+                    'input_name' => "xfields[rules][term_ids]",
+                    'options' => [ 'multiple' => '1', 'choices' => $xfields_term_ids ],
+                    'value' => $xfields_rules['term_ids']['values'],
                 ] );
             ?>
         </td>
@@ -314,28 +285,28 @@ foreach ( $templates as $template_name => $filename ) {
         </td>
         <td style="width:80px; vertical-align:top">
             <?php
-                XF()->create_field( [
+                XFields()->create_field( [
                     'type' => 'select',
-                    'input_name' => "xf[rules][operator][page_templates]",
+                    'input_name' => "xfields[rules][operator][page_templates]",
                     'options' => [
                         'choices' => [
-                            '==' => $equals_text,
-                            '!=' => $not_equals_text,
+                            '==' => $xfields_equals_text,
+                            '!=' => $xfields_not_equals_text,
                         ],
                         'force_single' => true,
                     ],
-                    'value' => $rules['page_templates']['operator'],
+                    'value' => $xfields_rules['page_templates']['operator'],
                 ] );
             ?>
         </td>
         <td>
             <?php
-                XF()->create_field( [
+                XFields()->create_field( [
                     'type' => 'select',
-                    'input_class' => 'select2',
-                    'input_name' => "xf[rules][page_templates]",
-                    'options' => [ 'multiple' => '1', 'choices' => $page_templates ],
-                    'value' => $rules['page_templates']['values'],
+                    'input_class' => 'xfields-enhanced',
+                    'input_name' => "xfields[rules][page_templates]",
+                    'options' => [ 'multiple' => '1', 'choices' => $xfields_page_templates ],
+                    'value' => $xfields_rules['page_templates']['values'],
                 ] );
             ?>
         </td>

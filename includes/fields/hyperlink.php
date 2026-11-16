@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_hyperlink extends xf_field
+class xfields_hyperlink extends xfields_field
 {
 
 
@@ -21,16 +21,16 @@ class xf_hyperlink extends xf_field
             'target' => isset( $field->value['target'] ) ? $field->value['target'] : '',
         ];
     ?>
-        <div class="xf-hyperlink" style="overflow:hidden;">
-            <div class="xf-hyperlink-url" style="width:39%;float:left;">
+        <div class="xfields-hyperlink" style="overflow:hidden;">
+            <div class="xfields-hyperlink-url" style="width:39%;float:left;">
                 <div><?php esc_html_e( 'URL', 'x-fields' ); ?></div>
                 <input type="text" name="<?php echo esc_attr( $field->input_name ); ?>[url]" class="link-url" value="<?php echo esc_url( $field->value['url'] ); ?>" placeholder="http://" />
             </div>
-            <div class="xf-hyperlink-text" style="width:39%;float:left;margin-left:1%;">
+            <div class="xfields-hyperlink-text" style="width:39%;float:left;margin-left:1%;">
                 <div><?php esc_html_e( 'Link Text', 'x-fields' ); ?></div>
                 <input type="text" name="<?php echo esc_attr( $field->input_name ); ?>[text]" class="link-text" value="<?php echo esc_attr( $field->value['text'] ); ?>" />
             </div>
-            <div class="xf-hyperlink-target" style="width:19%;float:left;margin-left:1%;">
+            <div class="xfields-hyperlink-target" style="width:19%;float:left;margin-left:1%;">
                 <div><?php esc_html_e( 'Link Target', 'x-fields' ); ?></div>
                 <select class="link-target widefat" name="<?php echo esc_attr( $field->input_name ); ?>[target]">
                     <option value="none" <?php selected( 'none', esc_attr( $field->value['target'] ) ); ?>>None</option>
@@ -52,9 +52,9 @@ class xf_hyperlink extends xf_field
             </td>
             <td>
                 <?php
-                    XF()->create_field( [
+                    XFields()->create_field( [
                         'type' => 'select',
-                        'input_name' => "xf[fields][$key][options][format]",
+                        'input_name' => "xfields[fields][$key][options][format]",
                         'options' => [
                             'choices' => [
                                 'html' => __( 'HTML', 'x-fields' ),
@@ -130,7 +130,7 @@ class xf_hyperlink extends xf_field
             if ( ! empty( $url ) ) {
                 $target_attr = empty( $target ) ? '' : ' target="' . esc_attr( $target ) . '"';
                 $rel_attr = ( '_blank' === $target ) ? ' rel="noopener noreferrer"' : '';
-                $output = '<a class="xf-hyperlink" href="' . esc_url( $url ) . '"' . $target_attr . $rel_attr . '><span class="text">' . esc_html( $text ) . '</span></a>';
+                $output = '<a class="xfields-hyperlink" href="' . esc_url( $url ) . '"' . $target_attr . $rel_attr . '><span class="text">' . esc_html( $text ) . '</span></a>';
             }
         }
 

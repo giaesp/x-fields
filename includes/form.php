@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class xf_form
+class xfields_form
 {
 
     public $used_types;
@@ -38,11 +38,11 @@ class xf_form
             return;
         }
 
-        $this->session = new xf_session();
+        $this->session = new xfields_session();
 
         // Save the form
-        if ( isset( $_POST['xf']['save'] ) && is_string( $_POST['xf']['save'] ) ) {
-            if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['xf']['save'] ) ), 'xf_save_input' ) ) {
+        if ( isset( $_POST['xfields']['save'] ) && is_string( $_POST['xfields']['save'] ) ) {
+            if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['xfields']['save'] ) ), 'xfields_save_input' ) ) {
                 $session = $this->session->get();
 
                 if ( empty( $session ) ) {
@@ -50,7 +50,7 @@ class xf_form
                 }
 
                 // Raw on purpose: save_fields() unslashes (stripslashes_deep) and sanitizes per field type / KSES
-                $field_data = isset( $_POST['xf']['input'] ) && is_array( $_POST['xf']['input'] ) ? $_POST['xf']['input'] : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+                $field_data = isset( $_POST['xfields']['input'] ) && is_array( $_POST['xfields']['input'] ) ? $_POST['xfields']['input'] : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
                 $post_data = [];
                 $is_front_end = ! empty( $session['front_end'] );
 
@@ -71,13 +71,13 @@ class xf_form
                 // Title
                 // (sanitized through the core *_save_pre filters, which apply KSES
                 // for users without the unfiltered_html capability)
-                if ( isset( $_POST['xf']['post_title'] ) && is_string( $_POST['xf']['post_title'] ) ) {
-                    $post_data['post_title'] = sanitize_post_field( 'post_title', wp_unslash( $_POST['xf']['post_title'] ), $post_id, 'db' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_post_field() applies title_save_pre / KSES
+                if ( isset( $_POST['xfields']['post_title'] ) && is_string( $_POST['xfields']['post_title'] ) ) {
+                    $post_data['post_title'] = sanitize_post_field( 'post_title', wp_unslash( $_POST['xfields']['post_title'] ), $post_id, 'db' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_post_field() applies title_save_pre / KSES
                 }
 
                 // Content
-                if ( isset( $_POST['xf']['post_content'] ) && is_string( $_POST['xf']['post_content'] ) ) {
-                    $post_data['post_content'] = sanitize_post_field( 'post_content', wp_unslash( $_POST['xf']['post_content'] ), $post_id, 'db' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_post_field() applies content_save_pre / KSES
+                if ( isset( $_POST['xfields']['post_content'] ) && is_string( $_POST['xfields']['post_content'] ) ) {
+                    $post_data['post_content'] = sanitize_post_field( 'post_content', wp_unslash( $_POST['xfields']['post_content'] ), $post_id, 'db' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_post_field() applies content_save_pre / KSES
 
                     // Anonymous visitors must not be able to inject shortcodes
                     if ( ! is_user_logged_in() ) {
@@ -114,7 +114,7 @@ class xf_form
                 ];
 
                 // Server-side validation (the browser checks can be bypassed)
-                $errors = XF()->api->validate_input( $field_data, $field_groups );
+                $errors = XFields()->api->validate_input( $field_data, $field_groups );
 
                 if ( ! empty( $errors ) ) {
                     if ( $is_front_end ) {
@@ -131,22 +131,22 @@ class xf_form
                     $is_draft_save = isset( $_POST['save'] ) || in_array( $status, [ 'draft', 'pending', 'auto-draft' ], true ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
                     if ( ! $is_draft_save ) {
-                        set_transient( 'xf_validation_' . get_current_user_id(), [ 'post_id' => $post_id, 'errors' => $errors ], 5 * MINUTE_IN_SECONDS );
+                        set_transient( 'xfields_validation_' . get_current_user_id(), [ 'post_id' => $post_id, 'errors' => $errors ], 5 * MINUTE_IN_SECONDS );
                     }
                 }
 
                 // Pre-save hook
-                do_action( 'xf_pre_save_input', $hook_params );
+                do_action( 'xfields_pre_save_input', $hook_params );
 
                 // Save the input values
-                $hook_params['post_data']['ID'] = XF()->save(
+                $hook_params['post_data']['ID'] = XFields()->save(
                     $field_data,
                     $post_data,
                     $options
                 );
 
                 // After-save hook
-                do_action( 'xf_after_save_input', $hook_params );
+                do_action( 'xfields_after_save_input', $hook_params );
 
                 // Delete expired sessions
                 $this->session->cleanup();
@@ -182,12 +182,10 @@ class xf_form
         add_action( 'wp_head', [ $this, 'head_scripts' ] );
         add_action( 'wp_footer', [ $this, 'footer_scripts' ], 25 );
 
-        wp_enqueue_script( 'jquery-ui-core' );
         wp_enqueue_script( 'jquery-ui-sortable' );
-        wp_enqueue_script( 'xf-validation', XF_URL . '/assets/js/validation.js', [ 'jquery' ], XF_VERSION );
-        wp_enqueue_script( 'jquery-powertip', XF_URL . '/assets/js/jquery-powertip/jquery.powertip.min.js', [ 'jquery' ], XF_VERSION );
-        wp_enqueue_style( 'jquery-powertip', XF_URL . '/assets/js/jquery-powertip/jquery.powertip.css', [], XF_VERSION );
-        wp_enqueue_style( 'xf-input', XF_URL . '/assets/css/input.css', [], XF_VERSION );
+        wp_enqueue_script( 'tom-select' );
+        wp_enqueue_script( 'xfields-validation' );
+        wp_enqueue_style( 'xfields-input' );
     }
 
 
@@ -199,9 +197,9 @@ class xf_form
     ?>
 
 <script>
-var XF = XF || {};
-XF['get_field_value'] = {};
-XF['loop_buffer'] = [];
+var XFields = XFields || {};
+XFields['get_field_value'] = {};
+XFields['loop_buffer'] = [];
 </script>
 
     <?php
@@ -213,7 +211,7 @@ XF['loop_buffer'] = [];
      * @since 1.9.5
      */
     function footer_scripts() {
-        do_action( 'xf_custom_validation' );
+        do_action( 'xfields_custom_validation' );
     }
 
 
@@ -230,7 +228,7 @@ XF['loop_buffer'] = [];
         }
 
         // Server-side validation result from the last save
-        $key = 'xf_validation_' . get_current_user_id();
+        $key = 'xfields_validation_' . get_current_user_id();
         $result = get_transient( $key );
         if ( is_array( $result ) && ! empty( $result['errors'] ) && (int) get_the_ID() === (int) $result['post_id'] ) {
             delete_transient( $key );
@@ -241,7 +239,7 @@ XF['loop_buffer'] = [];
             echo '</ul></div>';
         }
 
-        echo '<div class="notice notice-error" id="xf-validation-admin-notice" style="display: none;"><p><strong>';
+        echo '<div class="notice notice-error" id="xfields-validation-admin-notice" style="display: none;"><p><strong>';
         echo esc_html__( 'One (or more) of your fields had validation errors. More information is available below.', 'x-fields' );
         echo '</strong></p></div>';
     }
@@ -274,12 +272,12 @@ XF['loop_buffer'] = [];
         $input_fields = [];
 
         // The session isn't created during AJAX / autosave requests
-        if ( ! ( $this->session instanceof xf_session ) ) {
-            $this->session = new xf_session();
+        if ( ! ( $this->session instanceof xfields_session ) ) {
+            $this->session = new xfields_session();
         }
 
         // Keep track of field validators
-        XF()->validators = [];
+        XFields()->validators = [];
 
         $post_id = (int) $params['post_id'];
 
@@ -288,7 +286,7 @@ XF['loop_buffer'] = [];
         }
 
         if ( empty( $params['field_groups'] ) ) {
-            $field_groups = XF()->api->get_matching_groups( $post_id, true );
+            $field_groups = XFields()->api->get_matching_groups( $post_id, true );
             $field_groups = array_keys( $field_groups );
         }
         else {
@@ -296,19 +294,19 @@ XF['loop_buffer'] = [];
         }
 
         if ( ! empty( $field_groups ) ) {
-            $input_fields = XF()->api->get_input_fields( [
+            $input_fields = XFields()->api->get_input_fields( [
                 'group_id' => $field_groups,
                 'post_id_values' => $post_id,
             ] );
         }
 
         // Hook to allow for overridden field settings
-        $input_fields = apply_filters( 'xf_pre_render_fields', $input_fields, $params );
+        $input_fields = apply_filters( 'xfields_pre_render_fields', $input_fields, $params );
 
         // The SESSION should contain all applicable field group IDs. Since add_meta_box only
-        // passes 1 field group at a time, we use XF()->group_ids from admin_head.php
+        // passes 1 field group at a time, we use XFields()->group_ids from admin_head.php
         // to store all group IDs needed for the SESSION.
-        $all_group_ids = ( false === $params['front_end'] ) ? XF()->group_ids : $field_groups;
+        $all_group_ids = ( false === $params['front_end'] ) ? XFields()->group_ids : $field_groups;
         $all_group_ids = array_map( 'intval', (array) $all_group_ids );
 
         $session_data = [
@@ -327,7 +325,7 @@ XF['loop_buffer'] = [];
         if ( false !== $params['front_end'] ) {
     ?>
 
-<div class="xf_input no_box">
+<div class="xfields_input no_box">
     <form id="post" method="post" action="">
 
     <?php
@@ -338,7 +336,7 @@ XF['loop_buffer'] = [];
 
         <div class="field" data-validator="required">
             <label><?php echo esc_html( $params['post_title'] ); ?></label>
-            <input type="text" name="xf[post_title]" value="<?php echo empty( $post_id ) ? '' : esc_attr( $post->post_title ); ?>" />
+            <input type="text" name="xfields[post_title]" value="<?php echo empty( $post_id ) ? '' : esc_attr( $post->post_title ); ?>" />
         </div>
 
     <?php
@@ -349,7 +347,7 @@ XF['loop_buffer'] = [];
 
         <div class="field">
             <label><?php echo esc_html( $params['post_content'] ); ?></label>
-            <textarea name="xf[post_content]"><?php echo empty( $post_id ) ? '' : esc_textarea( $post->post_content ); ?></textarea>
+            <textarea name="xfields[post_content]"><?php echo empty( $post_id ) ? '' : esc_textarea( $post->post_content ); ?></textarea>
         </div>
 
     <?php
@@ -364,7 +362,7 @@ XF['loop_buffer'] = [];
             }
         }
 
-        do_action( 'xf_form_before_fields', $params, [
+        do_action( 'xfields_form_before_fields', $params, [
             'group_ids'     => $all_group_ids,
             'input_fields'  => $input_fields
         ] );
@@ -378,15 +376,15 @@ XF['loop_buffer'] = [];
             }
 
             // Skip missing field types
-            if ( ! isset( XF()->fields[ $field->type ] ) ) {
+            if ( ! isset( XFields()->fields[ $field->type ] ) ) {
                 continue;
             }
 
             // Output tabs
             if ( 'tab' == $field->type && $is_first_tab ) {
-                echo '<div class="xf-tabs">';
+                echo '<div class="xfields-tabs">';
                 foreach ( $tabs as $key => $tab ) {
-                    echo '<div class="xf-tab" rel="' . esc_attr( $tab->name ) . '">' . esc_html( $tab->label ) . '</div>';
+                    echo '<div class="xfields-tab" rel="' . esc_attr( $tab->name ) . '">' . esc_html( $tab->label ) . '</div>';
                 }
                 echo '</div>';
                 $is_first_tab = false;
@@ -394,7 +392,7 @@ XF['loop_buffer'] = [];
 
             // Keep track of active field types
             if ( ! isset( $this->used_types[ $field->type ] ) ) {
-                XF()->fields[ $field->type ]->input_head( $field );
+                XFields()->fields[ $field->type ]->input_head( $field );
                 $this->used_types[ $field->type ] = true;
             }
 
@@ -419,7 +417,7 @@ XF['loop_buffer'] = [];
             }
 
             if ( ! empty( $validator ) ) {
-                XF()->validators[ $field->name ] = [
+                XFields()->validators[ $field->name ] = [
                     'rule'  => $validator,
                     'type'  => $field->type
                 ];
@@ -435,10 +433,10 @@ XF['loop_buffer'] = [];
                     if ( isset( $tabs[0] ) && $field->name != $tabs[0]->name ) {
                         echo '</div>';
                     }
-                    echo '<div class="xf-tab-content xf-tab-content-' . esc_attr( $field->name ) . '">';
+                    echo '<div class="xfields-tab-content xfields-tab-content-' . esc_attr( $field->name ) . '">';
 
 					if ( ! empty( $field->notes ) ) {
-						echo '<div class="xf-tab-notes">' . esc_html( $field->notes ) . '</div>';
+						echo '<div class="xfields-tab-notes">' . esc_html( $field->notes ) . '</div>';
 					}
                 }
                 else {
@@ -446,7 +444,7 @@ XF['loop_buffer'] = [];
 
         <div class="field field-<?php echo esc_attr( $field->name ); ?>" data-type="<?php echo esc_attr( $field->type ); ?>" data-name="<?php echo esc_attr( $field->name ); ?>">
             <?php if ( 'loop' == $field->type ) : ?>
-            <a href="javascript:;" class="xf_loop_toggle" title="<?php esc_html_e( 'Toggle row visibility', 'x-fields' ); ?>"></a>
+            <a href="javascript:;" class="xfields_loop_toggle" title="<?php esc_html_e( 'Toggle row visibility', 'x-fields' ); ?>"></a>
             <?php endif; ?>
 
             <?php if ( ! empty( $field->label ) ) : ?>
@@ -457,14 +455,14 @@ XF['loop_buffer'] = [];
             <p class="notes"><?php echo esc_html( $field->notes ); ?></p>
             <?php endif; ?>
 
-            <div class="xf_<?php echo esc_attr( $field->type ); ?>">
+            <div class="xfields_<?php echo esc_attr( $field->type ); ?>">
 
     <?php
-                XF()->create_field( [
+                XFields()->create_field( [
                     'id'            => $field->id,
                     'group_id'      => $field->group_id,
                     'type'          => $field->type,
-                    'input_name'    => "xf[input][$field->id][value]",
+                    'input_name'    => "xfields[input][$field->id][value]",
                     'input_class'   => $field->type,
                     'options'       => $field->options,
                     'value'         => $field->value,
@@ -485,7 +483,7 @@ XF['loop_buffer'] = [];
             echo '</div>';
         }
 
-        do_action( 'xf_form_after_fields', $params, [
+        do_action( 'xfields_form_after_fields', $params, [
             'group_ids'     => $all_group_ids,
             'input_fields'  => $input_fields
         ] );
@@ -493,12 +491,12 @@ XF['loop_buffer'] = [];
 
         <script>
         (function($) {
-            XF.field_rules = XF.field_rules || {};
-            $.extend( XF.field_rules, <?php echo wp_json_encode( XF()->validators, JSON_HEX_TAG | JSON_HEX_AMP ); ?> );
+            XFields.field_rules = XFields.field_rules || {};
+            $.extend( XFields.field_rules, <?php echo wp_json_encode( XFields()->validators, JSON_HEX_TAG | JSON_HEX_AMP ); ?> );
         })(jQuery);
         </script>
-        <input type="hidden" name="xf[save]" value="<?php echo esc_attr( wp_create_nonce( 'xf_save_input' ) ); ?>" />
-        <input type="hidden" name="xf[session_id]" value="<?php echo esc_attr( $this->session->session_id ); ?>" />
+        <input type="hidden" name="xfields[save]" value="<?php echo esc_attr( wp_create_nonce( 'xfields_save_input' ) ); ?>" />
+        <input type="hidden" name="xfields[session_id]" value="<?php echo esc_attr( $this->session->session_id ); ?>" />
 
         <?php if ( false !== $params['front_end'] ) : ?>
 
@@ -511,4 +509,4 @@ XF['loop_buffer'] = [];
     }
 }
 
-XF()->form = new xf_form();
+XFields()->form = new xfields_form();
