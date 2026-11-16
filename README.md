@@ -2,7 +2,7 @@
 
 Simple, secure custom fields for WordPress: field groups, placement rules, repeaters, relationships and front-end forms.
 
-![PHP](https://img.shields.io/badge/PHP-7.4%E2%80%938.4-777bb4) ![WordPress](https://img.shields.io/badge/WordPress-6.0%2B-21759b) ![License](https://img.shields.io/badge/license-GPL--2.0--or--later-blue)
+[![CI](https://github.com/giaesp/x-fields/actions/workflows/ci.yml/badge.svg)](https://github.com/giaesp/x-fields/actions/workflows/ci.yml) [![Release](https://img.shields.io/github/v/release/giaesp/x-fields)](https://github.com/giaesp/x-fields/releases/latest) ![PHP](https://img.shields.io/badge/PHP-7.4%E2%80%938.4-777bb4) ![WordPress](https://img.shields.io/badge/WordPress-6.0%2B-21759b) ![License](https://img.shields.io/badge/license-GPL--2.0--or--later-blue)
 
 X-Fields is a fork of [Custom Field Suite](https://github.com/mgibbs189/custom-field-suite) by Matt Gibbs, security-hardened, made PHP 8 compatible and redesigned. Maintained by [Gianluca Esposito](https://github.com/giaesp).
 
@@ -112,6 +112,10 @@ wp eval-file tests/smoke-test.php   # inside a WordPress install
 
 Releases follow [Semantic Versioning](https://semver.org/); see [CHANGELOG.md](CHANGELOG.md).
 To release: update the version in `x-fields.php` (header + `XF_VERSION`) and `readme.txt`, update the changelog, then tag `vX.Y.Z` — GitHub Actions builds the zip.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Issues and pull requests are welcome.
 
 ## Security
 
