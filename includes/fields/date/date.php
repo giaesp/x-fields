@@ -14,7 +14,7 @@ class xf_date extends xf_field
     function input_head( $field = null ) {
         $this->load_assets();
     ?>
-        <link rel="stylesheet" type="text/css" href="<?php echo XF_URL; ?>/includes/fields/date/datepicker.css" />
+        <link rel="stylesheet" type="text/css" href="<?php echo esc_url( XF_URL . '/includes/fields/date/datepicker.css' ); ?>" />
         <script>
         (function($) {
             $(function() {

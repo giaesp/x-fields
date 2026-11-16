@@ -21,7 +21,7 @@ class xf_wysiwyg extends xf_field
                 <?php do_action( 'media_buttons' ); ?>
             </div>
             <div class="wp-editor-container">
-                <textarea name="<?php echo esc_attr( $field->input_name ); ?>" class="wp-editor-area <?php echo esc_attr( $field->input_class ); ?>" style="height:300px"><?php echo is_scalar( $field->value ) ? $field->value : ''; ?></textarea>
+                <textarea name="<?php echo esc_attr( $field->input_name ); ?>" class="wp-editor-area <?php echo esc_attr( $field->input_class ); ?>" style="height:300px"><?php echo esc_textarea( is_scalar( $field->value ) ? (string) $field->value : '' ); ?></textarea>
             </div>
         </div>
     <?php
@@ -32,7 +32,7 @@ class xf_wysiwyg extends xf_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Formatting', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Formatting', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
@@ -53,7 +53,7 @@ class xf_wysiwyg extends xf_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Validation', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Validation', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
@@ -185,9 +185,9 @@ class xf_wysiwyg extends xf_field
     }
 
 
-    // format_for_editor() escapes the value (htmlspecialchars), so html() can echo it
+    // Raw value; html() escapes it with format_for_editor() (also covers default values)
     function format_value_for_input( $value, $field = null ) {
-        return format_for_editor( is_scalar( $value ) ? (string) $value : '' );
+        return is_scalar( $value ) ? (string) $value : '';
     }
 
 

@@ -5,6 +5,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-16
+
+### Added
+- **Server-side validation** of required fields and min/max limits (Relationship, Term, User, Loop), including fields inside Loop rows. Browser checks can be bypassed; the server now enforces them.
+  - Front-end forms: invalid submissions are rejected with a list of errors (nothing is saved).
+  - Admin: the post is always saved (no lost work); when publishing, a notice lists the fields that need attention. Drafts are not validated, as in the browser.
+  - New filter `xf_validate_input` to add custom rules.
+
+### Security
+- All translatable strings are escaped on output (`esc_html_e`, `esc_attr_e`, `esc_html__`).
+- WYSIWYG default values are escaped in the editor textarea.
+- Input handling uses `wp_unslash()` + sanitization everywhere it is safe; remaining raw reads are documented.
+
+### Changed
+- PHPCS (WordPress security + PHP compatibility) now reports **0 warnings** (was 136) and the CI fails on any new warning.
+- Test suite: 42 checks; test data is cleaned up even if a test crashes.
+
 ## [1.0.1] - 2026-11-16
 
 ### Security
@@ -58,6 +75,7 @@ First release of X-Fields, forked from Custom Field Suite 2.6.7.
 - Double-encoded HTML entities in text/textarea values.
 - Tables are created with the site charset/collation (utf8mb4).
 
-[Unreleased]: https://github.com/giaesp/x-fields/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/giaesp/x-fields/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/giaesp/x-fields/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/giaesp/x-fields/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/giaesp/x-fields/releases/tag/v1.0.0

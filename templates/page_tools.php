@@ -9,7 +9,7 @@ SELECT ID, post_title
 FROM $wpdb->posts
 WHERE post_type = 'xf_group' AND post_status = 'publish'
 ORDER BY post_title";
-$results = $wpdb->get_results($sql);
+$results = $wpdb->get_results($sql); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
 ?>
 
 <style type="text/css">
@@ -87,14 +87,14 @@ $results = $wpdb->get_results($sql);
 </script>
 
 <div class="wrap xf-tools">
-    <h1><?php _e( 'Tools', 'x-fields' ); ?></h1>
+    <h1><?php esc_html_e( 'Tools', 'x-fields' ); ?></h1>
 
     <p class="description"><?php esc_html_e( 'Move field groups between sites, or remove all X-Fields data.', 'x-fields' ); ?></p>
 
     <h2 class="nav-tab-wrapper">
-        <a class="nav-tab nav-tab-active" rel="export"><?php _e('Export', 'x-fields' ); ?></a>
-        <a class="nav-tab" rel="import"><?php _e('Import', 'x-fields' ); ?></a>
-        <a class="nav-tab" rel="reset"><?php _e('Reset', 'x-fields' ); ?></a>
+        <a class="nav-tab nav-tab-active" rel="export"><?php esc_html_e('Export', 'x-fields' ); ?></a>
+        <a class="nav-tab" rel="import"><?php esc_html_e('Import', 'x-fields' ); ?></a>
+        <a class="nav-tab" rel="reset"><?php esc_html_e('Reset', 'x-fields' ); ?></a>
     </h2>
 
     <div class="content-container">
@@ -137,8 +137,8 @@ $results = $wpdb->get_results($sql);
         <!-- Reset -->
 
         <div class="tab-content reset xf-danger-zone">
-            <h2><?php _e('Reset and deactivate.', 'x-fields' ); ?></h2>
-            <p><?php _e('This will delete all X-Fields data and deactivate the plugin.', 'x-fields' ); ?></p>
+            <h2><?php esc_html_e('Reset and deactivate.', 'x-fields' ); ?></h2>
+            <p><?php esc_html_e('This will delete all X-Fields data and deactivate the plugin.', 'x-fields' ); ?></p>
             <button type="button" id="button-reset" class="button xf-button-danger"><?php esc_html_e( 'Delete everything', 'x-fields' ); ?></button>
         </div>
     </div>

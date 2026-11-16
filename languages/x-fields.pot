@@ -2,21 +2,21 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: X-Fields 1.0.0\n"
+"Project-Id-Version: X-Fields 1.0.1\n"
 "Report-Msgid-Bugs-To: https://github.com/giaesp/x-fields/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-16T15:15:41+01:00\n"
+"POT-Creation-Date: 2026-11-16T15:43:59+01:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: x-fields\n"
 
 #. Plugin Name of the plugin
 #: x-fields.php
-#: includes/init.php:62
+#: includes/init.php:68
 msgid "X-Fields"
 msgstr ""
 
@@ -40,6 +40,34 @@ msgstr ""
 msgid "https://github.com/giaesp"
 msgstr ""
 
+#. translators: 1: loop label, 2: row number
+#: includes/api.php:626
+#, php-format
+msgid "%1$s, row %2$d"
+msgstr ""
+
+#. translators: %s: field label
+#: includes/api.php:647
+#, php-format
+msgid "%s is required."
+msgstr ""
+
+#. translators: 1: field label, 2: minimum number of items
+#: includes/api.php:659
+#, php-format
+msgid "%1$s needs at least %2$d item."
+msgid_plural "%1$s needs at least %2$d items."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: field label, 2: maximum number of items
+#: includes/api.php:663
+#, php-format
+msgid "%1$s allows at most %2$d item."
+msgid_plural "%1$s allows at most %2$d items."
+msgstr[0] ""
+msgstr[1] ""
+
 #: includes/field.php:49
 #: includes/fields/text.php:10
 msgid "Text"
@@ -47,7 +75,7 @@ msgstr ""
 
 #: includes/field.php:75
 #: includes/fields/file.php:92
-#: includes/fields/select.php:151
+#: includes/fields/select.php:150
 #: includes/fields/text.php:32
 #: includes/fields/textarea.php:60
 #: includes/fields/true_false.php:49
@@ -57,7 +85,7 @@ msgstr ""
 
 #: includes/field.php:84
 #: includes/fields/file.php:101
-#: includes/fields/select.php:160
+#: includes/fields/select.php:159
 #: includes/fields/text.php:41
 #: includes/fields/textarea.php:69
 #: includes/fields/true_false.php:58
@@ -184,9 +212,9 @@ msgid "Add Row"
 msgstr ""
 
 #: includes/fields/loop.php:84
-#: includes/fields/relationship.php:107
-#: includes/fields/term.php:109
-#: includes/fields/user.php:60
+#: includes/fields/relationship.php:113
+#: includes/fields/term.php:108
+#: includes/fields/user.php:84
 msgid "Limits"
 msgstr ""
 
@@ -198,17 +226,17 @@ msgstr ""
 msgid "Relationship"
 msgstr ""
 
-#: includes/fields/relationship.php:63
+#: includes/fields/relationship.php:70
 msgid "Search posts"
 msgstr ""
 
-#: includes/fields/relationship.php:91
-#: includes/init.php:298
+#: includes/fields/relationship.php:97
+#: includes/init.php:316
 #: templates/meta_box_rules.php:159
 msgid "Post Types"
 msgstr ""
 
-#: includes/fields/relationship.php:92
+#: includes/fields/relationship.php:98
 msgid "Limit posts to the following types"
 msgstr ""
 
@@ -216,27 +244,27 @@ msgstr ""
 msgid "Select"
 msgstr ""
 
-#: includes/fields/select.php:104
+#: includes/fields/select.php:103
 msgid "Choices"
 msgstr ""
 
-#: includes/fields/select.php:105
+#: includes/fields/select.php:104
 msgid "Enter one choice per line"
 msgstr ""
 
-#: includes/fields/select.php:119
+#: includes/fields/select.php:118
 msgid "Multi-select?"
 msgstr ""
 
-#: includes/fields/select.php:128
+#: includes/fields/select.php:127
 msgid "This is a multi-select field"
 msgstr ""
 
-#: includes/fields/select.php:135
+#: includes/fields/select.php:134
 msgid "Select2"
 msgstr ""
 
-#: includes/fields/select.php:144
+#: includes/fields/select.php:143
 msgid "Render this field with Select2"
 msgstr ""
 
@@ -252,11 +280,11 @@ msgstr ""
 msgid "Search terms"
 msgstr ""
 
-#: includes/fields/term.php:93
+#: includes/fields/term.php:92
 msgid "Taxonomies"
 msgstr ""
 
-#: includes/fields/term.php:94
+#: includes/fields/term.php:93
 msgid "Limit terms to the following taxonomies"
 msgstr ""
 
@@ -297,6 +325,12 @@ msgstr ""
 msgid "Search users"
 msgstr ""
 
+#. translators: %d: user ID
+#: includes/fields/user.php:73
+#, php-format
+msgid "User #%d"
+msgstr ""
+
 #: includes/fields/wysiwyg.php:10
 msgid "Wysiwyg Editor"
 msgstr ""
@@ -326,108 +360,120 @@ msgstr ""
 msgid "Your session has expired."
 msgstr ""
 
-#: includes/form.php:61
+#: includes/form.php:62
 msgid "Sorry, you are not allowed to edit this item."
 msgstr ""
 
-#: includes/form.php:203
+#: includes/form.php:123
+msgid "Please correct the following and try again:"
+msgstr ""
+
+#: includes/form.php:124
+msgid "Form errors"
+msgstr ""
+
+#: includes/form.php:237
+msgid "Saved, but some fields need attention:"
+msgstr ""
+
+#: includes/form.php:245
 msgid "One (or more) of your fields had validation errors. More information is available below."
 msgstr ""
 
-#: includes/form.php:227
+#: includes/form.php:269
 msgid "Submit"
 msgstr ""
 
-#: includes/form.php:407
+#: includes/form.php:449
 msgid "Toggle row visibility"
 msgstr ""
 
-#: includes/init.php:60
+#: includes/init.php:66
 msgid "Field Groups"
 msgstr ""
 
-#: includes/init.php:61
+#: includes/init.php:67
 msgid "Field Group"
 msgstr ""
 
-#: includes/init.php:63
+#: includes/init.php:69
 msgid "Add New Field Group"
 msgstr ""
 
-#: includes/init.php:64
+#: includes/init.php:70
 msgid "Edit Field Group"
 msgstr ""
 
-#: includes/init.php:65
+#: includes/init.php:71
 msgid "New Field Group"
 msgstr ""
 
-#: includes/init.php:66
+#: includes/init.php:72
 msgid "View Field Group"
 msgstr ""
 
-#: includes/init.php:67
+#: includes/init.php:73
 msgid "Search Field Groups"
 msgstr ""
 
-#: includes/init.php:68
+#: includes/init.php:74
 msgid "No Field Groups found"
 msgstr ""
 
-#: includes/init.php:69
+#: includes/init.php:75
 msgid "No Field Groups found in Trash"
 msgstr ""
 
-#: includes/init.php:144
+#: includes/init.php:150
 msgid "X-Fields Tools"
 msgstr ""
 
-#: includes/init.php:152
+#: includes/init.php:158
 msgid "Fields"
 msgstr ""
 
-#: includes/init.php:153
+#: includes/init.php:159
 msgid "Placement Rules"
 msgstr ""
 
-#: includes/init.php:154
+#: includes/init.php:160
 msgid "Extras"
 msgstr ""
 
-#: includes/init.php:284
+#: includes/init.php:302
 msgid "Title"
 msgstr ""
 
-#: includes/init.php:285
+#: includes/init.php:303
 msgid "Placement"
 msgstr ""
 
-#: includes/init.php:299
+#: includes/init.php:317
 #: templates/meta_box_rules.php:225
 msgid "User Roles"
 msgstr ""
 
-#: includes/init.php:300
+#: includes/init.php:318
 #: templates/meta_box_rules.php:257
 msgid "Posts"
 msgstr ""
 
-#: includes/init.php:301
+#: includes/init.php:319
 msgid "Term IDs"
 msgstr ""
 
-#: includes/init.php:302
+#: includes/init.php:320
 #: templates/meta_box_rules.php:313
 msgid "Page Templates"
 msgstr ""
 
-#: includes/init.php:303
+#: includes/init.php:321
 #: templates/meta_box_rules.php:192
 msgid "Post Formats"
 msgstr ""
 
 #. translators: 1: number of field groups, 2: number of value rows
-#: includes/migration.php:120
+#: includes/migration.php:123
 #, php-format
 msgid "X-Fields imported %1$d field groups and %2$d values from Custom Field Suite. The old CFS tables were kept as a backup."
 msgstr ""
@@ -478,15 +524,15 @@ msgstr ""
 msgid "Field Type"
 msgstr ""
 
-#: templates/field_html.php:63
+#: templates/field_html.php:62
 msgid "Notes"
 msgstr ""
 
-#: templates/field_html.php:65
+#: templates/field_html.php:64
 msgid "Notes for editors during data entry"
 msgstr ""
 
-#: templates/field_html.php:78
+#: templates/field_html.php:77
 msgid "Done"
 msgstr ""
 

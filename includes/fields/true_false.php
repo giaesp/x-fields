@@ -31,8 +31,8 @@ class xf_true_false extends xf_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Message', 'x-fields' ); ?></label>
-                <p class="description"><?php _e( 'The text beside the checkbox', 'x-fields' ); ?></p>
+                <label><?php esc_html_e( 'Message', 'x-fields' ); ?></label>
+                <p class="description"><?php esc_html_e( 'The text beside the checkbox', 'x-fields' ); ?></p>
             </td>
             <td>
                 <?php
@@ -46,7 +46,7 @@ class xf_true_false extends xf_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Validation', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Validation', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php

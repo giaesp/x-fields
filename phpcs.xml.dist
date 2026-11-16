@@ -11,9 +11,6 @@
     <arg name="extensions" value="php"/>
     <arg value="sp"/>
 
-    <!-- Fail the build on errors only; warnings are tracked as technical debt -->
-    <config name="ignore_warnings_on_exit" value="1"/>
-
     <config name="testVersion" value="7.4-"/>
     <config name="minimum_wp_version" value="6.0"/>
 
@@ -31,9 +28,4 @@
         </properties>
     </rule>
 
-    <!-- Legacy code: report as warnings for now, tighten progressively -->
-    <rule ref="WordPress.Security.EscapeOutput"><type>warning</type></rule>
-    <rule ref="WordPress.Security.ValidatedSanitizedInput"><type>warning</type></rule>
-    <rule ref="WordPress.Security.NonceVerification"><type>warning</type></rule>
-    <rule ref="WordPress.DB.PreparedSQL"><type>warning</type></rule>
 </ruleset>

@@ -64,6 +64,17 @@ echo XF()->form( [
 
 Values submitted by users without the `unfiltered_html` capability are filtered with KSES, and shortcodes from anonymous visitors are neutralized. After submit, visitors are redirected only within the site: to use an external `confirmation_url`, whitelist its host with the `allowed_redirect_hosts` filter.
 
+### Validation
+
+Required fields and min/max limits are checked in the browser **and on the server**. Front-end forms reject invalid submissions; in the admin the post is saved and a notice lists the problems. Add your own rules:
+
+```php
+add_filter( 'xf_validate_input', function( $errors, $field_data, $group_ids ) {
+    // $field_data is keyed by field ID: [ 12 => [ 'value' => '...' ] ]
+    return $errors;
+}, 10, 3 );
+```
+
 ### Permissions
 
 Managing field groups and tools requires `manage_options`. Change it with:
@@ -84,6 +95,8 @@ Text · Textarea · WYSIWYG · Date · Color · True/False · Select · File · 
 | `xf_matching_groups` | filter | Override which groups apply to a post |
 | `xf_pre_save_input` / `xf_after_save_input` | action | Before/after a form save |
 | `xf_pre_render_fields` | filter | Alter fields before rendering |
+| `xf_validate_input` | filter | Add server-side validation errors |
+| `xf_manage_capability` | filter | Capability to manage field groups (default `manage_options`) |
 | `xf_field_relationship_query_args` | filter | Customise the Relationship post query |
 | `xf_relationship_display` / `xf_term_display` / `xf_user_display` | filter | Item label in pickers (receives escaped text) |
 

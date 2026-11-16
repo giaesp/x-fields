@@ -4,7 +4,7 @@ Tags: custom fields, repeater, relationship, meta box, fields
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,6 +43,10 @@ Always escape output in your theme (`esc_html`, `esc_url`, `wp_kses_post`…).
 No. Data is kept unless you add `define( 'XF_REMOVE_ALL_DATA', true );` to wp-config.php before uninstalling, or use Tools → X-Fields Tools → Reset.
 
 == Changelog ==
+
+= 1.1.0 =
+* Server-side validation of required fields and min/max limits (front-end forms reject invalid submissions; the admin shows a notice).
+* Code quality: zero PHPCS security warnings (was 136), stricter CI.
 
 = 1.0.1 =
 * Security hardening release: field groups restricted to administrators, open redirect fix, session cleanup, shortcode injection from anonymous forms, user login names hidden, stricter value validation. See CHANGELOG.md.

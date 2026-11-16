@@ -29,7 +29,7 @@ class xf_field_group
         INNER JOIN $wpdb->postmeta m2 ON m2.post_id = p.ID AND m2.meta_key = 'xf_rules'
         INNER JOIN $wpdb->postmeta m3 ON m3.post_id = p.ID AND m3.meta_key = 'xf_extras'
         WHERE p.post_status = 'publish'";
-        $results = $wpdb->get_results( $sql );
+        $results = $wpdb->get_results( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
 
         $output = [];
         foreach ( $results as $result ) {
@@ -200,7 +200,7 @@ class xf_field_group
         }
 
         $post_ids = implode( ',', $post_ids );
-        $post_data = $wpdb->get_results( "SELECT ID, post_title, post_name FROM {$wpdb->posts} WHERE post_type = 'xf_group' AND ID IN ($post_ids)" );
+        $post_data = $wpdb->get_results( "SELECT ID, post_title, post_name FROM {$wpdb->posts} WHERE post_type = 'xf_group' AND ID IN ($post_ids)" ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
 
         foreach ( $post_data as $row ) {
             $field_groups[ $row->ID ] = [
@@ -209,7 +209,7 @@ class xf_field_group
             ];
         }
 
-        $meta_data = $wpdb->get_results( "SELECT * FROM {$wpdb->postmeta} WHERE meta_key IN ('xf_fields','xf_rules','xf_extras') AND post_id IN ($post_ids)" );
+        $meta_data = $wpdb->get_results( "SELECT * FROM {$wpdb->postmeta} WHERE meta_key IN ('xf_fields','xf_rules','xf_extras') AND post_id IN ($post_ids)" ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
         foreach ( $meta_data as $row ) {
             if ( ! isset( $field_groups[ $row->post_id ] ) ) {
                 continue;
@@ -369,12 +369,15 @@ class xf_field_group
 
         if ( 0 < count( $deleted_field_ids ) ) {
             $deleted_field_ids = implode( ',', $deleted_field_ids );
+            // $deleted_field_ids is a list of integers (intval + array_filter above)
+            // phpcs:disable WordPress.DB.PreparedSQL
             $wpdb->query("
                 DELETE v, m
                 FROM {$wpdb->prefix}xf_values v
                 INNER JOIN {$wpdb->postmeta} m ON m.meta_id = v.meta_id
                 WHERE v.field_id IN ($deleted_field_ids)"
             );
+            // phpcs:enable WordPress.DB.PreparedSQL
         }
 
         /*---------------------------------------------------------------------------------------------

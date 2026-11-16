@@ -53,7 +53,7 @@ class xf_migration
 
         // Never merge into an X-Fields install that already has data (field IDs would collide)
         $xf_groups = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'xf_group'" );
-        $xf_rows   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$xf_table}" );
+        $xf_rows   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$xf_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
 
         if ( 0 < $xf_groups || 0 < $xf_rows ) {
             update_option( self::OPTION, [ 'status' => 'skipped', 'time' => time() ], false );
@@ -62,10 +62,13 @@ class xf_migration
 
         $copied = 0;
         if ( $has_cfs_table ) {
+            // Table names are built from $wpdb->prefix; no user input involved
+            // phpcs:disable WordPress.DB.PreparedSQL
             $copied = (int) $wpdb->query(
                 "INSERT INTO {$xf_table} (id, field_id, meta_id, post_id, base_field_id, hierarchy, depth, weight, sub_weight)
                  SELECT id, field_id, meta_id, post_id, base_field_id, hierarchy, depth, weight, sub_weight FROM {$cfs_table}"
             );
+            // phpcs:enable WordPress.DB.PreparedSQL
         }
 
         // Rename group meta first (scoped to CFS groups), then convert the post type

@@ -208,10 +208,13 @@ class xf_init
             return;
         }
 
-        if ( wp_verify_nonce( $_POST['xf']['save'], 'xf_save_fields' ) ) {
+        if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['xf']['save'] ) ), 'xf_save_fields' ) ) {
+            // Raw on purpose: xf_field_group::save() unslashes (stripslashes_deep) and sanitizes every key
+            // phpcs:disable WordPress.Security.ValidatedSanitizedInput
             $fields = isset( $_POST['xf']['fields'] ) && is_array( $_POST['xf']['fields'] ) ? $_POST['xf']['fields'] : [];
             $rules = isset( $_POST['xf']['rules'] ) && is_array( $_POST['xf']['rules'] ) ? $_POST['xf']['rules'] : [];
             $extras = isset( $_POST['xf']['extras'] ) && is_array( $_POST['xf']['extras'] ) ? $_POST['xf']['extras'] : [];
+            // phpcs:enable WordPress.Security.ValidatedSanitizedInput
 
             XF()->field_group->save( [
                 'post_id'   => $post_id,
@@ -250,18 +253,19 @@ class xf_init
             exit;
         }
 
-        $ajax_method = isset( $_POST['action_type'] ) && is_string( $_POST['action_type'] ) ? $_POST['action_type'] : false;
+        $ajax_method = isset( $_POST['action_type'] ) && is_string( $_POST['action_type'] ) ? sanitize_key( wp_unslash( $_POST['action_type'] ) ) : false;
 
         if ( $ajax_method && is_admin() ) {
             include_once( XF_DIR . '/includes/ajax.php' );
             $ajax = new xf_ajax();
 
             if ( 'import' == $ajax_method ) {
-                $import_code = isset( $_POST['import_code'] ) && is_string( $_POST['import_code'] ) ? wp_unslash( $_POST['import_code'] ) : '';
+                // JSON is decoded and every value is validated/sanitized by xf_field_group::import()
+                $import_code = isset( $_POST['import_code'] ) && is_string( $_POST['import_code'] ) ? wp_unslash( $_POST['import_code'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
                 $options = [
                     'import_code' => json_decode( $import_code, true ),
                 ];
-                echo XF()->field_group->import( $options );
+                echo wp_kses_post( XF()->field_group->import( $options ) );
             }
             elseif ( 'export' == $ajax_method ) {
                 echo wp_json_encode( XF()->field_group->export( $_POST ) );
@@ -273,7 +277,7 @@ class xf_init
                 echo esc_url_raw( admin_url( 'plugins.php' ) );
             }
             elseif ( 'search_posts' == $ajax_method ) {
-                echo $ajax->search_posts( $_POST );
+                echo $ajax->search_posts( $_POST ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON response (wp_json_encode)
             }
         }
 
@@ -341,7 +345,7 @@ class xf_init
                     $values = $temp;
                 }
 
-                echo '<div><strong>' . esc_html( $label ) . '</strong> ' . $operator . ' ' . esc_html( implode( ', ', $values ) ) . '</div>';
+                echo '<div><strong>' . esc_html( $label ) . '</strong> ' . esc_html( $operator ) . ' ' . esc_html( implode( ', ', $values ) ) . '</div>';
             }
         }
     }

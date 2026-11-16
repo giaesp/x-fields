@@ -70,7 +70,7 @@ if ( ! empty( $post_in ) ) {
     FROM $wpdb->posts
     WHERE ID IN ($post_in)
     ORDER BY post_type, post_title";
-    $results = $wpdb->get_results( $sql );
+    $results = $wpdb->get_results( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
 
     foreach ( $results as $result ) {
         $parent = '';
@@ -94,7 +94,7 @@ SELECT t.term_id, t.name, tt.taxonomy
 FROM $wpdb->terms t
 INNER JOIN $wpdb->term_taxonomy tt ON tt.term_id = t.term_id AND tt.taxonomy != 'post_tag'
 ORDER BY tt.parent, tt.taxonomy, t.name";
-$results = $wpdb->get_results( $sql );
+$results = $wpdb->get_results( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
 
 foreach ( $results as $result ) {
     $term_ids[ $result->term_id ] = "($result->taxonomy) $result->name";
@@ -156,7 +156,7 @@ foreach ( $templates as $template_name => $filename ) {
 <table>
     <tr>
         <td class="label">
-            <label><?php _e( 'Post Types', 'x-fields' ); ?></label>
+            <label><?php esc_html_e( 'Post Types', 'x-fields' ); ?></label>
         </td>
         <td style="width:80px; vertical-align:top">
             <?php
@@ -189,7 +189,7 @@ foreach ( $templates as $template_name => $filename ) {
     <?php if ( current_theme_supports( 'post-formats' ) && count( $post_formats ) ) : ?>
         <tr>
             <td class="label">
-                <label><?php _e( 'Post Formats', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Post Formats', 'x-fields' ); ?></label>
             </td>
             <td style="width:80px; vertical-align:top">
                 <?php
@@ -222,7 +222,7 @@ foreach ( $templates as $template_name => $filename ) {
     <?php endif; ?>
     <tr>
         <td class="label">
-            <label><?php _e( 'User Roles', 'x-fields' ); ?></label>
+            <label><?php esc_html_e( 'User Roles', 'x-fields' ); ?></label>
         </td>
         <td style="width:80px; vertical-align:top">
             <?php
@@ -254,7 +254,7 @@ foreach ( $templates as $template_name => $filename ) {
     </tr>
     <tr>
         <td class="label">
-            <label><?php _e('Posts', 'x-fields' ); ?></label>
+            <label><?php esc_html_e('Posts', 'x-fields' ); ?></label>
         </td>
         <td style="width:80px; vertical-align:top">
             <?php
@@ -273,12 +273,12 @@ foreach ( $templates as $template_name => $filename ) {
             ?>
         </td>
         <td>
-            <input type="hidden" name="xf[rules][post_ids]" class="select2-ajax" value="<?php echo implode( ',', $post_ids ); ?>" style="width:99.95%" />
+            <input type="hidden" name="xf[rules][post_ids]" class="select2-ajax" value="<?php echo esc_attr( implode( ',', $post_ids ) ); ?>" style="width:99.95%" />
         </td>
     </tr>
     <tr>
         <td class="label">
-            <label><?php _e( 'Taxonomy Terms', 'x-fields' ); ?></label>
+            <label><?php esc_html_e( 'Taxonomy Terms', 'x-fields' ); ?></label>
         </td>
         <td style="width:80px; vertical-align:top">
             <?php
@@ -310,7 +310,7 @@ foreach ( $templates as $template_name => $filename ) {
     </tr>
     <tr>
         <td class="label">
-            <label><?php _e( 'Page Templates', 'x-fields' ); ?></label>
+            <label><?php esc_html_e( 'Page Templates', 'x-fields' ); ?></label>
         </td>
         <td style="width:80px; vertical-align:top">
             <?php

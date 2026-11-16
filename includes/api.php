@@ -99,7 +99,7 @@ class xf_api
                 WHERE v.field_id IN ($field_ids) AND v.post_id = $post_id
                 ORDER BY v.depth, FIELD(v.field_id, $field_ids), v.weight, v.sub_weight";
 
-                $results = $wpdb->get_results( $sql );
+                $results = $wpdb->get_results( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
                 $num_rows = $wpdb->num_rows;
 
                 $prev_hierarchy = '';
@@ -258,7 +258,7 @@ class xf_api
         INNER JOIN $wpdb->postmeta m ON m.meta_id = v.meta_id
         WHERE $where";
 
-        $results = $wpdb->get_results( $sql );
+        $results = $wpdb->get_results( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
         $output = [];
 
         foreach ( $results as $result ) {
@@ -374,7 +374,7 @@ class xf_api
             WHERE v.post_id = $post_id AND (v.field_id IN ($field_ids) OR v.base_field_id IN ($field_ids))";
 
             if ( ! empty( $field_ids ) ) {
-                $wpdb->query( $sql );
+                $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
             }
         }
         elseif ( 'input' == $options['format'] ) {
@@ -395,7 +395,7 @@ class xf_api
                 WHERE v.post_id = $post_id AND v.field_id IN ($field_ids)";
 
                 if ( ! empty( $field_ids ) ) {
-                    $wpdb->query( $sql );
+                    $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
                 }
             }
         }
@@ -574,6 +574,93 @@ class xf_api
                 $new_params['hierarchy'][] = (int) $sub_field_id;
                 $this->save_fields_recursive( $new_params );
             }
+        }
+    }
+
+
+    /**
+     * Server-side validation of raw form input (required fields and min/max limits).
+     * Mirrors the client-side rules in assets/js/validation.js, which can be bypassed.
+     *
+     * @param array $field_data Raw input (format "input": keyed by field ID)
+     * @param array $group_ids  Field group IDs being saved
+     * @return array List of error messages (empty = valid)
+     * @since 1.1.0
+     */
+    public function validate_input( $field_data, $group_ids ) {
+        $fields = [];
+        foreach ( $this->find_input_fields( [ 'group_id' => array_map( 'intval', (array) $group_ids ) ] ) as $f ) {
+            $fields[ (int) $f['id'] ] = (object) $f;
+        }
+
+        $errors = [];
+        $this->validate_level( (array) $field_data, 0, $fields, $errors, '' );
+
+        return apply_filters( 'xf_validate_input', array_values( array_unique( $errors ) ), $field_data, $group_ids );
+    }
+
+
+    /**
+     * Validate one level of fields (top level, or one loop row)
+     */
+    private function validate_level( $data, $parent_id, $fields, &$errors, $prefix ) {
+        foreach ( $fields as $id => $field ) {
+            if ( (int) $field->parent_id !== (int) $parent_id || 'tab' === $field->type ) {
+                continue;
+            }
+
+            $options  = is_array( $field->options ) ? $field->options : [];
+            $label    = $prefix . ( '' !== (string) $field->label ? $field->label : $field->name );
+            $required = ! empty( $options['required'] );
+            $min      = empty( $options['limit_min'] ) ? 0 : (int) $options['limit_min'];
+            $max      = empty( $options['limit_max'] ) ? 0 : (int) $options['limit_max'];
+
+            if ( 'loop' === $field->type ) {
+                $rows = ( isset( $data[ $id ] ) && is_array( $data[ $id ] ) ) ? array_filter( $data[ $id ], 'is_array' ) : [];
+                $this->check_count( count( $rows ), $min, $max, $label, $errors );
+
+                $n = 0;
+                foreach ( $rows as $row ) {
+                    $n++;
+                    /* translators: 1: loop label, 2: row number */
+                    $this->validate_level( $row, $id, $fields, $errors, sprintf( __( '%1$s, row %2$d', 'x-fields' ), $label, $n ) . ' › ' );
+                }
+                continue;
+            }
+
+            $value = ( isset( $data[ $id ] ) && is_array( $data[ $id ] ) && array_key_exists( 'value', $data[ $id ] ) ) ? $data[ $id ]['value'] : null;
+
+            if ( in_array( $field->type, [ 'relationship', 'term', 'user' ], true ) ) {
+                $count = count( xf_sanitize_id_list( $value ) );
+                $this->check_count( $count, $min, $max, $label, $errors );
+                $empty = ( 0 === $count );
+            }
+            else {
+                $flat  = array_filter( (array) $value, function( $v ) {
+                    return is_scalar( $v ) && '' !== trim( (string) $v );
+                } );
+                $empty = empty( $flat );
+            }
+
+            if ( $required && $empty ) {
+                /* translators: %s: field label */
+                $errors[] = sprintf( __( '%s is required.', 'x-fields' ), $label );
+            }
+        }
+    }
+
+
+    /**
+     * Check a min/max item count
+     */
+    private function check_count( $count, $min, $max, $label, &$errors ) {
+        if ( 0 < $min && $count < $min ) {
+            /* translators: 1: field label, 2: minimum number of items */
+            $errors[] = sprintf( _n( '%1$s needs at least %2$d item.', '%1$s needs at least %2$d items.', $min, 'x-fields' ), $label, $min );
+        }
+        if ( 0 < $max && $count > $max ) {
+            /* translators: 1: field label, 2: maximum number of items */
+            $errors[] = sprintf( _n( '%1$s allows at most %2$d item.', '%1$s allows at most %2$d items.', $max, 'x-fields' ), $label, $max );
         }
     }
 
@@ -794,7 +881,7 @@ class xf_api
                         SELECT tt.term_id
                         FROM $wpdb->term_taxonomy tt
                         INNER JOIN $wpdb->term_relationships tr ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tr.object_id = %d";
-                        $value = $wpdb->get_col( $wpdb->prepare( $sql, $post_id ) );
+                        $value = $wpdb->get_col( $wpdb->prepare( $sql, $post_id ) ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
                     }
 
                     $operator = isset( $rules[ $rule_type ]['operator'] ) ? (array) $rules[ $rule_type ]['operator'] : [ '==' ];

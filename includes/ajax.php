@@ -25,7 +25,7 @@ class xf_ajax
         LIMIT 10",
         '%' . $wpdb->esc_like( $q ) . '%' );
 
-        $results = $wpdb->get_results( $sql );
+        $results = $wpdb->get_results( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
 
         $output = [];
         foreach ( $results as $result ) {
@@ -59,13 +59,13 @@ class xf_ajax
         DELETE p, m FROM {$wpdb->posts} p
         LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID
         WHERE p.post_type = 'xf_group'";
-        $wpdb->query( $sql );
+        $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
 
         // Drop custom field values
         $sql = "
         DELETE v, m FROM {$wpdb->prefix}xf_values v
         LEFT JOIN {$wpdb->postmeta} m ON m.meta_id = v.meta_id";
-        $wpdb->query( $sql );
+        $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
 
         // Drop tables
         $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}xf_values" );

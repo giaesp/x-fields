@@ -25,7 +25,7 @@ class xf_user extends xf_field
         $field->value = implode( ',', xf_sanitize_id_list( $field->value ) );
 
         if ( ! empty( $field->value ) ) {
-            $results = $wpdb->get_results( "SELECT ID, display_name FROM $wpdb->users WHERE ID IN ($field->value) ORDER BY FIELD(ID,$field->value)" );
+            $results = $wpdb->get_results( "SELECT ID, display_name FROM $wpdb->users WHERE ID IN ($field->value) ORDER BY FIELD(ID,$field->value)" ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
             foreach ( $results as $result ) {
                 $selected_users[ $result->ID ] = $result;
             }
@@ -37,8 +37,7 @@ class xf_user extends xf_field
 
         <div class="available_posts post_list">
         <?php foreach ( $available_users as $user ) : ?>
-            <?php $class = ( isset( $selected_users[ $user->ID ] ) ) ? ' class="used"' : ''; ?>
-            <div rel="<?php echo (int) $user->ID; ?>"<?php echo $class; ?>><?php echo wp_kses_post( apply_filters( 'xf_user_display', esc_html( $this->user_label( $user->ID ) ), $user->ID, $field ) ); ?></div>
+            <div rel="<?php echo (int) $user->ID; ?>"<?php echo isset( $selected_users[ $user->ID ] ) ? ' class="used"' : ''; ?>><?php echo wp_kses_post( apply_filters( 'xf_user_display', esc_html( $this->user_label( $user->ID ) ), $user->ID, $field ) ); ?></div>
         <?php endforeach; ?>
         </div>
 
@@ -82,7 +81,7 @@ class xf_user extends xf_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Limits', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Limits', 'x-fields' ); ?></label>
             </td>
             <td>
                 <input type="text" name="xf[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />

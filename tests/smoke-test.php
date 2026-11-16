@@ -22,8 +22,28 @@ function xf_t( $name, $cond ) {
 
 wp_set_current_user( 1 );
 
+$GLOBALS['xf_test_posts'] = [];
+$GLOBALS['xf_test_users'] = [];
+function xf_test_post( $args ) { $id = wp_insert_post( $args ); $GLOBALS['xf_test_posts'][] = $id; return $id; }
+function xf_test_user( $role ) {
+    $id = wp_insert_user( [ 'user_login' => 'xf_test_' . $role . '_' . wp_rand(), 'user_pass' => wp_generate_password(), 'role' => $role ] );
+    $GLOBALS['xf_test_users'][] = $id;
+    return $id;
+}
+register_shutdown_function( function() {
+    global $wpdb;
+    require_once ABSPATH . 'wp-admin/includes/user.php';
+    $imported = (int) $wpdb->get_var( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'xf_group' AND post_name = 'imported-copy'" );
+    foreach ( array_filter( array_merge( $GLOBALS['xf_test_posts'], [ $imported ] ) ) as $id ) {
+        wp_delete_post( $id, true );
+    }
+    foreach ( array_filter( $GLOBALS['xf_test_users'] ) as $uid ) {
+        wp_delete_user( $uid );
+    }
+} );
+
 // ---- Field group --------------------------------------------------------
-$group_id = wp_insert_post( [ 'post_type' => 'xf_group', 'post_status' => 'publish', 'post_title' => 'Test group' ] );
+$group_id = xf_test_post( [ 'post_type' => 'xf_group', 'post_status' => 'publish', 'post_title' => 'Test group' ] );
 XF()->field_group->save( [
     'post_id' => $group_id,
     'fields'  => [
@@ -58,7 +78,7 @@ XF()->field_group->cache = null;
 $ids = wp_list_pluck( get_post_meta( $group_id, 'xf_fields', true ), 'id', 'name' );
 
 // ---- Forged field ID can't hijack another group's field ------------------
-$other_group = wp_insert_post( [ 'post_type' => 'xf_group', 'post_status' => 'publish', 'post_title' => 'Other' ] );
+$other_group = xf_test_post( [ 'post_type' => 'xf_group', 'post_status' => 'publish', 'post_title' => 'Other' ] );
 XF()->field_group->save( [ 'post_id' => $other_group, 'fields' => [
     [ 'id' => $ids['body'], 'name' => 'hijack', 'label' => 'x', 'type' => 'text', 'notes' => '', 'parent_id' => 0 ],
 ], 'rules' => [], 'extras' => [] ] );
@@ -67,8 +87,8 @@ xf_t( 'forged field ID gets a new ID', (int) $other_fields[0]['id'] !== (int) $i
 XF()->field_group->cache = null;
 
 // ---- Save + read via API --------------------------------------------------
-$target = wp_insert_post( [ 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Target' ] );
-$page   = wp_insert_post( [ 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Test page' ] );
+$target = xf_test_post( [ 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Target' ] );
+$page = xf_test_post( [ 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Test page' ] );
 
 XF()->save( [
     'title_bx' => 'Hello & <b>world</b>',
@@ -169,7 +189,7 @@ xf_t( 'import with garbage is safe', 0 === strpos( XF()->field_group->import( [ 
 
 // ---- Round 2 hardening ------------------------------------------------------
 // Editors can't manage field groups
-$editor = wp_insert_user( [ 'user_login' => 'xf_editor_' . wp_rand(), 'user_pass' => wp_generate_password(), 'role' => 'editor' ] );
+$editor = xf_test_user( 'editor' );
 wp_set_current_user( $editor );
 xf_t( 'editor cannot edit field groups', ! current_user_can( 'edit_post', $group_id ) && ! current_user_can( get_post_type_object( 'xf_group' )->cap->create_posts ) );
 wp_set_current_user( 1 );
@@ -200,8 +220,8 @@ xf_t( 'get_option returns raw value (no double encoding)', 'A & B' === $f->get_o
 xf_t( 'protocol-relative redirect rejected', home_url( '/' ) === wp_validate_redirect( esc_url_raw( '//evil.example/x' ), home_url( '/' ) ) );
 
 // Relationship field never reveals unreadable posts
-$private = wp_insert_post( [ 'post_type' => 'page', 'post_status' => 'draft', 'post_title' => 'Secret draft title', 'post_author' => 1 ] );
-$contrib = wp_insert_user( [ 'user_login' => 'xf_contrib_' . wp_rand(), 'user_pass' => wp_generate_password(), 'role' => 'contributor' ] );
+$private = xf_test_post( [ 'post_type' => 'page', 'post_status' => 'draft', 'post_title' => 'Secret draft title', 'post_author' => 1 ] );
+$contrib = xf_test_user( 'contributor' );
 wp_set_current_user( $contrib );
 ob_start();
 XF()->create_field( [ 'type' => 'relationship', 'value' => (string) $private, 'options' => [ 'post_types' => [ 'page' ] ] ] );
@@ -223,14 +243,39 @@ $wpdb->insert( $wpdb->prefix . 'xf_sessions', [ 'id' => str_repeat( 'a', 32 ), '
 xf_t( 'expired sessions purged', 0 === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}xf_sessions WHERE id = '" . str_repeat( 'a', 32 ) . "'" ) );
 xf_t( 'session cleanup cron scheduled', (bool) wp_next_scheduled( 'xf_cleanup_sessions' ) );
 
-require_once ABSPATH . 'wp-admin/includes/user.php';
-wp_delete_user( $editor ); wp_delete_user( $contrib ); wp_delete_post( $private, true );
 
-// ---- Cleanup ----------------------------------------------------------------
-$imported = (int) $wpdb->get_var( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'xf_group' AND post_name = 'imported-copy'" );
-foreach ( array_filter( [ $group_id, $other_group, $target, $page, $imported ] ) as $id ) {
-    wp_delete_post( $id, true );
-}
+// ---- Server-side validation (1.1.0) ------------------------------------------
+$vg = xf_test_post( [ 'post_type' => 'xf_group', 'post_status' => 'publish', 'post_title' => 'Validation' ] );
+XF()->field_group->save( [ 'post_id' => $vg, 'fields' => [
+    [ 'id' => 0, 'name' => 'v_req', 'label' => 'Required text', 'type' => 'text', 'options' => [ 'required' => 1 ] ],
+    [ 'id' => 0, 'name' => 'v_rel', 'label' => 'Two to three', 'type' => 'relationship', 'options' => [ 'limit_min' => 2, 'limit_max' => 3 ] ],
+    [ 'id' => 0, 'name' => 'v_loop', 'label' => 'Rows', 'type' => 'loop', 'options' => [ 'limit_min' => 1 ] ],
+], 'rules' => [], 'extras' => [] ] );
+$vf = get_post_meta( $vg, 'xf_fields', true );
+$vids = wp_list_pluck( $vf, 'id', 'name' );
+$vf[] = [ 'id' => 0, 'name' => 'v_row_req', 'label' => 'Row title', 'type' => 'text', 'parent_id' => $vids['v_loop'], 'options' => [ 'required' => 1 ] ];
+XF()->field_group->save( [ 'post_id' => $vg, 'fields' => $vf, 'rules' => [], 'extras' => [] ] );
+XF()->field_group->cache = null;
+$vids = wp_list_pluck( get_post_meta( $vg, 'xf_fields', true ), 'id', 'name' );
+
+$errs = XF()->api->validate_input( [], [ $vg ] );
+xf_t( 'validation: empty submission reports required + limits', 3 === count( $errs ) );
+$errs = XF()->api->validate_input( [
+    $vids['v_req'] => [ 'value' => '   ' ],
+    $vids['v_rel'] => [ 'value' => '5,6,7,8' ],
+    $vids['v_loop'] => [ 0 => [ $vids['v_row_req'] => [ 'value' => [ '' ] ] ] ],
+], [ $vg ] );
+xf_t( 'validation: whitespace, too many items, empty required row field', 3 === count( $errs ) );
+$errs = XF()->api->validate_input( [
+    $vids['v_req'] => [ 'value' => 'ok' ],
+    $vids['v_rel'] => [ 'value' => '5,6' ],
+    $vids['v_loop'] => [ 0 => [ $vids['v_row_req'] => [ 'value' => [ 'Row 1' ] ] ] ],
+], [ $vg ] );
+xf_t( 'validation: valid submission passes', [] === $errs );
+$errs = XF()->api->validate_input( [ $vids['v_req'] => 'not-an-array', $vids['v_loop'] => 'x' ], [ $vg ] );
+xf_t( 'validation: malformed input handled', 3 === count( $errs ) );
+
+// ---- Cleanup happens in the shutdown function (also after fatal errors) ----
 
 echo "\nPHP notices/warnings from XF: " . count( $GLOBALS['xf_test_errors'] ) . "\n";
 foreach ( array_unique( $GLOBALS['xf_test_errors'] ) as $e ) { echo "  - $e\n"; }

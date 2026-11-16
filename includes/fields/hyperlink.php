@@ -23,15 +23,15 @@ class xf_hyperlink extends xf_field
     ?>
         <div class="xf-hyperlink" style="overflow:hidden;">
             <div class="xf-hyperlink-url" style="width:39%;float:left;">
-                <div><?php _e( 'URL', 'x-fields' ); ?></div>
+                <div><?php esc_html_e( 'URL', 'x-fields' ); ?></div>
                 <input type="text" name="<?php echo esc_attr( $field->input_name ); ?>[url]" class="link-url" value="<?php echo esc_url( $field->value['url'] ); ?>" placeholder="http://" />
             </div>
             <div class="xf-hyperlink-text" style="width:39%;float:left;margin-left:1%;">
-                <div><?php _e( 'Link Text', 'x-fields' ); ?></div>
+                <div><?php esc_html_e( 'Link Text', 'x-fields' ); ?></div>
                 <input type="text" name="<?php echo esc_attr( $field->input_name ); ?>[text]" class="link-text" value="<?php echo esc_attr( $field->value['text'] ); ?>" />
             </div>
             <div class="xf-hyperlink-target" style="width:19%;float:left;margin-left:1%;">
-                <div><?php _e( 'Link Target', 'x-fields' ); ?></div>
+                <div><?php esc_html_e( 'Link Target', 'x-fields' ); ?></div>
                 <select class="link-target widefat" name="<?php echo esc_attr( $field->input_name ); ?>[target]">
                     <option value="none" <?php selected( 'none', esc_attr( $field->value['target'] ) ); ?>>None</option>
                     <option value="_blank" <?php selected( '_blank', esc_attr( $field->value['target'] ) ); ?>>_blank</option>
@@ -48,7 +48,7 @@ class xf_hyperlink extends xf_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e('Output format', 'x-fields' ); ?></label>
+                <label><?php esc_html_e('Output format', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php

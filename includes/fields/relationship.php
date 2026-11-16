@@ -55,7 +55,7 @@ class xf_relationship extends xf_field
         $field->value = implode( ',', xf_sanitize_id_list( $field->value ) );
 
         if ( ! empty( $field->value ) ) {
-            $results = $wpdb->get_results( "SELECT ID, post_status, post_title FROM $wpdb->posts WHERE ID IN ($field->value) ORDER BY FIELD(ID,$field->value)" );
+            $results = $wpdb->get_results( "SELECT ID, post_status, post_title FROM $wpdb->posts WHERE ID IN ($field->value) ORDER BY FIELD(ID,$field->value)" ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
             foreach ( $results as $result ) {
                 // Never reveal titles the current user can't read (IDs can be tampered with)
                 if ( ! current_user_can( 'read_post', $result->ID ) ) {
@@ -72,8 +72,7 @@ class xf_relationship extends xf_field
 
         <div class="available_posts post_list">
         <?php foreach ( $available_posts as $post ) : ?>
-            <?php $class = ( isset( $selected_posts[ $post->ID ] ) ) ? ' class="used"' : ''; ?>
-            <div rel="<?php echo (int) $post->ID; ?>"<?php echo $class; ?> title="<?php echo esc_attr( $post->post_type ); ?>"><?php echo wp_kses_post( apply_filters( 'xf_relationship_display', esc_html( $post->post_title ), $post->ID, $field ) ); ?></div>
+            <div rel="<?php echo (int) $post->ID; ?>"<?php echo isset( $selected_posts[ $post->ID ] ) ? ' class="used"' : ''; ?> title="<?php echo esc_attr( $post->post_type ); ?>"><?php echo wp_kses_post( apply_filters( 'xf_relationship_display', esc_html( $post->post_title ), $post->ID, $field ) ); ?></div>
         <?php endforeach; ?>
         </div>
 
@@ -95,8 +94,8 @@ class xf_relationship extends xf_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e('Post Types', 'x-fields' ); ?></label>
-                <p class="description"><?php _e('Limit posts to the following types', 'x-fields' ); ?></p>
+                <label><?php esc_html_e('Post Types', 'x-fields' ); ?></label>
+                <p class="description"><?php esc_html_e('Limit posts to the following types', 'x-fields' ); ?></p>
             </td>
             <td>
                 <?php
@@ -111,7 +110,7 @@ class xf_relationship extends xf_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Limits', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Limits', 'x-fields' ); ?></label>
             </td>
             <td>
                 <input type="text" name="xf[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />

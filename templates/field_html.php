@@ -23,30 +23,29 @@
                             <tr>
                                 <td class="field_label">
                                     <label>
-                                        <?php _e( 'Label', 'x-fields' ); ?>
+                                        <?php esc_html_e( 'Label', 'x-fields' ); ?>
                                         <div class="xf_tooltip">?
-                                            <div class="tooltip_inner"><?php _e( 'The field label that editors will see.', 'x-fields' ); ?></div>
+                                            <div class="tooltip_inner"><?php esc_html_e( 'The field label that editors will see.', 'x-fields' ); ?></div>
                                         </div>
                                     </label>
                                     <input type="text" name="xf[fields][<?php echo esc_attr( $field->weight ); ?>][label]" value="<?php echo empty( $field->id ) ? '' : esc_attr( $field->label ); ?>" />
                                 </td>
                                 <td class="field_name">
                                     <label>
-                                        <?php _e( 'Name', 'x-fields' ); ?>
+                                        <?php esc_html_e( 'Name', 'x-fields' ); ?>
                                         <div class="xf_tooltip">?
                                             <div class="tooltip_inner">
-                                                <?php _e( 'The field name is passed into get() to retrieve values. Use only lowercase letters, numbers, and underscores.', 'x-fields' ); ?>
+                                                <?php esc_html_e( 'The field name is passed into get() to retrieve values. Use only lowercase letters, numbers, and underscores.', 'x-fields' ); ?>
                                             </div>
                                         </div>
                                     </label>
                                     <input type="text" name="xf[fields][<?php echo esc_attr( $field->weight ); ?>][name]" value="<?php echo empty( $field->id ) ? '' : esc_attr( $field->name ); ?>" />
                                 </td>
                                 <td class="field_type">
-                                    <label><?php _e( 'Field Type', 'x-fields' ); ?></label>
+                                    <label><?php esc_html_e( 'Field Type', 'x-fields' ); ?></label>
                                     <select name="xf[fields][<?php echo esc_attr( $field->weight ); ?>][type]">
                                         <?php foreach ( XF()->fields as $type ) : ?>
-                                        <?php $selected = ($type->name == $field->type) ? ' selected' : ''; ?>
-                                        <option value="<?php echo esc_attr( $type->name ); ?>"<?php echo $selected; ?>><?php echo esc_html( $type->label ); ?></option>
+                                        <option value="<?php echo esc_attr( $type->name ); ?>"<?php selected( $type->name, $field->type ); ?>><?php echo esc_html( $type->label ); ?></option>
                                         <?php endforeach; ?>
                                     </select>
                                 </td>
@@ -60,9 +59,9 @@
                 <tr class="field_notes">
                     <td class="label">
                         <label>
-                            <?php _e( 'Notes', 'x-fields' ); ?>
+                            <?php esc_html_e( 'Notes', 'x-fields' ); ?>
                             <div class="xf_tooltip">?
-                                <div class="tooltip_inner"><?php _e( 'Notes for editors during data entry', 'x-fields' ); ?></div>
+                                <div class="tooltip_inner"><?php esc_html_e( 'Notes for editors during data entry', 'x-fields' ); ?></div>
                             </div>
                         </label>
                     </td>

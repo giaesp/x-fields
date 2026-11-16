@@ -3,7 +3,7 @@
  * Plugin Name:       X-Fields
  * Plugin URI:        https://github.com/giaesp/x-fields
  * Description:       Simple, secure custom fields for WordPress: field groups, placement rules, loops (repeaters), relationships and front-end forms.
- * Version:           1.0.1
+ * Version:           1.1.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Gianluca Esposito
@@ -26,7 +26,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'XF_VERSION', '1.0.1' );
+define( 'XF_VERSION', '1.1.0' );
 define( 'XF_FILE', __FILE__ );
 define( 'XF_DIR', __DIR__ );
 define( 'XF_URL', plugins_url( '', __FILE__ ) );

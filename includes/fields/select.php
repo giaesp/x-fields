@@ -34,11 +34,10 @@ class xf_select extends xf_field
             $field->input_name .= '[]';
         }
     ?>
-        <select name="<?php echo esc_attr( $field->input_name ); ?>" class="<?php echo esc_attr( $field->input_class ); ?>"<?php echo $multiple; ?>>
+        <select name="<?php echo esc_attr( $field->input_name ); ?>" class="<?php echo esc_attr( $field->input_class ); ?>"<?php echo $multiple ? ' multiple' : ''; ?>>
         <?php foreach ( ( isset( $field->options['choices'] ) ? (array) $field->options['choices'] : [] ) as $val => $label ) : ?>
             <?php $val = ( '{empty}' == $val ) ? '' : $val; ?>
-            <?php $selected = in_array( $val, (array) $field->value ) ? ' selected' : ''; ?>
-            <option value="<?php echo esc_attr( $val ); ?>"<?php echo $selected; ?>><?php echo esc_html( $label ); ?></option>
+            <option value="<?php echo esc_attr( $val ); ?>"<?php selected( in_array( (string) $val, array_map( 'strval', (array) $field->value ), true ) ); ?>><?php echo esc_html( $label ); ?></option>
         <?php endforeach; ?>
         </select>
     <?php
@@ -101,8 +100,8 @@ class xf_select extends xf_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Choices', 'x-fields' ); ?></label>
-                <p class="description"><?php _e( 'Enter one choice per line', 'x-fields' ); ?></p>
+                <label><?php esc_html_e( 'Choices', 'x-fields' ); ?></label>
+                <p class="description"><?php esc_html_e( 'Enter one choice per line', 'x-fields' ); ?></p>
             </td>
             <td>
                 <?php
@@ -116,7 +115,7 @@ class xf_select extends xf_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Multi-select?', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Multi-select?', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
@@ -132,7 +131,7 @@ class xf_select extends xf_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e('Select2', 'x-fields' ); ?></label>
+                <label><?php esc_html_e('Select2', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
@@ -148,7 +147,7 @@ class xf_select extends xf_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Validation', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Validation', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php

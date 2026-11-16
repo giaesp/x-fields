@@ -36,7 +36,7 @@ class xf_loop extends xf_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Row Display', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Row Display', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
@@ -52,7 +52,7 @@ class xf_loop extends xf_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Row Label', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Row Label', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
@@ -66,7 +66,7 @@ class xf_loop extends xf_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Button Label', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Button Label', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
@@ -81,7 +81,7 @@ class xf_loop extends xf_field
 
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Limits', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Limits', 'x-fields' ); ?></label>
             </td>
             <td>
                 <input type="text" name="xf[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />
@@ -219,13 +219,13 @@ class xf_loop extends xf_field
                 $row_offset = max( $i, $row_offset );
     ?>
         <div class="loop_wrapper">
-            <div class="xf_loop_head<?php echo $css_class; ?>">
+            <div class="xf_loop_head<?php echo esc_attr( $css_class ); ?>">
                 <a class="xf_delete_field" href="javascript:;"></a>
                 <a class="xf_toggle_field" href="javascript:;"></a>
                 <a class="xf_insert_field" href="javascript:;"></a>
                 <span class="label"><?php echo esc_html( $this->dynamic_label( $row_label, $results, $values[ $i ] ) ); ?>&nbsp;</span>
             </div>
-            <div class="xf_loop_body<?php echo $css_class; ?>">
+            <div class="xf_loop_body<?php echo esc_attr( $css_class ); ?>">
             <?php foreach ( $results as $field ) : ?>
                 <label><?php echo esc_html( $field->label ); ?></label>
 

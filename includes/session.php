@@ -13,8 +13,11 @@ class xf_session
      * Constructor
      */
     public function __construct() {
-        if ( isset( $_POST['xf']['session_id'] ) && is_string( $_POST['xf']['session_id'] ) && $this->is_valid( $_POST['xf']['session_id'] ) ) {
-            $this->session_id = $_POST['xf']['session_id'];
+        // The nonce is verified by the caller (xf_form::init); the ID is validated as 32 hex chars
+        $posted = isset( $_POST['xf']['session_id'] ) && is_string( $_POST['xf']['session_id'] ) ? sanitize_text_field( wp_unslash( $_POST['xf']['session_id'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+        if ( $this->is_valid( $posted ) ) {
+            $this->session_id = $posted;
         }
         else {
             // Cryptographically secure, unpredictable ID (was md5( uniqid() ))

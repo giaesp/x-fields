@@ -85,11 +85,14 @@ class xf_third_party
             return;
         }
 
+        // Read-only prefill of a brand-new auto-draft; protected by edit_post capability checks below
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
         if ( empty( $_GET['from_post'] ) || empty( $_GET['new_lang'] ) || 'auto-draft' !== $post->post_status ) {
             return;
         }
 
         $from = absint( $_GET['from_post'] );
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
         if ( ! $from || ! current_user_can( 'edit_post', $from ) || ! current_user_can( 'edit_post', $post->ID ) ) {
             return;

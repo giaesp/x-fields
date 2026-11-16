@@ -15,7 +15,7 @@ class xf_color extends xf_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Default Value', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Default Value', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
@@ -43,7 +43,7 @@ class xf_color extends xf_field
         wp_register_script( 'miniColors', XF_URL . '/includes/fields/color/jquery.miniColors.min.js' );
         wp_enqueue_script( 'miniColors' );
     ?>
-        <link rel="stylesheet" type="text/css" href="<?php echo XF_URL; ?>/includes/fields/color/color.css" />
+        <link rel="stylesheet" type="text/css" href="<?php echo esc_url( XF_URL . '/includes/fields/color/color.css' ); ?>" />
         <script>
         (function($) {
             $(document).on('focus', '.xf_color input.color', function() {

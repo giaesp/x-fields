@@ -42,14 +42,15 @@ class xf_form
 
         // Save the form
         if ( isset( $_POST['xf']['save'] ) && is_string( $_POST['xf']['save'] ) ) {
-            if ( wp_verify_nonce( $_POST['xf']['save'], 'xf_save_input' ) ) {
+            if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['xf']['save'] ) ), 'xf_save_input' ) ) {
                 $session = $this->session->get();
 
                 if ( empty( $session ) ) {
                     wp_die( esc_html__( 'Your session has expired.', 'x-fields' ), '', [ 'response' => 403 ] );
                 }
 
-                $field_data = isset( $_POST['xf']['input'] ) && is_array( $_POST['xf']['input'] ) ? $_POST['xf']['input'] : [];
+                // Raw on purpose: save_fields() unslashes (stripslashes_deep) and sanitizes per field type / KSES
+                $field_data = isset( $_POST['xf']['input'] ) && is_array( $_POST['xf']['input'] ) ? $_POST['xf']['input'] : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
                 $post_data = [];
                 $is_front_end = ! empty( $session['front_end'] );
 
@@ -71,12 +72,12 @@ class xf_form
                 // (sanitized through the core *_save_pre filters, which apply KSES
                 // for users without the unfiltered_html capability)
                 if ( isset( $_POST['xf']['post_title'] ) && is_string( $_POST['xf']['post_title'] ) ) {
-                    $post_data['post_title'] = sanitize_post_field( 'post_title', wp_unslash( $_POST['xf']['post_title'] ), $post_id, 'db' );
+                    $post_data['post_title'] = sanitize_post_field( 'post_title', wp_unslash( $_POST['xf']['post_title'] ), $post_id, 'db' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_post_field() applies title_save_pre / KSES
                 }
 
                 // Content
                 if ( isset( $_POST['xf']['post_content'] ) && is_string( $_POST['xf']['post_content'] ) ) {
-                    $post_data['post_content'] = sanitize_post_field( 'post_content', wp_unslash( $_POST['xf']['post_content'] ), $post_id, 'db' );
+                    $post_data['post_content'] = sanitize_post_field( 'post_content', wp_unslash( $_POST['xf']['post_content'] ), $post_id, 'db' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_post_field() applies content_save_pre / KSES
 
                     // Anonymous visitors must not be able to inject shortcodes
                     if ( ! is_user_logged_in() ) {
@@ -112,6 +113,28 @@ class xf_form
                     'options'       => $options,
                 ];
 
+                // Server-side validation (the browser checks can be bypassed)
+                $errors = XF()->api->validate_input( $field_data, $field_groups );
+
+                if ( ! empty( $errors ) ) {
+                    if ( $is_front_end ) {
+                        // Public forms: never store invalid submissions
+                        wp_die(
+                            '<p>' . esc_html__( 'Please correct the following and try again:', 'x-fields' ) . '</p><ul><li>' . implode( '</li><li>', array_map( 'esc_html', $errors ) ) . '</li></ul>',
+                            esc_html__( 'Form errors', 'x-fields' ),
+                            [ 'response' => 400, 'back_link' => true ]
+                        );
+                    }
+
+                    // Admin: never lose the editor's work; warn when publishing (drafts are free, as client-side)
+                    $status = isset( $_POST['post_status'] ) ? sanitize_key( wp_unslash( $_POST['post_status'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified above
+                    $is_draft_save = isset( $_POST['save'] ) || in_array( $status, [ 'draft', 'pending', 'auto-draft' ], true ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+                    if ( ! $is_draft_save ) {
+                        set_transient( 'xf_validation_' . get_current_user_id(), [ 'post_id' => $post_id, 'errors' => $errors ], 5 * MINUTE_IN_SECONDS );
+                    }
+                }
+
                 // Pre-save hook
                 do_action( 'xf_pre_save_input', $hook_params );
 
@@ -130,7 +153,7 @@ class xf_form
 
                 // Redirect public forms
                 if ( $is_front_end ) {
-                    $redirect_url = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : home_url( '/' );
+                    $redirect_url = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : home_url( '/' );
                     if ( ! empty( $session['confirmation_url'] ) ) {
                         $redirect_url = $session['confirmation_url'];
                     }
@@ -206,8 +229,20 @@ XF['loop_buffer'] = [];
             return;
         }
 
+        // Server-side validation result from the last save
+        $key = 'xf_validation_' . get_current_user_id();
+        $result = get_transient( $key );
+        if ( is_array( $result ) && ! empty( $result['errors'] ) && (int) get_the_ID() === (int) $result['post_id'] ) {
+            delete_transient( $key );
+            echo '<div class="notice notice-warning is-dismissible"><p><strong>' . esc_html__( 'Saved, but some fields need attention:', 'x-fields' ) . '</strong></p><ul style="list-style:disc;margin-left:20px">';
+            foreach ( $result['errors'] as $error ) {
+                echo '<li>' . esc_html( $error ) . '</li>';
+            }
+            echo '</ul></div>';
+        }
+
         echo '<div class="notice notice-error" id="xf-validation-admin-notice" style="display: none;"><p><strong>';
-        echo __( 'One (or more) of your fields had validation errors. More information is available below.', 'x-fields' );
+        echo esc_html__( 'One (or more) of your fields had validation errors. More information is available below.', 'x-fields' );
         echo '</strong></p></div>';
     }
 

@@ -55,7 +55,7 @@ class xf_term extends xf_field
         $field->value = implode( ',', xf_sanitize_id_list( $field->value ) );
 
         if ( ! empty( $field->value ) ) {
-            $results = $wpdb->get_results( "SELECT term_id, name FROM $wpdb->terms WHERE term_id IN ($field->value) ORDER BY FIELD(term_id,$field->value)" );
+            $results = $wpdb->get_results( "SELECT term_id, name FROM $wpdb->terms WHERE term_id IN ($field->value) ORDER BY FIELD(term_id,$field->value)" ); // phpcs:ignore WordPress.DB.PreparedSQL -- only table names, constants or integer IDs are interpolated
             foreach ( $results as $result ) {
                 $selected_posts[ $result->term_id ] = $result;
             }
@@ -67,8 +67,7 @@ class xf_term extends xf_field
 
         <div class="available_posts post_list">
         <?php foreach ( $available_posts as $term ) : ?>
-            <?php $class = ( isset( $selected_posts[ $term->term_id ] ) ) ? ' class="used"' : ''; ?>
-            <div rel="<?php echo (int) $term->term_id; ?>"<?php echo $class; ?> title="<?php echo esc_attr( $term->name ); ?>"><?php echo wp_kses_post( apply_filters( 'xf_term_display', esc_html( $term->name ), $term->term_id, $field ) ); ?></div>
+            <div rel="<?php echo (int) $term->term_id; ?>"<?php echo isset( $selected_posts[ $term->term_id ] ) ? ' class="used"' : ''; ?> title="<?php echo esc_attr( $term->name ); ?>"><?php echo wp_kses_post( apply_filters( 'xf_term_display', esc_html( $term->name ), $term->term_id, $field ) ); ?></div>
         <?php endforeach; ?>
         </div>
 
@@ -90,8 +89,8 @@ class xf_term extends xf_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e('Taxonomies', 'x-fields' ); ?></label>
-                <p class="description"><?php _e('Limit terms to the following taxonomies', 'x-fields' ); ?></p>
+                <label><?php esc_html_e('Taxonomies', 'x-fields' ); ?></label>
+                <p class="description"><?php esc_html_e('Limit terms to the following taxonomies', 'x-fields' ); ?></p>
             </td>
             <td>
                 <?php
@@ -106,7 +105,7 @@ class xf_term extends xf_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Limits', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Limits', 'x-fields' ); ?></label>
             </td>
             <td>
                 <input type="text" name="xf[fields][<?php echo esc_attr( $key ); ?>][options][limit_min]" value="<?php echo esc_attr( $this->get_option( $field, 'limit_min' ) ); ?>" placeholder="min" style="width:60px" />

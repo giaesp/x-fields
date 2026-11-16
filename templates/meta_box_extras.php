@@ -32,9 +32,9 @@ if ( ! isset( $extras['context'] ) ) {
     <tr>
         <td class="label">
             <label>
-                <?php _e( 'Order', 'x-fields' ); ?>
+                <?php esc_html_e( 'Order', 'x-fields' ); ?>
                 <div class="xf_tooltip">?
-                    <div class="tooltip_inner"><?php _e( 'The field group with the lowest order will appear first.', 'x-fields' ); ?></div>
+                    <div class="tooltip_inner"><?php esc_html_e( 'The field group with the lowest order will appear first.', 'x-fields' ); ?></div>
                 </div>
             </label>
         </td>
@@ -44,16 +44,16 @@ if ( ! isset( $extras['context'] ) ) {
     </tr>
     <tr>
         <td class="label">
-            <label><?php _e( 'Position', 'x-fields' ); ?></label>
+            <label><?php esc_html_e( 'Position', 'x-fields' ); ?></label>
         </td>
         <td style="vertical-align:top">
-            <input type="radio" name="xf[extras][context]" value="normal"<?php echo ( $extras['context'] == 'normal' ) ? ' checked' : ''; ?> /> <?php _e( 'Normal', 'x-fields' ); ?> &nbsp; &nbsp;
-            <input type="radio" name="xf[extras][context]" value="side"<?php echo ( $extras['context'] == 'side' ) ? ' checked' : ''; ?> /> <?php _e( 'Side', 'x-fields' ); ?>
+            <input type="radio" name="xf[extras][context]" value="normal"<?php echo ( $extras['context'] == 'normal' ) ? ' checked' : ''; ?> /> <?php esc_html_e( 'Normal', 'x-fields' ); ?> &nbsp; &nbsp;
+            <input type="radio" name="xf[extras][context]" value="side"<?php echo ( $extras['context'] == 'side' ) ? ' checked' : ''; ?> /> <?php esc_html_e( 'Side', 'x-fields' ); ?>
         </td>
     </tr>
     <tr>
         <td class="label">
-            <label><?php _e( 'Display Settings', 'x-fields' ); ?></label>
+            <label><?php esc_html_e( 'Display Settings', 'x-fields' ); ?></label>
         </td>
         <td style="vertical-align:top">
             <div>

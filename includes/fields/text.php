@@ -15,7 +15,7 @@ class xf_text extends xf_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Default Value', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Default Value', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
@@ -29,7 +29,7 @@ class xf_text extends xf_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Validation', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Validation', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php

@@ -33,9 +33,9 @@ class xf_file extends xf_field
         // CSS logic for "Add" / "Remove" buttons
         $css = empty( $field->value ) ? [ '', ' hidden' ] : [ ' hidden', '' ];
     ?>
-        <span class="file_url"><?php echo $file_url; ?></span>
-        <input type="button" class="media button add<?php echo $css[0]; ?>" data-file-type="<?php echo esc_attr( $file_type ); ?>" value="<?php esc_attr_e( 'Add File', 'x-fields' ); ?>" />
-        <input type="button" class="media button remove<?php echo $css[1]; ?>" value="<?php esc_attr_e( 'Remove', 'x-fields' ); ?>" />
+        <span class="file_url"><?php echo $file_url; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built above from esc_url()/esc_html() ?></span>
+        <input type="button" class="media button add<?php echo esc_attr( $css[0] ); ?>" data-file-type="<?php echo esc_attr( $file_type ); ?>" value="<?php esc_attr_e( 'Add File', 'x-fields' ); ?>" />
+        <input type="button" class="media button remove<?php echo esc_attr( $css[1] ); ?>" value="<?php esc_attr_e( 'Remove', 'x-fields' ); ?>" />
         <input type="hidden" name="<?php echo esc_attr( $field->input_name ); ?>" class="file_value" value="<?php echo esc_attr( $field->value ); ?>" />
     <?php
     }
@@ -45,7 +45,7 @@ class xf_file extends xf_field
     ?>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'File Type', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'File Type', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
@@ -68,7 +68,7 @@ class xf_file extends xf_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Return Value', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Return Value', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
@@ -89,7 +89,7 @@ class xf_file extends xf_field
         </tr>
         <tr class="field_option field_option_<?php echo esc_attr( $this->name ); ?>">
             <td class="label">
-                <label><?php _e( 'Validation', 'x-fields' ); ?></label>
+                <label><?php esc_html_e( 'Validation', 'x-fields' ); ?></label>
             </td>
             <td>
                 <?php
